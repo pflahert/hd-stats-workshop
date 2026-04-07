@@ -1,0 +1,71 @@
+---
+title: "Homework: Day 1 → Day 2"
+subtitle: "Due at the Start of Day 2"
+date: "Estimated time: 1.5 hours"
+format:
+  html:
+    toc: true
+---
+
+## Purpose
+
+This homework consolidates Day 1 material (multiple testing, FDR, critical evaluation). It connects directly to the learning outcomes. You are welcome to use AI for coding tasks, but the conceptual and interpretation questions must reflect your own understanding.
+
+---
+
+## Q1: Multiple Testing Concepts (LO1)
+
+A proteomics experiment measures the abundance of $p = 5{,}000$ proteins in $n = 30$ tissue samples (15 tumor, 15 normal). For each protein, a two-sample $t$-test is performed.
+
+**(a)** Under the global null (no protein is differentially abundant), how many proteins would you expect to reject at $\alpha = 0.05$ without any correction?
+
+**(b)** The Bonferroni-corrected threshold is $\alpha / m$. Compute this threshold. A protein with a "real" effect has a $p$-value of $3 \times 10^{-4}$. Would it survive Bonferroni correction?
+
+**(c)** You apply the BH procedure at FDR $= 0.10$ and get 120 rejections. Give an interpretation of this result in plain language that a biologist would understand.
+
+**(d)** Your collaborator says "We found 120 significant proteins." A reviewer replies "But 12 of those are probably false positives!" Is the reviewer being unreasonable? Explain.
+
+---
+
+## Q2: FDR in Practice (LO1, LO3)
+
+Using the ALL dataset from Lab 2 (or your own dataset), perform the following analysis. **You should use AI to write the code**, but you must evaluate its correctness and interpret the results yourself.
+
+**(a)** Direct an AI to compute BH-adjusted $p$-values for the B-cell vs. T-cell comparison **using limma** (not raw $t$-tests). Report:
+
+- Number of genes significant at FDR $< 0.01$, $< 0.05$, $< 0.10$
+
+Include the prompt you used and note whether the AI spontaneously chose limma or whether you had to direct it.
+
+**(b)** Use the `qvalue` package to estimate $\hat{\pi}_0$. What does this estimate tell you about the dataset?
+
+**(c)** Make a $p$-value histogram. Annotate it: mark the region where you think the true alternatives are concentrated, and the region dominated by true nulls.
+
+Include your code (noting what was AI-generated vs. your own) and a one-paragraph interpretation.
+
+---
+
+## Q3: Evaluating Analysis Output (LO3)
+
+**(a)** Write two specifications for the same analysis task: "Perform differential expression analysis on a microarray dataset comparing treatment and control groups."
+
+- **Specification A**: Vague enough that it would likely produce an incorrect or incomplete analysis.
+- **Specification B**: Precise enough that it would likely produce a correct analysis on the first attempt.
+
+Explain what makes Specification B better.
+
+**(b)** You read (in a paper or AI output) the claim: "Gene XYZ promotes cell proliferation in breast cancer through the PI3K/AKT pathway (Smith et al., 2019)." Describe the steps you would take to verify this before including it in your own work.
+
+**(c)** Describe one specific error you encountered during today's labs—whether in AI-generated code, your own code, or a collaborator's analysis. What was the error? How did you catch it? What statistical knowledge was required to recognize it?
+
+**(d)** You receive a complete differential expression analysis from a collaborator. It uses raw $t$-tests with BH correction on a microarray dataset with 128 samples. Write a short review (3--4 sentences) describing what's adequate and what should be changed, and why. *(Hint: consult the [Decision Guide](../syllabus/decision-guide.qmd) for recommended methods.)*
+
+---
+
+## Submission
+
+Bring your written answers and code output (for Q2) to Day 2. We will discuss Q1 and Q3 briefly at the start of the day.
+
+### Assessment Criteria
+
+This is a formative assessment. Completeness and engagement matter more than getting every detail right. We are particularly interested in your interpretation of statistical results in your own words and your ability to identify errors in analysis code or output.

@@ -1,0 +1,9 @@
+_output/
+_pdf/
+.quarto/
+_freeze/
+.venv
+.DS_Store
+notebooks/*_exec.ipynb
+__pycache__/
+*.pyc

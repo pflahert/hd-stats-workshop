@@ -1,0 +1,541 @@
+---
+title: "The Gene That Wasn't There"
+subtitle: "Lecture 1"
+date: "Day 1, 9:00–10:00"
+format:
+  revealjs:
+    theme: default
+    slide-number: true
+    chalkboard: true
+    smaller: true
+    scrollable: true
+    code-fold: true
+    footer: "High-Dimensional Data Analysis Workshop | BTP"
+    math: mathjax
+jupyter: python3
+---
+
+## {background-color="black" .centered}
+
+![](images/caspi-2003-title.png){fig-alt="Title page of Caspi et al. 2003, Science" width="85%"}
+
+::: {.notes}
+In 2003, Avshalom Caspi and a team of researchers published a paper in Science that would become one of the most influential findings in psychiatric genetics. They reported that a variant in the serotonin transporter gene — a gene called 5-HTTLPR — predicted whether people who experienced stressful life events would develop depression. The idea was elegant: some people carry a version of this gene that produces less serotonin transporter protein, and those people, when exposed to stress, are more vulnerable to depression. Nature plus nurture, mediated by a single gene.
+:::
+
+---
+
+## {background-color="black" .centered}
+
+![](images/caspi-2003-fig2.png){fig-alt="Caspi et al. 2003 Figure 2: gene-environment interaction" width="80%"}
+
+::: {.notes}
+This is the key figure. The interaction looks clean — the short allele carriers show more depression under stress, the long allele carriers are protected. The paper was cited over 8,000 times. To put that in perspective, a typical well-cited paper in genetics gets maybe 200 citations. A famous one gets 1,000. 8,000 is a field-defining result. It launched an entire subfield. Hundreds of labs tried to replicate and extend the finding. Graduate students built dissertations around it. Textbooks cited it as a model of gene-environment interaction. If you took a psychology or genetics course between 2005 and 2015, you probably heard about it.
+:::
+
+---
+
+## 8,000 citations {.centered}
+
+::: {style="font-size: 1.5em; margin-top: 2em;"}
+**2003–2018**: Hundreds of replication attempts
+
+Some positive. Some negative. Some null.
+
+Meta-analyses disagreed with each other.
+:::
+
+::: {.notes}
+Over the next fifteen years, hundreds of studies tried to replicate or extend the result. Some found the same thing. Some found the opposite. Some found nothing. Meta-analyses — studies that combine the results of many studies — disagreed with each other, depending on which studies they included and how they weighted them. This should have been a red flag. When a real effect exists, replications generally agree on its direction and approximate size. When studies disagree about whether an effect is positive, negative, or zero, that's what noise looks like. But the field had reasons to keep believing. The biology was plausible — serotonin is genuinely involved in mood regulation. The original study was well-designed by the standards of its time.
+:::
+
+---
+
+## {background-color="black" .centered}
+
+![](images/border-2019-title.png){fig-alt="Title page of Border et al. 2019, AJPSYCH" width="85%"}
+
+::: {.notes}
+In 2019, a team led by Richard Border tested the 5-HTTLPR hypothesis — along with 17 other "candidate gene" hypotheses for depression — in samples ranging from 62,000 to 443,000 people. They had preregistered their analysis plan. They used the same measures and the same statistical approaches that the original studies had used, just with vastly more data.
+
+They found nothing. Not "a smaller effect than expected." Nothing. The serotonin transporter variant had no detectable relationship to depression, with or without stress. Neither did any of the other 17 candidate genes.
+:::
+
+---
+
+## {background-color="black" .centered}
+
+![](images/border-2019-fig.png){fig-alt="Border et al. 2019: null results across 18 candidate genes" width="80%"}
+
+::: {.notes}
+This is the figure. Eighteen candidate genes. Zero replication. The entire candidate gene literature for depression was, in effect, noise.
+
+How does a false positive survive for fifteen years? The short answer is: it wasn't one false positive. It was thousands of them, across hundreds of studies, in a field that was running many statistical tests without accounting for how many tests it was running. And the tools to prevent this — to control the rate of false discovery when you're testing many hypotheses — existed the entire time. The field just wasn't using them.
+
+That's what this lecture is about. Not the serotonin gene specifically, but the general problem: what happens when you test many hypotheses, and what it looks like when you don't account for it.
+:::
+
+---
+
+## {.centered}
+
+::: {style="font-size: 2em; margin-top: 2em;"}
+How does a false positive survive for **fifteen years**?
+:::
+
+::: {.notes}
+Pause here. Let the question hang. Then: "We're going to see this problem firsthand, using a real dataset that we'll work with for the rest of the workshop. And we'll start building the diagnostic tools to catch it."
+:::
+
+---
+
+# The ALL Dataset {.centered}
+
+::: {.notes}
+Shift gears. "Let's start with a dataset."
+:::
+
+---
+
+## {background-color="black" .centered}
+
+![](images/golub-1999-title.png){fig-alt="Golub et al. 1999, Science — molecular classification of cancer" width="85%"}
+
+::: {.notes}
+The ALL dataset — ALL stands for acute lymphoblastic leukemia. It comes from a study of 128 patients with leukemia, and each patient's tumor was profiled using a microarray: a technology that measures the expression level of thousands of genes simultaneously. In this case, 12,625 genes per patient. This is the kind of data that Golub and colleagues showed could classify cancer subtypes — we'll come back to this paper in Lecture 2.
+:::
+
+---
+
+## {.centered}
+
+::: {style="font-size: 1.3em;"}
+| | |
+|---|---|
+| **Patients** | 128 |
+| **Genes** | 12,625 |
+| **B-cell ALL** | 95 |
+| **T-cell ALL** | 33 |
+| **Ratio p/n** | ~100 |
+:::
+
+. . .
+
+::: {style="font-size: 1.3em; margin-top: 1em;"}
+More variables than observations. **100× more.**
+:::
+
+::: {.notes}
+The 128 patients fall into two groups: 95 with B-cell ALL and 33 with T-cell ALL. These are different subtypes of leukemia — they have different prognoses, different treatment responses, different biology. The question is: which genes are expressed differently between the two subtypes?
+
+This is a perfectly reasonable question. A clinician might want to know which genes distinguish the subtypes so they can develop better diagnostics. A biologist might want to understand the molecular basis of the distinction.
+
+So you do what anyone would do. You take each gene, one at a time, and ask: is this gene expressed at a different level in B-cell patients than in T-cell patients? The standard tool is a t-test. You compute a test statistic, you get a p-value, and you decide whether the difference is "statistically significant." Do this for all 12,625 genes and you get 12,625 p-values.
+:::
+
+---
+
+## {.centered}
+
+::: {style="font-size: 2em;"}
+$$12{,}625 \times 0.05 = 631$$
+:::
+
+. . .
+
+::: {style="font-size: 1.3em; margin-top: 1em;"}
+**631 "significant" genes from pure noise.**
+:::
+
+::: {.notes}
+Here's the thing about p-values that everyone learns in their first statistics course and then immediately forgets the implications of: a p-value of 0.05 means that if the gene is not differentially expressed — if there is truly no difference between B-cell and T-cell — there's still a 5% chance of getting a test statistic this extreme or more extreme, just by chance. That's fine for one test. You accept a 5% false positive rate as the cost of doing business.
+
+But you're not running one test. You're running 12,625.
+
+If none of the genes were actually different between B-cell and T-cell ALL — if the two subtypes were molecularly identical, which they're not, but bear with me — you'd still expect about 5% of your tests to come back significant at the 0.05 level. Five percent of 12,625 is 631. You'd get 631 "significant" results from pure noise.
+
+The false positive rate is still 5%. The false positive count is 631. And if you're a biologist looking at your results, you don't see a rate — you see a list of genes. A long list. A list that looks like you've discovered something.
+
+This is the multiple testing problem. It's not subtle. The math is first-semester probability. And yet it fooled an entire field of psychiatric genetics for fifteen years.
+:::
+
+---
+
+# The P-Value Histogram {.centered}
+
+::: {.notes}
+"I want to show you the single most useful plot in high-dimensional statistics. It's not a volcano plot. It's not a heatmap. It's a histogram of p-values."
+:::
+
+---
+
+## What "nothing" looks like
+
+```{python}
+#| label: null-histogram
+#| fig-height: 5
+#| fig-width: 9
+#| echo: false
+import numpy as np
+import matplotlib.pyplot as plt
+
+rng = np.random.default_rng(123)
+null_pvals = rng.uniform(size=12625)
+
+fig, ax = plt.subplots(figsize=(9, 5))
+ax.hist(null_pvals, bins=50, color="gray", edgecolor="white")
+ax.axhline(y=12625 / 50, color="red", linestyle="--", linewidth=2)
+ax.set_title("Simulated: all genes are null", fontsize=15)
+ax.set_xlabel("P-value", fontsize=13)
+ax.set_ylabel("Frequency", fontsize=13)
+plt.tight_layout()
+plt.show()
+```
+
+::: {.notes}
+Here's what you'd see if none of the genes were differentially expressed: a flat histogram. Uniform. Equal numbers of p-values in every bin. This is because, under the null hypothesis, p-values are uniformly distributed between 0 and 1. That's not an approximation or an asymptotic result — it's exact. Technically, this is true for continuous test statistics. Discrete test statistics produce p-values that are stochastically larger than uniform, which makes the test conservative. For gene expression data with continuous measurements, the uniform assumption is essentially exact. If nothing is going on, every bin gets the same number of p-values. Memorize this shape — it's your baseline.
+:::
+
+---
+
+## The ALL data
+
+```{python}
+#| label: all-histogram
+#| fig-height: 5.5
+#| fig-width: 10
+#| echo: false
+import pandas as pd
+from scipy import stats
+
+expr = pd.read_csv("../data/all_expression.csv", index_col=0)
+meta = pd.read_csv("../data/all_metadata.csv", dtype={"sample_id": str})
+bt_type = meta["subtype"].values
+b_mask = bt_type == "B"
+
+_, pvals = stats.ttest_ind(expr.loc[:, b_mask].values, expr.loc[:, ~b_mask].values, axis=1)
+
+fig, ax = plt.subplots(figsize=(10, 5.5))
+ax.hist(pvals, bins=100, color="steelblue", edgecolor="white")
+ax.axhline(y=len(pvals) / 100, color="red", linestyle="--", linewidth=2)
+ax.legend(["Expected if all null"], loc="upper right", fontsize=12, frameon=False)
+ax.set_title("P-value histogram: 12,625 genes, B-cell vs. T-cell ALL", fontsize=15)
+ax.set_xlabel("P-value", fontsize=13)
+ax.set_ylabel("Frequency", fontsize=13)
+plt.tight_layout()
+plt.show()
+```
+
+::: {.notes}
+Now here's the ALL data. The histogram is not flat. There's a massive spike near zero — hundreds of genes with very small p-values — and then a roughly flat region for the rest. The spike is signal: genes that are genuinely differentially expressed between B-cell and T-cell ALL. The flat part is the null genes — the genes where nothing is going on, producing the uniform distribution we'd expect.
+
+Don't explain yet. Ask the audience: "What do you see?" Let them describe it — spike near zero, flat region, excess above the red line. Then confirm what they said.
+:::
+
+---
+
+## Three things this histogram tells you
+
+::: {style="font-size: 1.2em;"}
+
+1. **Is there signal?** Spike near zero → yes.
+
+2. **How much?** The flat part estimates π₀ (fraction of null genes).
+
+3. **Is your analysis trustworthy?** Flat part should be flat. If not, something is wrong.
+
+:::
+
+. . .
+
+::: {style="font-size: 1.2em; margin-top: 1em;"}
+> Plot the histogram before you do anything else.
+:::
+
+::: {.notes}
+This one plot tells you three things. First, whether there's signal. If the histogram is flat, go home. There's nothing to find. If there's a spike near zero, something real is happening.
+
+Second, roughly how much signal. The height of the flat part tells you the density of null p-values. If the flat part is at, say, 80% of the total, then roughly 80% of your genes are null and 20% are non-null. In the ALL data, the spike is substantial — B-cell and T-cell ALL are genuinely different diseases, and the transcriptomic differences are large.
+
+Third, whether your analysis is trustworthy. A well-behaved analysis produces a histogram with a flat right side and a spike on the left. But sometimes the histogram looks wrong. If the bars increase toward the right — more large p-values than expected — your test is conservative. If there's a bump in the middle, something is off with your test statistics. If the entire histogram is shifted left with no flat region, your null model is wrong. These pathological histograms are surprisingly common, and they tell you to stop and fix your analysis before interpreting any results.
+
+I want you to internalize this: before you look at gene lists, before you compute adjusted p-values, before you run any correction procedure — plot the histogram. It takes ten seconds and it tells you whether the rest of your analysis is worth doing.
+
+We'll come back to this histogram in Lecture 2, where it turns from a diagnostic into an estimator. The flat part isn't just telling you "these genes are null" — it's telling you the proportion of null genes, and that proportion is the key ingredient in false discovery rate estimation. But I'm getting ahead of myself.
+:::
+
+---
+
+## {.centered}
+
+![](images/pval-histogram-pathologies.png){fig-alt="Examples of well-behaved vs. pathological p-value histograms" width="90%"}
+
+::: {.notes}
+[PLACEHOLDER — create a 2×2 panel showing: (1) well-behaved with signal, (2) all null/uniform, (3) anti-conservative (too many small p-values, inflated null), (4) conservative (dip near zero). Label each panel clearly.]
+
+These are the shapes you'll learn to recognize. Top left is what we just saw — signal plus well-behaved null. Top right is all null — flat, go home. Bottom left is anti-conservative — the null is inflated, your analysis has a problem, probably batch effects or confounders. Bottom right is conservative — your test is too cautious, maybe a discrete test statistic. In every case, the histogram tells you what to do before you run any correction.
+:::
+
+---
+
+# The Sledgehammer {.centered}
+
+::: {.notes}
+"So you have 12,625 p-values and a histogram that shows real signal. You want to call some genes significant. But you know that if you use the standard 0.05 threshold, you'll get hundreds of false positives mixed in with the real results. What do you do?"
+:::
+
+---
+
+## Bonferroni correction
+
+::: {style="font-size: 1.8em; text-align: center; margin-top: 1.5em;"}
+$$\frac{0.05}{12{,}625} \approx 4 \times 10^{-6}$$
+:::
+
+. . .
+
+::: {style="font-size: 1.2em; text-align: center; margin-top: 1em;"}
+Controls the **family-wise error rate**: P(any false positive) ≤ 0.05
+:::
+
+::: {.notes}
+The oldest and simplest answer is Bonferroni correction. The idea is almost embarrassingly straightforward: divide your significance level by the number of tests. Instead of calling a gene significant at p < 0.05, you call it significant at p < 0.05 / 12,625 ≈ 4 × 10⁻⁶.
+
+The logic goes like this. You want the probability of making any false positive — even one — to be at most 5%. This is called the family-wise error rate, or FWER. If each individual test has a false positive probability of α/m, then by the union bound, the probability that at least one of the m tests produces a false positive is at most m × (α/m) = α. Done.
+
+Bonferroni is clean, easy to explain, and requires no assumptions about the dependence structure of your tests. It works whether your genes are independent or correlated. It works whether you're testing 10 hypotheses or 10 million. In genome-wide association studies, where you're testing around a million genetic variants, the convention is a significance threshold of 5 × 10⁻⁸ — which is just Bonferroni at the million-variant scale. The actual number comes from a more sophisticated calculation involving linkage disequilibrium and the effective number of independent tests in the genome, but it's in the Bonferroni ballpark.
+
+And Bonferroni works, in the sense that it does what it promises. If you apply Bonferroni to 12,625 tests, the probability that any of your declared significant genes is a false positive is at most 5%.
+
+But here's the problem: Bonferroni controls the wrong thing.
+:::
+
+---
+
+## Where is the threshold?
+
+```{python}
+#| label: bonf-histogram
+#| fig-height: 5.5
+#| fig-width: 10
+#| echo: false
+bonf_threshold = 0.05 / len(pvals)
+
+fig, ax = plt.subplots(figsize=(10, 5.5))
+ax.hist(pvals, bins=100, color="steelblue", edgecolor="white")
+ax.axvline(x=bonf_threshold, color="red", linewidth=3)
+ax.annotate(f"← Bonferroni: {bonf_threshold:.2e}", xy=(bonf_threshold + 0.015, ax.get_ylim()[1] * 0.9),
+            color="red", fontsize=13)
+ax.set_title("The Bonferroni threshold", fontsize=15)
+ax.set_xlabel("P-value", fontsize=13)
+ax.set_ylabel("Frequency", fontsize=13)
+plt.tight_layout()
+plt.show()
+```
+
+::: {.notes}
+Think about what the family-wise error rate actually means. It's the probability of any false positive. Any. Even one. In a list of 500 significant genes, Bonferroni demands a guarantee that not a single one is a false discovery. That's an extraordinarily high standard. And to achieve it, the threshold becomes so stringent that you miss most of the real signal.
+
+You can barely see the red line. It's jammed against zero. Only the very tip of the spike survives. Everything else — including real signal — gets thrown away.
+
+If you're an astronomer and you're about to announce the discovery of gravitational waves, yes, you want to be very sure you haven't made even one false positive. The standard there is "five sigma," roughly one in 3.5 million. The cost of a false claim is enormous.
+
+But if you're a biologist screening 12,625 genes to find candidates for follow-up experiments, you're in a completely different situation. You don't need a guarantee that every gene on your list is real. You need a useful list — one where most of the genes are real and the false positives are a manageable fraction. If your list of 500 genes contains 25 false positives, that's a 5% false discovery rate, and for most biological applications, that's fine. You'll validate the interesting ones in follow-up experiments anyway.
+
+Bonferroni can't give you that list. It's trying to prevent a different kind of error — any error at all — and in doing so, it throws away most of your real discoveries.
+:::
+
+---
+
+## {background-color="black" .centered}
+
+![](images/dead-salmon-poster.png){fig-alt="Bennett et al. 2009 — dead salmon fMRI poster" width="80%"}
+
+::: {.notes}
+In 2009, a neuroscientist named Craig Bennett and his colleagues put a dead Atlantic salmon in an fMRI scanner. It was purchased at a local fish market. It was, by all accounts, very dead.
+
+They showed the salmon a series of photographs of people in social situations and asked it — well, they ran the standard fMRI analysis pipeline — to determine the emotional valence of each photograph. The scanner measured blood oxygenation levels across thousands of tiny volume elements, called voxels, in the salmon's body. For each voxel, a statistical test asked: does the signal in this voxel change in response to the photographs?
+
+Without any correction for multiple comparisons, a cluster of voxels in the salmon's brain cavity showed statistically significant "neural activity." The dead fish appeared to be processing human emotions.
+
+With a standard correction for multiple comparisons, the signal disappeared. Because of course it did — the salmon was dead.
+:::
+
+---
+
+## {background-color="black" .centered}
+
+![](images/dead-salmon-activation.png){fig-alt="Dead salmon fMRI showing spurious activation without correction" width="75%"}
+
+::: {.notes}
+This is the figure. The colored blobs are "statistically significant" voxels in the dead salmon's brain cavity. Without correction, the salmon is thinking about human emotions. With correction, it's a dead fish.
+
+Bennett presented this as a poster at a conference, and it became famous, partly because it's funny and partly because it made a serious point: every fMRI analysis involves thousands of voxels, each tested independently, and the multiple testing problem is the same as in genomics. Bennett surveyed published fMRI studies and found that between 25% and 40% did not report correcting for multiple comparisons. The dead salmon was funny. The survey was not.
+
+I'm telling you the salmon story because it's memorable and because it makes the multiple testing problem feel visceral in a way that abstract calculations don't. But the salmon was caught quickly — it was a deliberate demonstration. The next story is about what happens when false positives aren't caught at all.
+:::
+
+---
+
+## The gap
+
+::: {style="font-size: 1.2em;"}
+| Approach | Genes significant | Problem |
+|----------|:---:|---------|
+| No correction | Thousands | Hundreds of false positives |
+| Bonferroni | A handful | Most real signal missed |
+:::
+
+. . .
+
+::: {style="font-size: 1.3em; margin-top: 1em;"}
+You need a different question.
+:::
+
+::: {.notes}
+You need a different question. Not "did I make any false positives?" but "what fraction of my discoveries are false?" That question has an answer, and it's the subject of Lecture 2. But before we get there, I want to show you what happens when people skip the correction entirely.
+:::
+
+---
+
+## Two questions
+
+::: {style="font-size: 1.2em;"}
+**FWER** (Bonferroni): Did I make **any** false positive?
+
+$$P(\text{at least one false positive}) \leq \alpha$$
+
+. . .
+
+**FDR** (Benjamini-Hochberg): What **fraction** of my discoveries are false?
+
+$$E\!\left[\frac{\text{false positives}}{\text{total discoveries}}\right] \leq \alpha$$
+:::
+
+::: {.notes}
+This is the conceptual reframe. Bonferroni asks: what's the probability of any false positive? FDR asks: of the genes I called significant, what fraction are wrong? If I call 200 genes significant and the FDR is 10%, I expect about 20 of them to be wrong. The other 180 are real. That's a useful list.
+:::
+
+---
+
+## Three approaches, one dataset
+
+```{python}
+#| label: three-methods
+#| fig-height: 5.5
+#| fig-width: 9
+#| echo: false
+from statsmodels.stats.multitest import multipletests
+
+_, p_bh, _, _ = multipletests(pvals, alpha=0.05, method="fdr_bh")
+
+methods = ["No correction\n(α = 0.05)", "Bonferroni\n(FWER ≤ 0.05)", "BH procedure\n(FDR ≤ 0.05)"]
+counts = [np.sum(pvals < 0.05), np.sum(pvals < bonf_threshold), np.sum(p_bh <= 0.05)]
+colors = ["firebrick", "gray", "steelblue"]
+
+fig, ax = plt.subplots(figsize=(9, 5.5))
+bars = ax.bar(methods, counts, width=0.6, color=colors)
+for bar, count in zip(bars, counts):
+    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + max(counts) * 0.02,
+            str(count), ha="center", va="bottom", fontsize=16)
+ax.set_ylabel("Number of genes", fontsize=14)
+ax.set_title("Genes called significant under three approaches", fontsize=16)
+ax.set_ylim(0, max(counts) * 1.15)
+plt.tight_layout()
+plt.show()
+```
+
+::: {.notes}
+The Benjamini-Hochberg procedure finds the middle ground. We'll learn how it works in Lecture 2. For now, just see the result: uncorrected gives you thousands with hundreds of false positives. Bonferroni gives you a handful. BH gives you a useful discovery set. Which list would you want for follow-up experiments?
+:::
+
+---
+
+# What a Field-Wide False Positive Looks Like {.centered}
+
+::: {.notes}
+"The dead salmon was funny. Now let's go back to the case that wasn't funny at all."
+
+Let's go back to the serotonin gene. Caspi et al. published their finding in 2003. Over the next fifteen years, hundreds of studies tried to replicate or extend the result. This should have been a red flag. When a real effect exists, replications generally agree on its direction and approximate size. When studies disagree about whether an effect is positive, negative, or zero, that's what noise looks like.
+:::
+
+---
+
+## How false positives survive
+
+::: {style="font-size: 1.2em;"}
+
+**Publication bias**
+Studies finding nothing sit in file drawers.
+
+. . .
+
+**Winner's curse**
+To cross the significance threshold in a small sample, the observed effect has to overshoot the true value.
+
+. . .
+
+**Garden of forking paths**
+Many defensible analytical choices, each a branch point. The effective number of tests is much larger than reported.
+
+:::
+
+::: {.notes}
+How did the false positives survive? Three mechanisms, each reinforcing the others.
+
+Publication bias. Studies that found a significant result for 5-HTTLPR were more likely to be published. Studies that found nothing were more likely to sit in a file drawer. The published literature was a biased sample of the evidence.
+
+Winner's curse. The studies that did get published — the ones that found significant results — necessarily overestimated the effect size. To cross the significance threshold with a small, noisy sample, the observed effect has to be larger than the true effect. So the early estimates of the 5-HTTLPR effect were inflated, and later studies with more realistic estimates looked like "failures to replicate."
+
+The garden of forking paths. There are many defensible choices in any analysis: which covariates to include, which subgroups to analyze, which outcome measure to use, how to define "stressful life events." Each choice is a branch point, and the analysts — without any intent to deceive — could explore different branches until they found one that produced a significant result. This isn't the same as running 12,625 explicit tests, but it has the same effect: the number of implicit tests is much larger than the number of reported tests.
+
+None of this required bad intentions. The researchers who studied 5-HTTLPR were, for the most part, careful scientists who believed in their hypothesis and interpreted ambiguous evidence in its favor. That's not fraud — that's human cognition. The problem wasn't the scientists. The problem was the statistical framework, which didn't account for the scale of testing that was actually happening.
+:::
+
+---
+
+## Meanwhile, GWAS got it right
+
+::: {style="font-size: 1.2em;"}
+
+| | Candidate genes | GWAS |
+|--|:---:|:---:|
+| **Tests per study** | 1–few | ~1,000,000 |
+| **Correction** | Usually none | 5 × 10⁻⁸ |
+| **Depression loci found** | 0 (replicated) | 100+ |
+
+:::
+
+. . .
+
+::: {style="font-size: 1.2em; margin-top: 1em;"}
+Same biology. Different statistical framework. **Different results.**
+:::
+
+::: {.notes}
+Meanwhile, a parallel approach had been yielding real results. Genome-wide association studies, which test hundreds of thousands or millions of genetic variants and apply stringent multiple testing correction — that 5 × 10⁻⁸ threshold — had been steadily finding genetic loci associated with depression. By 2019, GWAS had identified over 100 loci. These weren't the same genes that the candidate gene studies had focused on. The two approaches — one without proper correction, one with — were studying the same biology and getting completely different answers.
+
+The fix was known the entire time. GWAS adopted it from the beginning: test everything, correct for everything, accept the stringent thresholds. The candidate gene field tested one or a few genes per study, which seemed like it shouldn't require correction — but across the entire literature, across hundreds of studies each making dozens of analytical choices, the effective number of tests was enormous. The correction should have happened at the field level, not just the study level.
+:::
+
+---
+
+## {.centered}
+
+::: {style="font-size: 1.5em; margin-top: 3em;"}
+The 5-HTTLPR story isn't a story about bad scientists.
+
+. . .
+
+It's a story about what happens when a field's statistical framework doesn't match the scale of its questions.
+
+. . .
+
+The framework exists.
+
+That's what we'll build in Lecture 2.
+:::
+
+::: {.notes}
+The 5-HTTLPR story isn't a story about bad scientists. It's a story about what happens when a field's statistical framework doesn't match the scale of its questions. The framework to handle that scale exists — it's what we'll build in Lecture 2. But first, in the lab, you're going to see it for yourself. You'll take the ALL dataset, run those 12,625 tests, plot the histogram, apply Bonferroni, and feel the gap between "controls any error" and "gives you a useful answer." That gap is where the false discovery rate lives.
+:::

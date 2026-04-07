@@ -1,0 +1,437 @@
+---
+title: "Lecture 4: Penalized Regression & Modern AI Tools"
+subtitle: "Regularization, Variable Selection, and LLMs in Data Analysis"
+date: "Day 2, 11:00–12:00"
+format:
+  revealjs:
+    theme: default
+    slide-number: true
+    chalkboard: true
+    smaller: true
+    scrollable: true
+    code-fold: true
+    footer: "High-Dimensional Data Analysis Workshop | BTP"
+    math: mathjax
+jupyter: python3
+---
+
+# The Model That Memorizes Noise {.centered}
+
+---
+
+## Perfect Training, Catastrophic Prediction
+
+A research team fitted ordinary least squares to predict patient outcomes from 500 gene expression features on 80 patients.
+
+. . .
+
+- **Training $R^2$**: 0.99 — the model fit the data almost perfectly
+- **Test $R^2$**: $-0.3$ — worse than simply predicting the mean for everyone
+
+. . .
+
+The model had **memorized noise**. With more features than samples, OLS finds a perfect interpolation — not because the biology is that clean, but because there are infinitely many solutions that pass through every data point.
+
+. . .
+
+**This is the overfitting catastrophe that regularization prevents.**
+
+---
+
+## The Regression Problem in High-D
+
+We want to model a response $y \in \mathbb{R}^n$ as a function of predictors $X \in \mathbb{R}^{n \times p}$:
+
+$$y = X\beta + \varepsilon, \quad \varepsilon \sim N(0, \sigma^2 I)$$
+
+. . .
+
+### When $p > n$:
+
+- OLS $\hat{\beta} = (X^TX)^{-1}X^Ty$ does not exist ($X^TX$ is singular)
+- Even when $p < n$ but $p$ is close to $n$, OLS **overfits**: high variance, poor prediction
+- Need to **regularize**: trade some bias for reduced variance
+
+---
+
+## Ridge Regression
+
+Add an $\ell_2$ penalty:
+
+$$\hat{\beta}_{\text{ridge}} = \arg\min_\beta \left\{ \frac{1}{2n}\|y - X\beta\|_2^2 + \frac{\lambda}{2} \|\beta\|_2^2 \right\}$$
+
+. . .
+
+**Closed-form solution**: $\hat{\beta}_{\text{ridge}} = (X^TX + n\lambda I)^{-1}X^Ty$
+
+(All three methods---ridge, LASSO, elastic net---use the glmnet convention with $1/(2n)$ scaling on the loss, so $\lambda$ is comparable across methods.)
+
+### Properties
+
+- Shrinks all coefficients toward zero (but none exactly to zero)
+- The penalty term makes the system invertible even when $p > n$
+- Equivalent to a Bayesian posterior with $\beta_j \sim N(0, \tau^2)$ prior, where $\lambda = \sigma^2/\tau^2$
+
+---
+
+## Ridge: Bias-Variance Tradeoff
+
+As $\lambda$ increases:
+
+- **Bias increases**: coefficients shrink toward zero
+- **Variance decreases**: estimates become more stable
+
+. . .
+
+There exists an optimal $\lambda$ that minimizes prediction error. The mean squared error:
+
+$$\text{MSE}(\hat{\beta}_{\text{ridge}}) = \text{Bias}^2 + \text{Variance}$$
+
+Ridge is optimal when **many predictors have small effects** (no true sparsity).
+
+---
+
+# The Diamond vs. the Sphere {.centered}
+
+---
+
+## The Most Elegant Geometry in Modern Statistics
+
+Why does changing $\|\beta\|_2^2$ to $\|\beta\|_1$ — changing a **sphere** to a **diamond** — cause coefficients to become exactly zero?
+
+. . .
+
+The answer is **corners**.
+
+. . .
+
+The $\ell_1$ constraint set (a diamond / cross-polytope) has corners on every coordinate axis. The $\ell_2$ constraint set (a sphere) is perfectly smooth.
+
+When the OLS contour ellipse expands until it touches the constraint set, it almost always hits a **corner** of the diamond — where one or more coordinates are exactly zero.
+
+. . .
+
+In $p$ dimensions: the $\ell_1$ ball has $2p$ vertices, all on coordinate axes. High-dimensional geometry makes corner intersections even more likely.
+
+---
+
+## The LASSO
+
+**Least Absolute Shrinkage and Selection Operator** (Tibshirani, 1996):
+
+$$\hat{\beta}_{\text{lasso}} = \arg\min_\beta \left\{ \frac{1}{2n}\|y - X\beta\|_2^2 + \lambda \|\beta\|_1 \right\}$$
+
+. . .
+
+### Key difference from ridge
+
+The $\ell_1$ penalty $\|\beta\|_1 = \sum_j |\beta_j|$ produces **sparse** solutions: many $\hat{\beta}_j = 0$ exactly.
+
+LASSO simultaneously performs **estimation** and **variable selection**.
+
+---
+
+## Geometry: Why $\ell_1$ Gives Sparsity
+
+The constraint region for $\ell_1$ is a diamond (cross-polytope). The constraint for $\ell_2$ is a sphere.
+
+The OLS solution, projected onto the constraint set, is more likely to hit a **corner** of the diamond (where coordinates are zero) than the smooth surface of the sphere.
+
+. . .
+
+In $p$ dimensions: the $\ell_1$ ball has $2p$ vertices (one per axis), making sparse intersections very likely.
+
+---
+
+## LASSO: Solution Path
+
+As $\lambda$ decreases from $\lambda_{\max}$ (where $\hat{\beta} = 0$) to 0:
+
+- Coefficients enter the model one at a time
+- The **regularization path** $\hat{\beta}(\lambda)$ is piecewise linear (Efron et al., 2004, LARS)
+- Can compute the entire path efficiently
+
+```{python}
+#| echo: false
+#| fig-height: 4
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import lasso_path
+
+rng = np.random.default_rng(1)
+n, p = 100, 200
+X_sim = rng.normal(size=(n, p))
+beta_true = np.concatenate([np.full(5, 3.0), np.full(5, -2.0), np.zeros(p - 10)])
+y_sim = X_sim @ beta_true + rng.normal(size=n)
+
+alphas, coefs, _ = lasso_path(X_sim, y_sim, n_alphas=100)
+
+fig, ax = plt.subplots(figsize=(7, 4))
+for i in range(min(p, 20)):  # plot first 20 features for clarity
+    ax.semilogx(alphas, coefs[i], linewidth=0.8)
+ax.set_xlabel("λ (regularization strength)")
+ax.set_ylabel("Coefficient value")
+ax.set_title("LASSO Path")
+ax.invert_xaxis()
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+## Choosing $\lambda$: Cross-Validation
+
+**$K$-fold cross-validation**:
+
+1. Split data into $K$ folds (typically $K = 10$)
+2. For each $\lambda$: fit on $K-1$ folds, predict on held-out fold
+3. Average the prediction error across folds
+4. Choose $\lambda$ that minimizes CV error
+
+. . .
+
+### Two common choices
+
+- $\lambda_{\min}$: minimizes CV error (best prediction)
+- $\lambda_{1\text{se}}$: largest $\lambda$ within 1 SE of the minimum (more parsimonious model)
+
+---
+
+## Elastic Net
+
+Compromise between ridge and LASSO (Zou & Hastie, 2005):
+
+$$\hat{\beta}_{\text{enet}} = \arg\min_\beta \left\{ \frac{1}{2n}\|y - X\beta\|_2^2 + \lambda\left[\alpha\|\beta\|_1 + \frac{1-\alpha}{2}\|\beta\|_2^2\right] \right\}$$
+
+- $\alpha = 1$: LASSO
+- $\alpha = 0$: Ridge
+- $0 < \alpha < 1$: Elastic net
+
+. . .
+
+**When to use elastic net**: Correlated predictors (common in genomics). LASSO tends to arbitrarily select one from a group of correlated variables; elastic net selects the group.
+
+---
+
+## Penalized Regression: Summary
+
+| Method | Penalty | Sparsity? | Best when... |
+|--------|---------|-----------|-------------|
+| Ridge | $\frac{1}{2}\|\beta\|_2^2$ | No | Many small effects |
+| LASSO | $\|\beta\|_1$ | Yes | Few large effects |
+| Elastic Net | $\alpha\|\beta\|_1 + \frac{1-\alpha}{2}\|\beta\|_2^2$ | Yes | Correlated predictors |
+
+. . .
+
+All are available in `glmnet` (R) and `scikit-learn` (Python).
+
+---
+
+## Theoretical Guarantees
+
+### LASSO consistency (Zhao & Yu, 2006)
+
+Under the **irrepresentable condition** and sufficient signal strength, LASSO recovers the true support (nonzero coefficients) with probability $\to 1$ as $n \to \infty$.
+
+### Prediction error bounds
+
+Under restricted eigenvalue conditions, LASSO achieves prediction error:
+
+$$\frac{1}{n}\|X\hat{\beta}_{\text{lasso}} - X\beta^*\|_2^2 = O\left(\frac{s \log p}{n}\right)$$
+
+where $s$ = number of true nonzero coefficients. This is **near-optimal**---you pay only $\log p$, not $p$.
+
+---
+
+# Seventy Genes and a Fraud {.centered}
+
+---
+
+## MammaPrint: When Regularization Saves Lives
+
+In 2002, Laura van 't Veer measured 25,000 genes on 78 breast cancer patients and used a supervised method to find a **70-gene signature** predicting metastasis (van 't Veer et al., 2002, *Nature*).
+
+. . .
+
+The signature was commercialized as **MammaPrint**, cleared by the FDA, and validated in the **MINDACT trial** (Cardoso et al., 2016, *NEJM*): 6,693 patients. Women classified as high clinical risk but low genomic risk were randomized to chemotherapy vs. no chemotherapy.
+
+. . .
+
+**Result**: 94.7% five-year distant metastasis-free survival without chemo. **46% of women who would have received chemotherapy were spared** — because a model built on 25,000 variables and 78 patients turned out to be right.
+
+---
+
+## The Duke Fraud: When the Same Method Destroys Trust
+
+At Duke University, Anil Potti used gene expression signatures to predict which chemotherapy drug a tumor would respond to. Clinical trials enrolled patients based on these signatures.
+
+. . .
+
+Two statisticians at MD Anderson — **Keith Baggerly and Kevin Coombes** — spent years trying to reproduce the analysis (Baggerly & Coombes, 2009, *Ann. Appl. Stat.*). They found mislabeled samples, off-by-one errors in gene indices, and results that were literally the opposite of what was claimed.
+
+. . .
+
+**18 papers retracted.** Potti's medical license revoked. Patients had been assigned to treatments based on fraudulent models.
+
+---
+
+## The Same Method, Different Outcomes
+
+MammaPrint and the Duke fraud used the **same method** on the **same kind of data** for the **same kind of question**. The difference:
+
+. . .
+
+- **Validation**: MammaPrint was tested in a 6,693-patient prospective randomized trial. Duke's signatures were never properly validated.
+- **Reproducibility**: Baggerly and Coombes couldn't reproduce the Duke analysis because the code and data were not shared. Van 't Veer's 70 genes replicated.
+- **Cross-validation done correctly**: The Duke group leaked information between training and test sets. MammaPrint did not.
+
+. . .
+
+**The lesson**: Regularization is a tool, not a guarantee. The model is only as good as the analysis pipeline.
+
+---
+
+## LASSO Instability: A Warning
+
+Even when the method is applied honestly, LASSO has a reproducibility challenge:
+
+. . .
+
+When predictors are correlated (as genes always are), LASSO arbitrarily picks one from each correlated group. Different samples → different arbitrary picks → different gene lists, **same prediction accuracy**.
+
+. . .
+
+This is why **bootstrap stability analysis** matters: it tells you which genes are consistently selected, not just selected once. Elastic net mitigates this via the grouping property.
+
+---
+
+## Using Generative AI in High-Dimensional Analysis
+
+Large language models (Claude, ChatGPT, and others) can now write and debug analysis code, explain statistical output, suggest analysis strategies, and provide first-pass biological interpretations.
+
+. . .
+
+They are useful for code generation, syntax lookup, and boilerplate. They are unreliable for statistical judgment, numerical computation, and novel biological claims. Code may contain subtle bugs; gene function descriptions may be fabricated.
+
+---
+
+## Common Errors to Watch For
+
+| Error | Why it matters | How you catch it |
+|-------|---------------|-----------------|
+| No multiple testing correction | Hundreds of false positives | Check for `p.adjust()` or equivalent |
+| Uses theoretical null when empirical null is needed | Inflated false discovery rate | Look at the $z$-score histogram |
+| Runs t-SNE on raw 20K dimensions | Slow, noisy, misleading | Check if PCA was applied first |
+| Doesn't set `scale. = TRUE` in PCA | Variables on different scales dominate | Read the code carefully |
+| Uses `lambda.min` without justification | Overly complex model | Is the sparser `lambda.1se` model adequate? |
+| Hallucinated gene functions | Wrong biological conclusions | Verify against GeneCards, NCBI Gene, PubMed |
+
+---
+
+## Verifying Biological Interpretations
+
+After identifying a gene set, you might ask an AI to describe their functions. Always cross-reference the response:
+
+1. Pick at least 3 genes
+2. Look them up on [GeneCards](https://www.genecards.org/) or [NCBI Gene](https://www.ncbi.nlm.nih.gov/gene/)
+3. Check: Did the AI get the function right? Did it invent a citation?
+
+---
+
+## Other Modern Approaches (Brief Survey)
+
+### Deep learning for high-D biology
+
+- **Autoencoders**: Nonlinear dimension reduction; used in single-cell analysis (e.g., scVI)
+- **Variational autoencoders (VAEs)**: Probabilistic; learn latent representations
+- **Transformers**: Protein structure prediction (AlphaFold), gene expression modeling (Geneformer)
+
+. . .
+
+### When do these beat classical methods?
+
+- Very large $n$ (thousands of samples/cells)
+- Complex nonlinear relationships
+- Transfer learning from pre-trained models
+
+For $n \leq$ a few hundred (typical in many BTP settings), penalized regression and empirical Bayes methods often perform comparably or better, and are much more interpretable.
+
+---
+
+## Bringing It All Together
+
+The complete high-dimensional analysis toolkit:
+
+| Day | Topic | Key Idea |
+|-----|-------|----------|
+| 1 | Multiple testing & FDR | Control false discoveries when testing thousands of hypotheses |
+| 1 | Empirical Bayes | Use the aggregate data to estimate prior, then individualize |
+| 2 | PCA & UMAP | Find low-dimensional structure; visualize |
+| 2 | Penalized regression | Predict and select variables when $p \gg n$ |
+| 2 | LLMs as tools | Accelerate coding and interpretation; verify everything |
+
+---
+
+## Discussion
+
+*Take a few minutes on each of these before we move to the lab.*
+
+### Why not OLS?
+
+You have $n = 80$ samples and $p = 5{,}000$ gene expression measurements. Why can't you just run ordinary least squares?
+
+. . .
+
+- **Mathematical**: $X^TX$ is at most rank 80, so it's singular—$(X^TX)^{-1}$ doesn't exist.
+- **Practical**: Even if $p$ were just slightly less than $n$, OLS would overfit catastrophically—memorizing noise rather than learning signal.
+
+---
+
+### Ridge at the extremes
+
+Ridge regression minimizes $\frac{1}{2n}\|y - X\beta\|_2^2 + \frac{\lambda}{2}\|\beta\|_2^2$.
+
+**Discuss**: What happens to $\hat{\beta}_{\text{ridge}}$ as $\lambda \to 0$? As $\lambda \to \infty$?
+
+. . .
+
+- $\lambda \to 0$: Ridge approaches OLS (minimum-norm solution when $p > n$). Maximum variance, minimum bias.
+- $\lambda \to \infty$: All coefficients shrink to zero. Zero variance, maximum bias. The model predicts the mean $\bar{y}$ for every observation.
+
+---
+
+### Why does LASSO give zeros?
+
+**Discuss**: Explain geometrically why the $\ell_1$ penalty gives exactly sparse solutions but the $\ell_2$ penalty does not.
+
+. . .
+
+The $\ell_1$ constraint set is a diamond (corners on the axes). The $\ell_2$ constraint set is a sphere (smooth, no corners). The OLS contours typically hit the diamond at a corner, where one or more coordinates are exactly zero. The sphere has no corners to hit.
+
+In $p$ dimensions: the $\ell_1$ ball has $2p$ vertices, all on coordinate axes. High-dimensional geometry makes corner intersections even more likely.
+
+---
+
+### Which $\lambda$?
+
+Cross-validation gives $\lambda_{\min}$ (45 genes) and $\lambda_{1\text{se}}$ (12 genes). You're writing a paper to identify a gene signature.
+
+**Discuss**: Which do you report?
+
+. . .
+
+$\lambda_{1\text{se}}$. Its prediction error is statistically indistinguishable from $\lambda_{\min}$, but the model is much sparser. A 12-gene signature is more interpretable, more reproducible, and more practical for a diagnostic panel than a 45-gene signature.
+
+---
+
+## Summary
+
+1. **Ridge, LASSO, elastic net** handle the $p > n$ problem through regularization.
+2. **LASSO** gives sparse solutions; **ridge** when you expect many small effects; **elastic net** for correlated predictors.
+3. **Cross-validation** chooses the regularization strength.
+4. **LLMs** are powerful tools for code generation and interpretation, but require critical evaluation.
+5. **Classical methods remain strong** for moderate $n$; deep learning shines with massive datasets.
+
+### Up Next
+
+**Lab 4**: Penalized regression on the ALL dataset with biological interpretation.

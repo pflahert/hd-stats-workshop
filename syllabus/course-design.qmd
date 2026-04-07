@@ -1,0 +1,374 @@
+---
+title: "Workshop Design"
+subtitle: "Understanding by Design Framework"
+format: html
+---
+
+# Design Principles
+
+## Story-Driven Inquiry
+
+Each lecture is anchored by a **real scientific story** --- a finding that surprised, failed, or changed a field. Students remember the story, learn the statistics through it, and connect the method to the problem it solves. The story is the mental handle; the method is what the story teaches. Some stories involve spectacular failure (5-HTTLPR, the dead salmon, the Duke fraud), some involve unexpected success (MammaPrint, Allen Brain Atlas), and some involve beautiful mistakes (Cavalli-Sforza's maps). Each is memorable, concrete, and true.
+
+## Named Stories by Lecture
+
+| Lecture | Named Story | Method It Teaches |
+|---|---|---|
+| 1: "The Gene That Wasn't There" | Caspi 2003 / Border 2019 (5-HTTLPR) | Multiple testing, FWER, p-value histogram |
+| 1 | Dead salmon fMRI (Bennett et al.) | Cost of not correcting |
+| 2: "The Histogram That Was Too Wide" | Efron's prostate cancer z-scores | Empirical null, two-groups model, local FDR |
+| 2 | Efron & Morris baseball shrinkage | Empirical Bayes, James-Stein estimation |
+| 2 | Open Science Collaboration (2015) | Replication crisis as calibration failure |
+| 3: "The Map That Drew Itself" | Cavalli-Sforza's PCA maps / Novembre 2008 | PCA artifacts on spatial data |
+| 3 | Netflix Prize (2006) | Low-rank approximation, latent factors |
+| 3 | Allen Brain Cell Atlas (single-cell) | UMAP as genuine discovery tool |
+| 4: "Seventy Genes and a Fraud" | van 't Veer 2002 / MINDACT trial | Penalized regression, external validation |
+| 4 | Anil Potti / Duke fraud | Reproducibility, cross-validation leakage |
+| 4 | Hoerl & Kennard 1970 | Ridge regression, bias-variance tradeoff |
+| 4 | Tibshirani 1996 | LASSO, geometry of sparsity |
+
+## Three-Part Lecture Structure
+
+Each 45--60 minute lecture is an essay structured as three to six connected sections (~8--12 minutes each). Each section has:
+
+- A **named story or vivid example**: teach through narrative, make it concrete.
+- A **statistical idea**: the formal concept the story illustrates --- definition, method, diagnostic.
+- A **"but" turn**: the limitation, failure mode, or complication that motivates the next section.
+
+The sections are loosely coupled: students who lose the thread in one section can re-enter at the next story. The "but" turns create forward momentum --- each answer raises a new question.
+
+## Recurring Motifs (Callbacks Across All Four Lectures)
+
+1. **"What does the histogram tell you?"** --- p-value histogram (L1--L2), z-score distribution (L2), scree plot (L3), coefficient path (L4).
+2. **"Would this replicate?"** --- 5-HTTLPR didn't (L1). 64% of psychology didn't (L2). PCA artifacts replicate perfectly but mean nothing (L3). LASSO picks different genes on different bootstrap samples (L4).
+3. **"What are you actually asking?"** --- FWER vs. FDR (L1--L2). Visualization vs. classification (L3). Prediction vs. inference (L4).
+
+## Lecture + Lab Pairing
+
+Each lecture is immediately followed by a hands-on lab. The lecture provides conceptual understanding through narrative; the lab provides procedural understanding through code. Students hear the story, then build the analysis themselves on the same dataset.
+
+| Lecture | Paired Lab | Students Will... |
+|---|---|---|
+| L1: The Gene That Wasn't There | Lab 1: The Multiple Testing Problem | Run 12,625 t-tests, read the p-value histogram, apply Bonferroni vs. BH |
+| L2: The Histogram That Was Too Wide | Lab 2: FDR in Practice | Apply BH and Storey's q-values to the ALL dataset, estimate $\pi_0$ |
+| L3: The Map That Drew Itself | Lab 3: Dimension Reduction | Run PCA and UMAP on the ALL dataset, read scree plots, compare projections |
+| L4: Seventy Genes and a Fraud | Lab 4: Penalized Regression | Fit ridge/LASSO/elastic net, examine coefficient paths, cross-validate |
+
+
+# Stage 1: Desired Results
+
+## Enduring Understandings
+
+These are the big ideas students should internalize and carry beyond the workshop.
+
+1. **Classical statistical inference breaks down when $p \gg n$, and the breakdown is predictable.**
+   Testing thousands of hypotheses at the standard 5% level guarantees hundreds of false positives. This is not a flaw in the statistics --- it is the statistics working exactly as designed for a single test, applied to a problem it was not designed for. The tools to handle this exist; the challenge is knowing when and how to use them.
+
+2. **High-dimensional data always shows structure --- the question is whether the structure is real.**
+   PCA produces gradients. UMAP produces clusters. LASSO produces gene lists. These methods are designed to find patterns, and they will find patterns even in pure noise. The discipline of high-dimensional analysis is validation: checking whether the patterns replicate, whether they correspond to known biology, and whether they survive alternative analysis choices.
+
+3. **Borrowing information across features transforms the multiple testing problem from a curse into a resource.**
+   When you test 12,625 genes, you have 12,625 problems --- but you also have 12,625 data points about the behavior of the null. Empirical Bayes methods (Efron's two-groups model, Storey's q-values, limma's moderated t-statistics) exploit this: the ensemble teaches you about each individual test. This is the central insight of large-scale inference.
+
+4. **The gap between fitting data and predicting outcomes is the core challenge of high-dimensional modeling.**
+   With $p > n$, any method can achieve perfect fit on training data. The bias-variance tradeoff --- deliberately introducing bias through regularization to reduce variance --- is not a compromise but a necessity. The choice of regularizer (L1, L2, elastic net) encodes assumptions about the structure of the signal.
+
+5. **Reproducibility is a statistical property, not just an ethical norm.**
+   The difference between MammaPrint (saved lives) and the Duke fraud (harmed patients) is not statistical sophistication --- both used penalized regression on microarray data. The difference is validation discipline: proper cross-validation, external replication, and honesty about uncertainty. Reproducibility requires both statistical tools and the judgment to use them correctly.
+
+## Essential Questions
+
+These are recurring, open-ended questions that thread across all four lectures and labs, provoking deeper inquiry.
+
+1. **When should you believe a statistical finding, and what would it take to change your mind?**
+   *(Threads through: 5-HTTLPR survival for 15 years (L1), the replication crisis (L2), PCA artifacts that look convincing (L3), MammaPrint vs. Duke fraud (L4))*
+
+2. **What does the histogram tell you --- and what can't it tell you?**
+   *(Threads through: p-value histogram as diagnostic (L1), z-score distribution and empirical null (L2), scree plot (L3), coefficient path (L4))*
+
+3. **When you run thousands of tests simultaneously, who benefits --- and what are the hidden costs?**
+   *(Threads through: multiple testing problem (L1), FDR as a negotiated tradeoff (L2), overclustering in UMAP (L3), LASSO instability (L4))*
+
+4. **How do you tell the difference between a pattern in the data and a pattern in the method?**
+   *(Threads through: Bonferroni as conservative overcorrection (L1), empirical vs. theoretical null (L2), Cavalli-Sforza's PCA maps (L3), overfitting in p >> n (L4))*
+
+5. **What does it mean to use a computational tool responsibly --- and what goes wrong when you don't?**
+   *(Threads through: dead salmon (L1), winner's curse and publication bias (L2), UMAP hallucinations (L3), Duke fraud (L4), AI-generated analysis in all labs)*
+
+## Transfer Goals
+
+By the end of this workshop, students should be able to:
+
+- Given a high-dimensional dataset, diagnose the testing regime (how many tests, what error rate to control) and select an appropriate correction procedure (Bonferroni, BH, q-values) with justification.
+- Read a p-value histogram and identify signal, noise, the null proportion $\pi_0$, and signs of problems (anti-conservative or conservative behavior).
+- Apply PCA and UMAP to a biological dataset, interpret the output critically (scree plots, loadings, cluster stability), and articulate what the projection does and does not show.
+- Fit regularized regression models (ridge, LASSO, elastic net) using cross-validation, interpret coefficient paths, and explain why variable selection is unstable.
+- Evaluate computational output --- from their own code or from AI --- by checking for common errors, questioning default choices, and verifying interpretations against primary sources.
+- Articulate the difference between exploratory visualization, confirmatory testing, and predictive modeling, and choose methods appropriate to each goal.
+
+
+# Stage 2: Acceptable Evidence
+
+## Assessment Philosophy
+
+This is a **two-day training workshop**, not a graded course. All assessments are **formative** --- they exist to consolidate understanding and provide feedback, not to assign grades. The value is in the doing.
+
+Assessments serve three roles:
+
+- **Preparation** (Pre-Homework): Activate prerequisite knowledge and verify software setup before Day 1. Students arrive ready to engage.
+- **Practice** (Labs 1--4): Build procedural skills on the same dataset used in the lectures. Labs pair with lectures: hear the story, then build the analysis.
+- **Integration** (Homework): Connect ideas across lectures, apply methods to new scenarios, and practice evaluating AI-generated analysis.
+
+### AI Use
+
+AI tools are permitted and explicitly used in every lab and in the homework. Some exercises require students to prompt AI, evaluate its output, and catch errors. Assessment focuses on whether students understand what the analysis does, whether it's correct, and what the results mean --- not on whether they can code everything from scratch.
+
+## Assessment Structure
+
+| Assessment | Timing | Primary EUs | Purpose |
+|---|---|---|---|
+| Pre-Homework | Before Day 1 (~1.5 hr) | EU1, EU5 | Activate prerequisite knowledge; software check; first AI evaluation exercise |
+| Lab 1 | Day 1 AM (1 hr) | EU1, EU3 | Practice: 12,625 t-tests, p-value histogram, Bonferroni vs. BH |
+| Lab 2 | Day 1 PM (1 hr) | EU1, EU3 | Practice: BH on ALL dataset, estimate $\pi_0$, empirical Bayes |
+| Homework | Day 1 evening (~1.5 hr) | EU1, EU3, EU5 | Integration: new scenarios, AI-assisted limma analysis, error evaluation |
+| Lab 3 | Day 2 AM (1 hr) | EU2, EU4 | Practice: PCA and UMAP on ALL, scree plots, cluster validation |
+| Lab 4 | Day 2 PM (1 hr) | EU2, EU4, EU5 | Practice: ridge/LASSO/elastic net, coefficient paths, cross-validation |
+
+### Bloom's Taxonomy Distribution
+
+| Bloom's Level | Pre-HW | Labs 1--2 | Homework | Labs 3--4 |
+|---|---|---|---|---|
+| **Remember / Understand** | Heavy | Light | Light | Light |
+| **Apply** | Moderate | Heavy | Moderate | Heavy |
+| **Analyze** | Light | Moderate | Heavy | Moderate |
+| **Evaluate** | Moderate | Moderate | Heavy | Moderate |
+| **Create** | --- | Light (AI extension) | Light (write specs) | Light (AI extension) |
+
+## Lab Design Principles
+
+- Each lab follows the structure: **setup $\to$ write code $\to$ use AI $\to$ critique checklist**.
+- Labs use the **ALL dataset** (12,625 genes $\times$ 128 samples) throughout --- continuity across all four labs builds familiarity and allows comparison across methods.
+- Labs include deliberately **subtle errors** for students to identify --- training critical evaluation, not just execution.
+- AI extension exercises provide a **suggested prompt** and a **critique checklist** so students practice evaluating AI output systematically.
+- Python Colab notebooks require **zero local installation** --- students run everything in a browser.
+- Reproducibility: `numpy.random.seed(2026)` and `plt.style.use('seaborn-v0_8-whitegrid')` in every notebook.
+
+## Homework Design Principles
+
+- The homework bridges Day 1 and Day 2 --- it reinforces large-scale inference concepts (L1--L2) and previews the critical evaluation skills needed for Day 2.
+- Three questions span different Bloom's levels:
+  - **Q1** (Apply/Analyze): Multiple testing concepts applied to a new scenario (proteomics, 5,000 proteins).
+  - **Q2** (Apply/Evaluate): AI-assisted FDR analysis using limma (not raw t-tests) --- students evaluate whether AI makes good methodological choices.
+  - **Q3** (Evaluate/Create): Evaluate analysis output, write specifications, verify claims, review a collaborator's analysis.
+- The homework is not graded. Completeness and engagement matter more than correctness.
+
+## Pre-Homework Design Principles
+
+- Three parts activate different prerequisites:
+  - **Part 1** (Remember): Hypothesis testing vocabulary (H$_0$, H$_1$, p-value, Type I/II error).
+  - **Part 2** (Analyze): Thought experiment about 10,000 genes --- students derive the multiple testing problem intuitively before Lecture 1 formalizes it.
+  - **Part 3** (Evaluate): First encounter with AI evaluation --- students prompt AI for statistical definitions and assess correctness.
+
+
+# Stage 3: Learning Plan
+
+## Scaffolding Logic
+
+The workshop follows a two-day arc with a consistent pedagogical rhythm:
+
+1. **Pre-Homework activates prerequisites** --- students arrive having reviewed hypothesis testing and attempted an intuitive version of the multiple testing problem.
+2. **Lecture introduces concepts through stories** --- each lecture is an essay with named stories, statistical ideas, and "but" turns that motivate the next idea.
+3. **Lab practices the skills on the same dataset** --- students build the analysis they just heard about, on the ALL dataset, with AI assistance.
+4. **Homework integrates and transfers** --- students apply Day 1 concepts to new scenarios and practice evaluating AI output.
+5. **Day 2 builds on Day 1** --- dimension reduction (L3) and penalized regression (L4) use the same dataset and the same critical evaluation framework, but for different statistical problems.
+
+The connecting thread is the **ALL dataset**: 12,625 genes, 128 patients, B-cell vs. T-cell leukemia. Every lecture, every lab, and the homework use this dataset. By the end, students have seen the same data through four different statistical lenses.
+
+## Lecture Plan
+
+Four lectures across two days. Each lecture is a multi-section essay (~45--60 minutes) followed by a one-hour hands-on lab.
+
+### Day 1: Large-Scale Inference
+
+*Primary textbook: Efron (2010), Large-Scale Inference, Ch. 1--7*
+
+**Lecture 1 --- "The Gene That Wasn't There"**
+
+How false positives survive --- and how a histogram catches them.
+
+| Section | Named Story | Statistical Idea |
+|---|---|---|
+| 1.1 | Caspi 2003: 5-HTTLPR and depression (8,000 citations, then nothing) | Hypothesis testing logic; one test works, many tests break |
+| 1.2 | ALL dataset: 12,625 genes, 128 patients | Multiple testing from first principles; 12,625 $\times$ 0.05 = 631 expected false positives |
+| 1.3 | Two histograms: pure-null (uniform) vs. ALL (spike + flat) | P-value histogram as diagnostic; excess near zero = signal; flat height $\approx \pi_0$ |
+| 1.4 | GWAS threshold: $5 \times 10^{-8}$ | Bonferroni and FWER; controls the wrong thing for discovery |
+| 1.5 | Dead salmon with "brain activity" (Bennett et al.) | Voxelwise testing without correction; 25--40% of fMRI studies didn't correct |
+| 1.6 | Border 2019: 18 candidate genes, 62K--443K people, none replicate | Publication bias, winner's curse, garden of forking paths |
+
+> **Lab 1** follows immediately: students run the 12,625 tests themselves.
+
+**Lecture 2 --- "The Histogram That Was Too Wide"**
+
+From Benjamini--Hochberg to Efron's local FDR.
+
+| Section | Named Story | Statistical Idea |
+|---|---|---|
+| 2.1 | Benjamini & Hochberg 1995 (2-page paper, now 60K+ citations) | FDR definition: $E[V/R]$; the BH procedure; controls FDR under independence |
+| 2.2 | Efron's prostate cancer z-scores: the center was too wide | Theoretical vs. empirical null; sources of null inflation (correlations, batch effects) |
+| 2.3 | The mixture model: $f(z) = \pi_0 f_0(z) + (1-\pi_0) f_1(z)$ | Two-groups model; local fdr: $\text{fdr}(z) = \pi_0 f_0(z) / f(z)$ |
+| 2.4 | Efron & Morris baseball shrinkage (1977) | Empirical Bayes; James-Stein; Storey's q-values; borrowing strength |
+| 2.5 | Open Science Collaboration 2015: 97% $\to$ 36% replication | Replication crisis as predicted by FDR framework when $\pi_0$ is high and power is low |
+
+> **Lab 2** follows after lunch: students apply BH and q-values to the ALL dataset.
+
+---
+
+### Day 2: Structure Discovery and Modern Tools
+
+*Primary textbook: Hastie, Tibshirani & Friedman (2009), Elements of Statistical Learning, Ch. 3, 14, 18*
+
+**Lecture 3 --- "The Map That Drew Itself"**
+
+Finding structure in high-dimensional data --- and learning not to trust everything you see.
+
+| Section | Named Story | Statistical Idea |
+|---|---|---|
+| 3.1 | Cavalli-Sforza 1978: PCA maps of European gene frequencies | PCA finds orthogonal directions of max variance; eigenvectors on spatial grids produce sinusoidal artifacts |
+| 3.2 | ALL dataset: PC1 vs. PC2 separates B-cell from T-cell | Scree plot, loadings, biplots; Marchenko-Pastur law for distinguishing signal from noise |
+| 3.3 | Netflix Prize 2006: matrix factorization for recommendations | SVD and low-rank approximation; choosing rank; latent factors |
+| 3.4 | Allen Brain Cell Atlas: 5,000+ cell types from UMAP | t-SNE and UMAP; neighborhood graphs; what is preserved (local clusters) and what is not (distances) |
+| 3.5 | UMAP on permuted ALL data: clusters in pure noise | Stability analysis; validation strategies; PCA as GWAS covariate (Price 2006) |
+
+> **Lab 3** follows immediately: students run PCA and UMAP on the ALL dataset.
+
+**Lecture 4 --- "Seventy Genes and a Fraud"**
+
+Regularization, variable selection, and the discipline of validation.
+
+| Section | Named Story | Statistical Idea |
+|---|---|---|
+| 4.1 | 98 patients, 25,000 genes: perfect fit, zero information | Rank deficiency when $p > n$; overfitting guaranteed; bias-variance at its extreme |
+| 4.2 | Hoerl & Kennard 1970: deliberately biased estimates predict better | Ridge: $\|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|^2 + \lambda\|\boldsymbol{\beta}\|^2$; regularization path; cross-validation |
+| 4.3 | Tibshirani 1996: L1 geometry produces sparsity | LASSO: diamond vs. circle; corners $\Rightarrow$ exact zeros; instability of selected variables |
+| 4.4 | Zou & Hastie 2005: correlated genes need grouping | Elastic net: $\alpha$ mixing parameter; grouping property; stable sparse models |
+| 4.5 | van 't Veer 2002 / MINDACT 2016: 46% spared chemotherapy | External validation; why MammaPrint worked (strong signal, proper CV, prospective trial) |
+| 4.6 | Potti / Duke fraud: 18 retractions, patients harmed | Cross-validation leakage; mislabeled samples; reproducibility as statistical practice |
+
+> **Lab 4** follows after lunch: students fit penalized models to the ALL dataset.
+
+## Textbook and Reference Mapping
+
+### Primary Texts
+
+| Text | Coverage | Lectures |
+|---|---|---|
+| Efron (2010), *Large-Scale Inference* | Ch. 1--2 (large-scale testing), Ch. 3--4 (FDR), Ch. 5--7 (empirical Bayes, two-groups) | L1, L2 |
+| Hastie, Tibshirani & Friedman (2009), *Elements of Statistical Learning* | Ch. 3 (linear regression), Ch. 14 (unsupervised learning), Ch. 18 (high-dimensional) | L3, L4 |
+| Hastie, Tibshirani & Wainwright (2015), *Statistical Learning with Sparsity* | Ch. 2 (LASSO), Ch. 4 (elastic net), Ch. 6 (inference after selection) | L4 |
+| James, Witten, Hastie & Tibshirani (2021), *Introduction to Statistical Learning* | Ch. 6 (regularization), Ch. 12 (unsupervised) | L3, L4 |
+
+### Key Papers by Lecture
+
+| Lecture | Paper | Role |
+|---|---|---|
+| L1 | Caspi et al. (2003), *Science* | Anchor story: 5-HTTLPR |
+| L1 | Border et al. (2019), *Am J Psychiatry* | The replication failure |
+| L1 | Bennett et al. (2009), poster | Dead salmon fMRI |
+| L2 | Benjamini & Hochberg (1995), *JRSS-B* | FDR procedure |
+| L2 | Storey (2002), *JRSS-B* | Q-values and $\pi_0$ estimation |
+| L2 | Efron (2004), *JASA* | Empirical null and local FDR |
+| L2 | Efron & Morris (1977), *Sci Am* | Baseball shrinkage |
+| L2 | Open Science Collaboration (2015), *Science* | Replication crisis |
+| L3 | Cavalli-Sforza et al. (1978), *PNAS* | PCA maps of European gene frequencies |
+| L3 | Novembre & Stephens (2008), *Nature Genetics* | PCA artifacts |
+| L3 | McInnes, Healy & Melville (2018), arXiv | UMAP |
+| L3 | Price et al. (2006), *Nature Genetics* | PCA for population structure correction |
+| L4 | Hoerl & Kennard (1970), *Technometrics* | Ridge regression |
+| L4 | Tibshirani (1996), *JRSS-B* | LASSO |
+| L4 | Zou & Hastie (2005), *JRSS-B* | Elastic net |
+| L4 | van 't Veer et al. (2002), *Nature* | MammaPrint 70-gene signature |
+| L4 | Cardoso et al. (2016), *NEJM* | MINDACT trial |
+| L4 | Baggerly & Coombes (2009), *Ann Appl Stat* | Duke fraud forensics |
+
+### Lecture-to-Chapter Mapping
+
+| Lecture | Efron (2010) | ESL (2009) | SLS (2015) | ISLR (2021) |
+|---|---|---|---|---|
+| L1 | Ch. 1--2 | --- | --- | --- |
+| L2 | Ch. 3--7 | --- | --- | --- |
+| L3 | --- | Ch. 14 (§14.5--14.9) | --- | Ch. 12 |
+| L4 | --- | Ch. 3 (§3.4), Ch. 18 | Ch. 2, 4 | Ch. 6 |
+
+## The ALL Dataset as Unifying Thread
+
+The ALL (Acute Lymphoblastic Leukemia) dataset is used in every lecture, every lab, and the homework. This continuity is a deliberate design choice:
+
+| Component | How the ALL Dataset Is Used |
+|---|---|
+| **Lecture 1** | 12,625 t-tests; p-value histogram; multiple testing problem |
+| **Lab 1** | Students run the 12,625 tests; read the histogram; apply corrections |
+| **Lecture 2** | BH procedure applied; $\pi_0$ estimated; empirical null discussed |
+| **Lab 2** | Students apply BH and q-values; estimate $\pi_0$; make the p-value histogram |
+| **Homework** | Q2: limma analysis of ALL with AI; compare to raw t-tests |
+| **Lecture 3** | PCA separates B-cell from T-cell; UMAP clusters; scree plot |
+| **Lab 3** | Students run PCA and UMAP; compare projections; check stability |
+| **Lecture 4** | Penalized regression to classify subtypes; gene selection |
+| **Lab 4** | Students fit ridge/LASSO/elastic net; examine which genes are selected |
+
+**Dataset specifications:**
+
+- **Source**: Bioconductor `ALL` package (v1.44.0); Chiaretti et al. (2004), *Blood*, 103(7), 2771--2778
+- **Platform**: Affymetrix HGU95Av2 microarray
+- **Dimensions**: 12,625 genes (probesets) $\times$ 128 samples
+- **Classes**: 95 B-cell ALL, 33 T-cell ALL
+- **Format**: Log2-scale expression values exported to CSV
+
+## AI Integration Design
+
+AI is not an add-on --- it is woven into every lab as a skill students must develop.
+
+### AI Integration by Lab
+
+| Lab | AI Exercise | Critique Focus |
+|---|---|---|
+| **Lab 1** | Use AI to generate a power curve for BH by effect size | Does the code correctly simulate from the two-groups model? |
+| **Lab 2** | Use AI to perform full FDR analysis with Storey's q-values | Does AI choose appropriate methods (e.g., limma vs. raw t-tests)? |
+| **Lab 3** | Use AI to add silhouette scores or stability analysis to UMAP | Does AI interpret UMAP distances correctly? |
+| **Lab 4** | Use AI to interpret selected genes biologically | Does AI fabricate gene function claims? Can you verify? |
+
+### AI Evaluation Framework
+
+Every AI exercise includes a **critique checklist**:
+
+1. Does the code run without errors?
+2. Does it use appropriate methods for this data structure?
+3. Are the statistical assumptions met?
+4. Are the interpretations of results correct?
+5. Are any claims fabricated or unverifiable?
+
+This framework maps directly to **EU5** (reproducibility as statistical practice) and **LO3** (critical evaluation of computational output).
+
+## Assessment Pacing Summary
+
+| Time | Session | Assessment |
+|---|---|---|
+| Before Day 1 | Pre-Homework | Activate prerequisites; software check; first AI evaluation |
+| Day 1, 0:00--1:00 | Lecture 1 | --- |
+| Day 1, 1:00--2:00 | Lab 1 | Practice: multiple testing, p-value histogram |
+| Day 1, 2:00--3:00 | Lecture 2 | --- |
+| Day 1, 3:00--4:00 | Lunch | --- |
+| Day 1, 4:00--5:00 | Lab 2 | Practice: BH, q-values, empirical Bayes |
+| Day 1 evening | Homework assigned | Integration: new scenarios, AI-assisted analysis, error evaluation |
+| Day 2, 0:00--0:15 | HW discussion | Brief review of Q1 and Q3 |
+| Day 2, 0:15--1:00 | Lecture 3 | --- |
+| Day 2, 1:00--2:00 | Lab 3 | Practice: PCA, UMAP, scree plots |
+| Day 2, 2:00--3:00 | Lecture 4 | --- |
+| Day 2, 3:00--4:00 | Lunch | --- |
+| Day 2, 4:00--5:00 | Lab 4 | Practice: ridge, LASSO, elastic net, interpretation |
+
+## Questions Still Open
+
+- Should Day 2 include a brief "synthesis" session at the end connecting all four methods on the ALL dataset?
+- How much time should the homework discussion take? 15 minutes may be too short if students have interesting Q3 responses.
+- Should the decision guide be introduced explicitly at the start of Day 2, or left as a reference?
+- Is the balance between lecture time (~45--60 min) and lab time (60 min) right, or should labs be longer?

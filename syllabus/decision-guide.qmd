@@ -1,0 +1,175 @@
+---
+title: "Decision Guide for High-Dimensional Analysis"
+subtitle: "A Reference for Choosing Methods"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+---
+
+## How to Use This Guide
+
+This is a reference document for making methodological decisions in high-dimensional data analysis. It summarizes the key choice points from the workshop. Keep it handy when starting a new analysis.
+
+---
+
+## 1. Multiple Testing: Which Error Rate?
+
+```{mermaid}
+flowchart TD
+    A[How many tests?] -->|1–20| B["FWER: Bonferroni or Holm"]
+    A -->|"100+"| C{What is the goal?}
+    C -->|Confirm a specific hypothesis| D["FWER: Bonferroni or Holm"]
+    C -->|Discover candidates for follow-up| E{How many tests?}
+    E -->|100–1000| F["BH or Storey q-values"]
+    E -->|"1000+"| G{Do you need per-test probabilities?}
+    G -->|No — just a list| F
+    G -->|Yes| H["Efron local FDR"]
+```
+
+| Situation | Method | Controls | R function |
+|-----------|--------|----------|------------|
+| Few tests, confirmatory | Bonferroni | FWER $\leq \alpha$ | `p.adjust(method="bonferroni")` |
+| Few tests, want more power | Holm | FWER $\leq \alpha$ | `p.adjust(method="holm")` |
+| Many tests, discovery | Benjamini–Hochberg | FDR $\leq \alpha$ | `p.adjust(method="BH")` |
+| Many tests, want $\hat{\pi}_0$ | Storey $q$-value | FDR $\leq \alpha$ (adaptive) | `qvalue::qvalue()` |
+| Thousands of tests, want per-test probability | Local FDR | $P(\text{null} \mid z)$ | `locfdr::locfdr()` |
+
+**Always check**: Does your $p$-value histogram look right? If the central peak of the $z$-score distribution is wider than $N(0,1)$, the theoretical null is wrong—use the empirical null.
+
+---
+
+## 2. Differential Expression: Which Test?
+
+```{mermaid}
+flowchart TD
+    A[Data type?] -->|Microarray, log-transformed| B["limma: lmFit → eBayes"]
+    A -->|RNA-seq counts| C["DESeq2 or edgeR"]
+    A -->|Other continuous| D{Sample size per group?}
+    D -->|"Large (n > 30/group)"| E["t-tests + BH correction"]
+    D -->|"Small (n < 30/group)"| F["limma (borrows strength across features)"]
+```
+
+**Why not raw $t$-tests?** With small samples, variance estimates are noisy. limma uses empirical Bayes to shrink gene-specific variance estimates toward a common value, producing more stable (moderated) $t$-statistics and better power.
+
+---
+
+## 3. Dimension Reduction: Which Method?
+
+```{mermaid}
+flowchart TD
+    A[Goal?] -->|Preprocessing for downstream analysis| B["PCA"]
+    A -->|Visualization| C{Need interpretable axes?}
+    A -->|Denoising| B
+    C -->|Yes| B
+    C -->|No — want cluster separation| D{Dataset size?}
+    D -->|"n < 5000"| E["t-SNE (on top PCs)"]
+    D -->|"n > 5000"| F["UMAP (on top PCs)"]
+```
+
+### How many PCs to keep?
+
+| Method | When to use |
+|--------|-------------|
+| Scree plot (look for elbow) | Quick visual check; always do this first |
+| Cumulative variance $\geq 80\%$ | Simple rule of thumb |
+| Marchenko–Pastur threshold | Formal: keep eigenvalues above $(1 + \sqrt{p/n})^2$ |
+| Parallel analysis | Compare to eigenvalues from permuted data |
+
+### What NOT to conclude from t-SNE / UMAP
+
+- Distances between clusters are meaningful → **No.** Distorted.
+- Cluster sizes reflect true population sizes → **No.** Distorted.
+- The number of visible clusters = number of real groups → **Not necessarily.** Artifacts can split or merge groups.
+- A trajectory from A to B is real → **Needs independent evidence.**
+
+**Always**: Run PCA first. Apply t-SNE/UMAP to the top $k$ PCs, not to the raw data.
+
+---
+
+## 4. Penalized Regression: Which Penalty?
+
+```{mermaid}
+flowchart TD
+    A["Goal?"] -->|Prediction only| B{Expected signal structure?}
+    A -->|Variable selection + prediction| C{Correlated predictors?}
+    B -->|Many small effects| D["Ridge (α = 0)"]
+    B -->|Few large effects| E["LASSO (α = 1)"]
+    B -->|Unsure| F["Elastic net (α = 0.5), tune α by CV"]
+    C -->|No| E
+    C -->|"Yes (e.g., co-regulated genes)"| G["Elastic net (0 < α < 1)"]
+```
+
+| Method | Penalty | Sparsity? | Use when |
+|--------|---------|-----------|----------|
+| Ridge | $\lambda\|\beta\|_2^2$ | No | Many small effects, want stable prediction |
+| LASSO | $\lambda\|\beta\|_1$ | Yes | Few large effects, want interpretable model |
+| Elastic net | $\lambda[\alpha\|\beta\|_1 + \frac{1-\alpha}{2}\|\beta\|_2^2]$ | Yes | Correlated predictors |
+
+*Penalty parameterization follows `glmnet`; some textbooks use different scaling conventions.*
+
+### Choosing $\lambda$
+
+- **$\lambda_{\min}$**: Minimizes CV error. Best prediction. More variables selected.
+- **$\lambda_{1\text{se}}$**: Largest $\lambda$ within 1 SE of the minimum. Sparser, more interpretable.
+- For a **gene signature**: report $\lambda_{1\text{se}}$.
+- For **prediction accuracy**: report $\lambda_{\min}$.
+
+### Stability
+
+LASSO selection can be unstable—run bootstrap resampling and report genes selected in $>50\%$ of resamples.
+
+---
+
+## 5. Putting It Together: A Typical Workflow
+
+```{mermaid}
+flowchart TD
+    A[High-dimensional dataset] --> B[Explore: PCA, check for batch effects]
+    B --> C{Analysis goal?}
+    C -->|Which features differ between groups?| D[Differential expression: limma/DESeq2 + FDR]
+    C -->|Visualize sample structure| E[PCA → t-SNE or UMAP]
+    C -->|Predict outcome from features| F[Penalized regression: LASSO/elastic net + CV]
+    C -->|All of the above| G[Do all three and compare gene lists]
+    D --> H[Volcano plot, gene set enrichment]
+    E --> I[Color by known covariates, check for batch effects]
+    F --> J[Bootstrap stability, interpret selected features]
+    G --> K[Overlap: FDR genes ∩ LASSO genes?]
+```
+
+### Key questions to ask at each stage
+
+| Stage | Question |
+|-------|----------|
+| Before anything | Is the data normalized? Are there batch effects? |
+| Multiple testing | Is the $p$-value histogram flat in the right half? Is the empirical null close to $N(0,1)$? |
+| Dimension reduction | Did I scale the data? Did I run t-SNE/UMAP on PCs (not raw data)? |
+| Penalized regression | Did I use `family = "binomial"` for classification? Did I check stability? |
+| Biological interpretation | Did I verify gene functions against a primary database (not just AI output)? |
+
+---
+
+## 6. Verifying Biological Claims
+
+Whether the claim comes from a paper, a collaborator, or an AI:
+
+1. Look up genes on [GeneCards](https://www.genecards.org/) or [NCBI Gene](https://www.ncbi.nlm.nih.gov/gene/)
+2. Check cited papers on [PubMed](https://pubmed.ncbi.nlm.nih.gov/)—do they exist? Do they say what's claimed?
+3. Cross-reference with pathway databases: [KEGG](https://www.genome.jp/kegg/), [Gene Ontology](http://geneontology.org/)
+4. For gene set enrichment: use `clusterProfiler` (R) or [Enrichr](https://maayanlab.cloud/Enrichr/) (web)
+
+---
+
+## Quick Reference Card
+
+| I want to... | Use... | R package |
+|--------------|--------|-----------|
+| Test thousands of hypotheses | BH-FDR or $q$-values | `p.adjust()`, `qvalue` |
+| Test with per-gene posterior probability | Local FDR | `locfdr` |
+| Find DE genes (microarray) | Moderated $t$-test | `limma` |
+| Find DE genes (RNA-seq) | Negative binomial GLM | `DESeq2`, `edgeR` |
+| Reduce dimensions (linear) | PCA | `prcomp()` |
+| Reduce dimensions (nonlinear) | UMAP or t-SNE | `uwot`, `Rtsne` |
+| Predict with variable selection | LASSO or elastic net | `glmnet` |
+| Predict without variable selection | Ridge | `glmnet(alpha=0)` |
+| Check LASSO stability | Bootstrap resampling | manual loop + `glmnet` |

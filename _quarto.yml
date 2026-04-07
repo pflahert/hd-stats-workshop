@@ -1,0 +1,58 @@
+project:
+  title: "High-Dimensional Data Analysis Workshop"
+  type: website
+  output-dir: _output
+  render:
+    - "**/*.qmd"
+    - "!notebooks/**"
+
+website:
+  title: "High-Dimensional Data Analysis — BTP Graduate Workshop"
+  navbar:
+    left:
+      - text: "Syllabus"
+        href: index.qmd
+      - text: "Day 1"
+        menu:
+          - text: "Lecture 1: The Gene That Wasn't There"
+            href: lectures/lecture1.qmd
+          - text: "Lecture 1 Slides"
+            href: lectures/lecture1-slides.qmd
+          - text: "Lab 1: The Multiple Testing Problem (Colab)"
+            href: https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab1.ipynb
+          - text: "Lecture 2: The Histogram That Was Too Wide"
+            href: lectures/lecture2.qmd
+          - text: "Lab 2: FDR in Practice (Colab)"
+            href: https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab2.ipynb
+      - text: "Day 2"
+        menu:
+          - text: "Lecture 3: The Map That Drew Itself"
+            href: lectures/lecture3.qmd
+          - text: "Lab 3: Dimension Reduction (Colab)"
+            href: https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab3.ipynb
+          - text: "Lecture 4: Seventy Genes and a Fraud"
+            href: lectures/lecture4.qmd
+          - text: "Lab 4: Penalized Regression (Colab)"
+            href: https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab4.ipynb
+      - text: "Reference"
+        menu:
+          - text: "Decision Guide"
+            href: syllabus/decision-guide.qmd
+          - text: "Course Design"
+            href: syllabus/course-design.qmd
+      - text: "Assignments"
+        menu:
+          - text: "Pre-Homework"
+            href: assessments/pre-homework.qmd
+          - text: "Homework"
+            href: assessments/homework.qmd
+
+execute:
+  cache: false
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-fold: false
+    code-tools: true

@@ -1,0 +1,170 @@
+---
+title: "Pre-Homework: Review & Software Check"
+subtitle: "Due Before Day 1"
+date: "Estimated time: 1.5 hours"
+format:
+  html:
+    toc: true
+---
+
+## Purpose
+
+This pre-homework ensures everyone starts Day 1 with a shared foundation in hypothesis testing and $p$-values. It also introduces the multiple testing problem and includes a short exercise using AI tools.
+
+**Learning Outcomes**: LO1, LO3
+
+---
+
+## Part 1: Review of Hypothesis Testing (30 min)
+
+### Reading
+
+Review the basics of hypothesis testing from your introductory statistics course or one of these free references:
+
+- OpenIntro Statistics, Ch. 5: [openintro.org](https://www.openintro.org/book/os/)
+- *An Introduction to Statistical Learning*, Ch. 13 (Multiple Testing): [statlearning.com](https://www.statlearning.com/)
+
+### Questions
+
+**Q1.1**: In your own words, define: (a) Null hypothesis ($H_0$), (b) Alternative hypothesis ($H_1$), (c) $p$-value, (d) Type I error, (e) Type II error.
+
+**Q1.2**: A researcher tests whether a new drug reduces blood pressure. They report $p = 0.03$.
+
+(a) State the null and alternative hypotheses.
+(b) At significance level $\alpha = 0.05$, do they reject $H_0$?
+(c) The $p$-value is NOT the probability that $H_0$ is true. Explain why not, in one or two sentences.
+
+**Q1.3**: If you perform a test at $\alpha = 0.05$ and the null hypothesis is actually true, what is the probability of a Type I error? If you perform 20 such independent tests (all with true nulls), what is the probability of getting at least one Type I error?
+
+*Hint*: $P(\text{at least one}) = 1 - P(\text{none}) = 1 - (1 - 0.05)^{20}$.
+
+---
+
+## Part 2: The Multiple Testing Problem (20 min)
+
+### A thought experiment
+
+Imagine you are a genomics researcher. You have gene expression data for 10,000 genes measured on 40 patients (20 with disease, 20 healthy controls). You run a $t$-test for each gene to see if its expression differs between the two groups.
+
+**Q2.1**: If none of the 10,000 genes are truly associated with the disease, how many genes would you expect to have $p < 0.05$ by chance alone?
+
+**Q2.2**: Now suppose 100 of the 10,000 genes are truly associated. The remaining 9,900 null genes still produce approximately $9{,}900 \times 0.05 \approx 495$ false positives, plus some additional true positives. If you report all genes with $p < 0.05$ as "significant," roughly what fraction of your reported genes would be false positives?
+
+**Q2.3**: Suggest at least one approach to deal with this problem. You don't need to know the formal name—just describe the idea intuitively.
+
+---
+
+## Part 3: Working with AI Tools (30 min)
+
+### Exercise: Test the AI on something you know
+
+**Q3.1**: Ask the university AI platform (or Claude/ChatGPT) the following question:
+
+> "What is a $p$-value? Explain it in two sentences."
+
+Record the AI's response. Then evaluate:
+
+- Is the response correct?
+- Is it complete?
+- Does it avoid the common mistake of saying "$p$-value = probability that $H_0$ is true"?
+
+```
+AI's response:
+
+Your evaluation:
+```
+
+**Q3.2**: Now ask the AI a question where it's more likely to make a mistake:
+
+> "I ran 10,000 $t$-tests on gene expression data and found 600 genes with $p < 0.05$. I corrected with Bonferroni and now only 15 genes are significant. A reviewer says I should use FDR instead of Bonferroni. Write 2 sentences explaining why the reviewer might be right."
+
+Evaluate:
+
+- Did the AI correctly explain the difference between FWER and FDR?
+- Did it explain why FDR is more appropriate for discovery?
+- Did it get anything wrong or leave anything important out?
+
+```
+AI's response:
+
+Your evaluation:
+```
+
+**Q3.3**: Ask the AI to write code:
+
+> "In R, generate 1000 $p$-values from a uniform distribution and make a histogram. Then generate 1000 $p$-values where 950 are uniform and 50 are from Beta(0.1, 1). Make a histogram of each. Use base R graphics."
+
+Run the code. Did it work? If not, what was wrong?
+
+```r
+#| label: ai-code-exercise
+#| eval: false
+# PASTE AI-GENERATED CODE HERE
+
+```
+
+```
+Did it work on the first try?
+If not, what did you fix?
+```
+
+---
+
+## Part 4: Software Check (10 min)
+
+Ensure you have R and Python installed with the required packages.
+
+#### R
+
+```r
+#| label: software-check-r
+#| eval: false
+cat("R version:", R.version.string, "\n")
+
+packages <- c("tidyverse", "ggplot2", "glmnet", "Rtsne", "uwot", "pheatmap")
+for (pkg in packages) {
+  if (requireNamespace(pkg, quietly = TRUE)) {
+    cat(pkg, "OK\n")
+  } else {
+    cat(pkg, "MISSING — install with: install.packages('", pkg, "')\n")
+  }
+}
+
+# Bioconductor packages
+bioc_packages <- c("limma", "qvalue", "ALL")
+for (pkg in bioc_packages) {
+  if (requireNamespace(pkg, quietly = TRUE)) {
+    cat(pkg, "OK\n")
+  } else {
+    cat(pkg, "MISSING — install with: BiocManager::install('", pkg, "')\n")
+  }
+}
+```
+
+#### Python
+
+```python
+#| label: software-check-py
+#| eval: false
+import sys
+print(f"Python {sys.version}")
+
+packages = ["numpy", "scipy", "pandas", "sklearn", "matplotlib",
+            "seaborn", "statsmodels", "umap"]
+for pkg in packages:
+    try:
+        __import__(pkg)
+        print(f"{pkg} OK")
+    except ImportError:
+        pip_names = {"sklearn": "scikit-learn", "umap": "umap-learn"}
+        install_name = pip_names.get(pkg, pkg)
+        print(f"{pkg} MISSING — install with: pip install {install_name}")
+```
+
+Also verify you have access to the **university AI platform** and can paste code into it and receive responses.
+
+---
+
+## Submission
+
+Bring your written answers and code output to Day 1. We will briefly discuss the answers at the start of Lecture 1.
