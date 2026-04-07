@@ -5,5 +5,9 @@ _freeze/
 .venv
 .DS_Store
 notebooks/*_exec.ipynb
+*.quarto_ipynb
+*.quarto_ipynb_1
+*.quarto_ipynb_2
+syllabus/course-design.pdf
 __pycache__/
 *.pyc
