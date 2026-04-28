@@ -81,7 +81,14 @@ data: data/export_all.R
 
 # --- PDF targets ---
 
-pdf: lectures-pdf slides-pdf docs-pdf
+# Build all PDFs. We invoke each sub-target with a separate make call so that a
+# failure in one (e.g. slides-pdf failing because images are missing — see
+# lectures/images/IMAGES_TODO.md) does not block the others. The `-` prefix
+# tells make to ignore non-zero exit codes.
+pdf:
+	-$(MAKE) lectures-pdf
+	-$(MAKE) docs-pdf
+	-$(MAKE) slides-pdf
 
 lectures-pdf: $(PDF_LECTURES)
 
@@ -91,45 +98,61 @@ docs-pdf: $(PDF_DOCS)
 
 # ---------- PDF rules ----------
 
+# Helper: chained mv covering all locations Quarto might emit a PDF.
+# Quarto puts the PDF in:
+#   - the source's directory       (e.g. lectures/lecture1.pdf)
+#   - _output/<source-dir>/        (when run inside a website project)
+#   - _output/                     (sometimes for project-root sources)
+#   - cwd                          (when run with -o and no project context)
+# This macro tries each in order.
+define mv_pdf_to_pdfdir
+	@mv $(1)/$(notdir $@) $(PDF_DIR)/ 2>/dev/null \
+		|| mv _output/$(1)/$(notdir $@) $(PDF_DIR)/ 2>/dev/null \
+		|| mv _output/$(notdir $@) $(PDF_DIR)/ 2>/dev/null \
+		|| mv $(notdir $@) $(PDF_DIR)/ 2>/dev/null \
+		|| (echo "ERROR: produced PDF not found for $@"; exit 1)
+endef
+
 # Slide decks → Beamer PDF
 $(PDF_DIR)/%-slides.pdf: lectures/%-slides.qmd | $(PDF_DIR)
 	@echo "--- Rendering $< to Beamer PDF ---"
 	quarto render $< --to beamer -o $(notdir $@)
-	@mv lectures/$(notdir $@) $(PDF_DIR)/ 2>/dev/null || mv $(notdir $@) $(PDF_DIR)/
+	$(call mv_pdf_to_pdfdir,lectures)
 
 # Lecture notes → PDF document
+# Lectures 2/3/4 are dual-format (revealjs + pdf); lecture1 is html + pdf.
 $(PDF_DIR)/lecture%.pdf: lectures/lecture%.qmd | $(PDF_DIR)
 	@echo "--- Rendering $< to PDF ---"
 	quarto render $< --to pdf -o $(notdir $@)
-	@mv lectures/$(notdir $@) $(PDF_DIR)/ 2>/dev/null || mv _output/$(notdir $@) $(PDF_DIR)/ 2>/dev/null || mv $(notdir $@) $(PDF_DIR)/
+	$(call mv_pdf_to_pdfdir,lectures)
 
 # Assessments → PDF
 $(PDF_DIR)/pre-homework.pdf: assessments/pre-homework.qmd | $(PDF_DIR)
 	@echo "--- Rendering $< to PDF ---"
 	quarto render $< --to pdf -o $(notdir $@)
-	@mv assessments/$(notdir $@) $(PDF_DIR)/ 2>/dev/null || mv $(notdir $@) $(PDF_DIR)/
+	$(call mv_pdf_to_pdfdir,assessments)
 
 $(PDF_DIR)/homework.pdf: assessments/homework.qmd | $(PDF_DIR)
 	@echo "--- Rendering $< to PDF ---"
 	quarto render $< --to pdf -o $(notdir $@)
-	@mv assessments/$(notdir $@) $(PDF_DIR)/ 2>/dev/null || mv $(notdir $@) $(PDF_DIR)/
+	$(call mv_pdf_to_pdfdir,assessments)
 
 # Syllabus files → PDF
 $(PDF_DIR)/decision-guide.pdf: syllabus/decision-guide.qmd | $(PDF_DIR)
 	@echo "--- Rendering $< to PDF ---"
 	quarto render $< --to pdf -o $(notdir $@)
-	@mv syllabus/$(notdir $@) $(PDF_DIR)/ 2>/dev/null || mv $(notdir $@) $(PDF_DIR)/
+	$(call mv_pdf_to_pdfdir,syllabus)
 
 $(PDF_DIR)/course-design.pdf: syllabus/course-design.qmd | $(PDF_DIR)
 	@echo "--- Rendering $< to PDF ---"
 	quarto render $< --to pdf -o $(notdir $@)
-	@mv syllabus/$(notdir $@) $(PDF_DIR)/ 2>/dev/null || mv $(notdir $@) $(PDF_DIR)/
+	$(call mv_pdf_to_pdfdir,syllabus)
 
 # Root docs → PDF
 $(PDF_DIR)/index.pdf: index.qmd | $(PDF_DIR)
 	@echo "--- Rendering $< to PDF ---"
 	quarto render $< --to pdf -o $(notdir $@)
-	@mv $(notdir $@) $(PDF_DIR)/
+	$(call mv_pdf_to_pdfdir,.)
 
 $(PDF_DIR):
 	mkdir -p $(PDF_DIR)

@@ -12,7 +12,10 @@ format:
     code-fold: true
     footer: "High-Dimensional Data Analysis Workshop | BTP"
     math: mathjax
-jupyter: python3
+  pdf:
+    toc: true
+    number-sections: false
+    fig-pos: 'H'
 ---
 
 # The Eigenface That Launched a Thousand Papers {.centered}
@@ -390,4 +393,4 @@ In practice, 20–50 PCs is a common default in single-cell workflows (Seurat us
 
 ### Up Next
 
-**Lab 3**: Apply PCA and UMAP to the ALL dataset. Interpret biplots, scree plots, and embeddings.
+**Lab 3**: Apply PCA and UMAP to the Golub dataset. Interpret biplots, scree plots, and embeddings.

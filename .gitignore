@@ -1,13 +1,40 @@
+# Build outputs
 _output/
 _pdf/
 .quarto/
 _freeze/
+
+# Environments / runtime
 .venv
+__pycache__/
+*.pyc
+
+# OS / editor cruft
 .DS_Store
-notebooks/*_exec.ipynb
+.idea/
+.vscode/
+
+# Claude Code internals (never commit)
+.claude/
+
+# Quarto intermediates (sometimes land in source dir)
 *.quarto_ipynb
 *.quarto_ipynb_1
 *.quarto_ipynb_2
+**/*.quarto_ipynb
+notebooks/*_exec.ipynb
+
+# LaTeX intermediates from `quarto render --to pdf`
+*.aux
+*.log
+*.tex
+*.toc
+*.out
+
+# Quarto figure caches that land next to source files
+**/*_files/figure-beamer/
+**/*_files/figure-latex/
+**/*_files/figure-pdf/
+
+# Pre-rendered PDFs that should not be committed at source root
 syllabus/course-design.pdf
-__pycache__/
-*.pyc

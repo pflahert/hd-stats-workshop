@@ -12,7 +12,10 @@ format:
     code-fold: true
     footer: "High-Dimensional Data Analysis Workshop | BTP"
     math: mathjax
-jupyter: python3
+  pdf:
+    toc: true
+    number-sections: false
+    fig-pos: 'H'
 ---
 
 # The Histogram That Tells You Everything {.centered}

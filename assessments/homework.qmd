@@ -5,7 +5,20 @@ date: "Estimated time: 1.5 hours"
 format:
   html:
     toc: true
+  pdf:
+    toc: true
 ---
+
+::: {.callout-tip icon=true}
+## Do this assignment in Colab
+
+The interactive version with answer cells lives in a Colab notebook (R kernel — Q2 uses limma + qvalue):
+[**Open Homework in Colab**](https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/homework.ipynb)
+
+In Colab: **Runtime → Change runtime type → R** before running cells.
+
+This page is the readable web reference.
+:::
 
 ## Purpose
 
@@ -29,9 +42,9 @@ A proteomics experiment measures the abundance of $p = 5{,}000$ proteins in $n =
 
 ## Q2: FDR in Practice (LO1, LO3)
 
-Using the ALL dataset from Lab 2 (or your own dataset), perform the following analysis. **You should use AI to write the code**, but you must evaluate its correctness and interpret the results yourself.
+Using the Golub dataset from Lab 2 (or your own dataset), perform the following analysis. **You should use AI to write the code**, but you must evaluate its correctness and interpret the results yourself.
 
-**(a)** Direct an AI to compute BH-adjusted $p$-values for the B-cell vs. T-cell comparison **using limma** (not raw $t$-tests). Report:
+**(a)** Direct an AI to compute BH-adjusted $p$-values for the ALL vs. AML comparison **using limma** (not raw $t$-tests). Report:
 
 - Number of genes significant at FDR $< 0.01$, $< 0.05$, $< 0.10$
 
@@ -58,7 +71,7 @@ Explain what makes Specification B better.
 
 **(c)** Describe one specific error you encountered during today's labs—whether in AI-generated code, your own code, or a collaborator's analysis. What was the error? How did you catch it? What statistical knowledge was required to recognize it?
 
-**(d)** You receive a complete differential expression analysis from a collaborator. It uses raw $t$-tests with BH correction on a microarray dataset with 128 samples. Write a short review (3--4 sentences) describing what's adequate and what should be changed, and why. *(Hint: consult the [Decision Guide](../syllabus/decision-guide.qmd) for recommended methods.)*
+**(d)** You receive a complete differential expression analysis from a collaborator. It uses raw $t$-tests with BH correction on a microarray dataset with 72 samples. Write a short review (3--4 sentences) describing what's adequate and what should be changed, and why. *(Hint: consult the [Decision Guide](../syllabus/decision-guide.qmd) for recommended methods.)*
 
 ---
 

@@ -14,7 +14,7 @@
 
 ### Lecture 1: "The Gene That Wasn't There"
 
-For fifteen years, the most-cited finding in psychiatric genetics was a serotonin transporter variant linked to depression. It had 8,000 citations. Then someone actually tested it in 38,000 people and found nothing. How does a false positive survive for fifteen years? Because the field was testing many hypotheses without accounting for how many they tested. Today, we'll see exactly how this happens — not in psychiatry, but in our own data. We'll take a leukemia dataset with 12,625 genes, test every one for a difference between cancer subtypes, and watch the false discovery problem unfold in a single histogram. That histogram will become your first diagnostic tool: it tells you whether there's signal, how much, and whether your analysis is trustworthy. By the end, you'll understand why the most common correction (Bonferroni) is a sledgehammer, and why biologists needed something better.
+For fifteen years, the most-cited finding in psychiatric genetics was a serotonin transporter variant linked to depression. It had 8,000 citations. Then someone actually tested it in 38,000 people and found nothing. How does a false positive survive for fifteen years? Because the field was testing many hypotheses without accounting for how many they tested. Today, we'll see exactly how this happens — not in psychiatry, but in our own data. We'll take a leukemia dataset with 3,051 genes, test every one for a difference between cancer subtypes, and watch the false discovery problem unfold in a single histogram. That histogram will become your first diagnostic tool: it tells you whether there's signal, how much, and whether your analysis is trustworthy. By the end, you'll understand why the most common correction (Bonferroni) is a sledgehammer, and why biologists needed something better.
 
 ### Lecture 2: "The Histogram That Was Too Wide"
 
@@ -42,17 +42,17 @@ Seventy percent of breast cancer patients who receive chemotherapy would have su
 
 **Connection to next**: "But what happens when you don't test one gene — you test all of them?"
 
-#### 1.2 — Twelve thousand six hundred twenty-five tests
+#### 1.2 — Three thousand and fifty-one tests
 
-**Hook**: "Here's a leukemia dataset. 128 patients. Two subtypes: B-cell ALL and T-cell ALL. 12,625 genes measured per patient. You want to know which genes differ between the subtypes. So you do what anyone would do — you test each one." Introduce the ALL dataset not as example data but as the experiment we're analyzing together for the entire workshop. Run a t-test for each gene. Get 12,625 p-values.
+**Hook**: "Here's a leukemia dataset. 72 patients. Two types: ALL and AML. 3,051 genes measured per patient. You want to know which genes differ between the types. So you do what anyone would do — you test each one." Introduce the Golub dataset not as example data but as the experiment we're analyzing together for the entire workshop. Run a t-test for each gene. Get 3,051 p-values.
 
-**Statistical idea**: The multiple testing problem from first principles. If each test has a 5% false positive rate and you run 12,625 independent tests, you expect ~631 false positives even when nothing is happening. The rate of false positives is fine; the *number* is not.
+**Statistical idea**: The multiple testing problem from first principles. If each test has a 5% false positive rate and you run 3,051 independent tests, you expect ~153 false positives even when nothing is happening. The rate of false positives is fine; the *number* is not.
 
-**Connection to next**: "Now let's look at what those 12,625 p-values look like."
+**Connection to next**: "Now let's look at what those 3,051 p-values look like."
 
 #### 1.3 — Your first diagnostic: the p-value histogram
 
-**Hook**: Show two histograms side by side — one from a pure-null simulation (uniform), one from the ALL data (spike near zero plus uniform bulk). "This is the single most useful plot in high-dimensional statistics." The shape tells you three things: (1) whether there's any signal at all, (2) roughly how much, and (3) whether your analysis has problems (anti-conservative = pile-up at zero beyond what's expected; conservative = dip near zero).
+**Hook**: Show two histograms side by side — one from a pure-null simulation (uniform), one from the Golub data (spike near zero plus uniform bulk). "This is the single most useful plot in high-dimensional statistics." The shape tells you three things: (1) whether there's any signal at all, (2) roughly how much, and (3) whether your analysis has problems (anti-conservative = pile-up at zero beyond what's expected; conservative = dip near zero).
 
 **Statistical idea**: Under the null, p-values are uniform. The excess near zero is signal. The height of the flat part estimates π₀, the proportion of true nulls. This is a visual introduction to the two-groups model that Lecture 2 will formalize.
 
@@ -60,7 +60,7 @@ Seventy percent of breast cancer patients who receive chemotherapy would have su
 
 #### 1.4 — The sledgehammer: Bonferroni and FWER
 
-**Hook**: "The simplest fix: divide your significance level by the number of tests. 0.05 / 12,625 ≈ 4 × 10⁻⁶. Any gene with a p-value below that threshold, you call significant." Bonferroni controls the family-wise error rate — the probability of *any* false positive. In GWAS, the threshold is 5 × 10⁻⁸ because you're testing ~1 million variants.
+**Hook**: "The simplest fix: divide your significance level by the number of tests. 0.05 / 3,051 ≈ 1.6 × 10⁻⁵. Any gene with a p-value below that threshold, you call significant." Bonferroni controls the family-wise error rate — the probability of *any* false positive. In GWAS, the threshold is 5 × 10⁻⁸ because you're testing ~1 million variants.
 
 **Statistical idea**: FWER control (Bonferroni, Šidák). The logic: if you want the probability of at least one false positive to be ≤ α, each test needs significance level α/m. Conservative because it controls the wrong thing for discovery — you don't care about "any error," you care about "what fraction of my discoveries are wrong."
 
@@ -92,7 +92,7 @@ Seventy percent of breast cancer patients who receive chemotherapy would have su
 
 **Hook**: "In 1995, Yoav Benjamini and Yosef Hochberg wrote a two-page paper that would eventually become one of the most cited papers in statistics. They asked a question nobody had formalized before: *of all the hypotheses I declare significant, what fraction are wrong?*" This is the false discovery rate. Lecture 1 showed why FWER is a sledgehammer. FDR is the scalpel.
 
-**Statistical idea**: FDR definition — E[V/R] where V is false discoveries and R is total discoveries. The BH procedure: rank p-values, find the largest k where p_(k) ≤ (k/m)α. It controls FDR at level α under independence (and positive dependence). Walk through the procedure on the ALL dataset.
+**Statistical idea**: FDR definition — E[V/R] where V is false discoveries and R is total discoveries. The BH procedure: rank p-values, find the largest k where p_(k) ≤ (k/m)α. It controls FDR at level α under independence (and positive dependence). Walk through the procedure on the Golub dataset.
 
 **The "but" turn**: "BH controls FDR. But it relies on knowing what the null looks like — specifically, that null p-values are uniform. What if they're not?"
 
@@ -150,7 +150,7 @@ Seventy percent of breast cancer patients who receive chemotherapy would have su
 
 #### 3.2 — What PCA actually finds (and the scree plot as diagnostic)
 
-**Hook**: Return to the ALL dataset. "128 patients, 12,625 genes. Can PCA show us the difference between B-cell and T-cell leukemia without being told the labels?" Run PCA. Plot PC1 vs. PC2. The subtypes separate. "Now — how do you know this isn't another Cavalli-Sforza?" Answer: the scree plot and the loadings. The scree plot tells you how many dimensions matter. The loadings tell you which genes drive the separation.
+**Hook**: Return to the Golub dataset. "72 patients, 3,051 genes. Can PCA show us the difference between ALL and AML without being told the labels?" Run PCA. Plot PC1 vs. PC2. The types separate. "Now — how do you know this isn't another Cavalli-Sforza?" Answer: the scree plot and the loadings. The scree plot tells you how many dimensions matter. The loadings tell you which genes drive the separation.
 
 **Statistical idea**: Eigenvalues as variance explained. The scree plot — what it looks like when there's signal vs. noise. The elbow and the Marchenko-Pastur law (eigenvalue distribution under pure noise). Loadings and biplots: interpreting what the components mean biologically. Variance explained vs. structure explained (a component can explain little variance but capture real biology).
 
@@ -176,7 +176,7 @@ Seventy percent of breast cancer patients who receive chemotherapy would have su
 
 #### 3.5 — Artifacts, overclustering, and the discipline of validation
 
-**Hook**: "Here's a UMAP of the ALL dataset. The subtypes separate cleanly. Now here's a UMAP of the same data with permuted labels — the genes have no relationship to the subtypes. There are still clusters." The visual lesson: clusters on a UMAP plot are necessary but not sufficient evidence of real structure. Validation strategies: (1) do the clusters correspond to known biology? (2) are they stable across parameter choices? (3) do they replicate in independent data?
+**Hook**: "Here's a UMAP of the Golub dataset. The types separate cleanly. Now here's a UMAP of the same data with permuted labels — the genes have no relationship to the types. There are still clusters." The visual lesson: clusters on a UMAP plot are necessary but not sufficient evidence of real structure. Validation strategies: (1) do the clusters correspond to known biology? (2) are they stable across parameter choices? (3) do they replicate in independent data?
 
 **Statistical idea**: Stability analysis — bootstrap or subsample the data, rerun the projection, see which clusters persist. Silhouette scores and cluster validation metrics (briefly). The distinction between visualization (explore) and inference (conclude). PCA corrections in GWAS (Price et al. 2006): PCA went from visualization tool to causal-inference correction — top PCs summarize ancestry and remove confounding when included as covariates. This is dimension reduction doing something PCA maps couldn't: solving a real statistical problem.
 
@@ -200,7 +200,7 @@ Seventy percent of breast cancer patients who receive chemotherapy would have su
 
 **Statistical idea**: Ridge regression: minimize ||y - Xβ||² + λ||β||². The penalty shrinks all coefficients toward zero but never to exactly zero. The solution: β̂_ridge = (X'X + λI)⁻¹X'y — the λI term makes the matrix invertible. Geometric interpretation: the L2 ball. The regularization path — plot coefficients as a function of λ. Cross-validation to choose λ.
 
-**The "but" turn**: "Ridge gives you stable predictions. But with 12,625 genes, every single one gets a nonzero coefficient. If you want to know *which* genes matter — which genes a clinician should look at — ridge doesn't help."
+**The "but" turn**: "Ridge gives you stable predictions. But with 3,051 genes, every single one gets a nonzero coefficient. If you want to know *which* genes matter — which genes a clinician should look at — ridge doesn't help."
 
 **Connection to next**: "You want a model that selects genes. That's what LASSO does."
 
@@ -208,7 +208,7 @@ Seventy percent of breast cancer patients who receive chemotherapy would have su
 
 **Hook**: "In 1996, Robert Tibshirani proposed replacing the squared penalty with an absolute-value penalty. The change seems minor — L2 norm to L1 norm — but the geometry is completely different." Show the diamond (L1 ball) vs. the circle (L2 ball). The constraint contours have corners on the axes. The regression solution hits a corner, and at a corner, some coefficients are exactly zero. "LASSO doesn't just shrink — it selects."
 
-**Statistical idea**: LASSO: minimize ||y - Xβ||² + λ||β||₁. The geometry of why L1 produces sparsity. The regularization path — coefficients enter the model one at a time as λ decreases. Cross-validation for λ. Applied to the ALL dataset: at the optimal λ, maybe 50–100 genes have nonzero coefficients out of 12,625.
+**Statistical idea**: LASSO: minimize ||y - Xβ||² + λ||β||₁. The geometry of why L1 produces sparsity. The regularization path — coefficients enter the model one at a time as λ decreases. Cross-validation for λ. Applied to the Golub dataset: at the optimal λ, maybe 30–50 genes have nonzero coefficients out of 3,051.
 
 **The "but" turn**: "LASSO gives you a gene list. But here's the problem: run it again on a bootstrap sample and you get a *different* gene list. The identity of the selected genes is unstable, even when the prediction accuracy is stable. Which 70 genes depends on the random seed."
 

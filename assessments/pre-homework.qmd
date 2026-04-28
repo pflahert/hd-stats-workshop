@@ -5,7 +5,18 @@ date: "Estimated time: 1.5 hours"
 format:
   html:
     toc: true
+  pdf:
+    toc: true
 ---
+
+::: {.callout-tip icon=true}
+## Do this assignment in Colab
+
+The interactive version with answer cells lives in a Colab notebook:
+[**Open Pre-Homework in Colab**](https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/pre-homework.ipynb)
+
+This page is the readable web reference. Type your answers in the Colab notebook (`File → Save a copy in Drive` to keep your work).
+:::
 
 ## Purpose
 

@@ -12,7 +12,10 @@ format:
     code-fold: true
     footer: "High-Dimensional Data Analysis Workshop | BTP"
     math: mathjax
-jupyter: python3
+  pdf:
+    toc: true
+    number-sections: false
+    fig-pos: 'H'
 ---
 
 # The Model That Memorizes Noise {.centered}
@@ -434,4 +437,4 @@ $\lambda_{1\text{se}}$. Its prediction error is statistically indistinguishable 
 
 ### Up Next
 
-**Lab 4**: Penalized regression on the ALL dataset with biological interpretation.
+**Lab 4**: Penalized regression on the Golub dataset with biological interpretation.

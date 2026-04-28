@@ -13,64 +13,74 @@ make              # Full build (HTML + PDF)
 make html         # Render full website
 make preview      # Live preview with auto-reload
 
-make lectures     # Render lecture notes (essays) as HTML
-make slides       # Render slide decks (Reveal.js) as HTML
+make lectures     # Render lecture notes / slide decks as HTML
+make slides       # Render lecture1-slides as Reveal.js HTML
 make docs         # Render syllabus, assessments, decision guide as HTML
 
 make pdf          # Render all PDFs
-make lectures-pdf # Lecture notes as PDF (for printing/reading)
-make slides-pdf   # Slide decks as Beamer PDF
+make lectures-pdf # Lecture notes/decks as PDF (printable handouts)
+make slides-pdf   # lecture1-slides as Beamer PDF
 make docs-pdf     # Syllabus/assessments as PDF
 
-make data         # Export ALL dataset CSVs (requires Bioconductor)
+make data         # Export Golub + ALL dataset CSVs (requires Bioconductor)
 
 make clean        # Remove all output
 make clean-pdf    # Remove PDF output only
 ```
 
-Primary tool is Quarto (≥1.4). Output goes to `_output/`. PDFs go to `_pdf/`.
+Primary tool is Quarto (≥1.4). Output goes to `_output/`. PDFs go to `_pdf/`. Local Jupyter kernel for Python execution is named `hd-stats` (set via `jupyter: hd-stats` in `_quarto.yml`).
 
 ## Directory Structure
 
 ```
 hd-stats-workshop/
-├── _quarto.yml           # Quarto website config, navbar
+├── _quarto.yml           # Quarto website config, navbar, project-level jupyter kernel
 ├── CLAUDE.md
+├── README.md             # Instructor-facing teaching guide
 ├── Makefile
 ├── index.qmd             # Syllabus / landing page
 ├── syllabus/
 │   ├── course-design.qmd # UbD framework (enduring understandings, assessment design, lecture plan)
 │   └── decision-guide.qmd # Mermaid flowcharts for method selection
 ├── lectures/
-│   ├── images/           # Slide image assets
+│   ├── images/           # Slide image assets (see IMAGES_TODO.md for missing files)
 │   ├── lecture-outlines.md # Master outline at three levels of detail
-│   ├── lecture1.qmd      # Essay: "The Gene That Wasn't There"
-│   ├── lecture1-slides.qmd # Reveal.js slides for Lecture 1
-│   ├── lecture2.qmd      # Slides: "The Histogram That Was Too Wide"
-│   ├── lecture3.qmd      # Slides: "The Map That Drew Itself"
-│   └── lecture4.qmd      # Slides: "Seventy Genes and a Fraud"
+│   ├── lecture1.qmd      # Essay: "The Gene That Wasn't There" (HTML article + PDF)
+│   ├── lecture1-slides.qmd # Reveal.js slide deck for Lecture 1 (image-driven)
+│   ├── lecture2.qmd      # Reveal.js + PDF: "The Histogram That Was Too Wide"
+│   ├── lecture3.qmd      # Reveal.js + PDF: "The Map That Drew Itself"
+│   └── lecture4.qmd      # Reveal.js + PDF: "Seventy Genes and a Fraud"
 ├── assessments/
-│   ├── pre-homework.qmd  # Pre-workshop review & software check
-│   └── homework.qmd      # Day 1 → Day 2 homework
+│   ├── pre-homework.qmd  # HTML/PDF web reference for pre-workshop assignment
+│   └── homework.qmd      # HTML/PDF web reference for Day 1→Day 2 assignment
 ├── notebooks/
-│   ├── lab1.ipynb        # Lab 1: The Multiple Testing Problem (Colab)
-│   ├── lab2.ipynb        # Lab 2: FDR in Practice (Colab)
-│   ├── lab3.ipynb        # Lab 3: Dimension Reduction (Colab)
-│   └── lab4.ipynb        # Lab 4: Penalized Regression (Colab)
+│   ├── pre-homework.ipynb # Colab assignment (Python kernel)
+│   ├── homework.ipynb     # Colab assignment (R kernel — uses limma + qvalue)
+│   ├── lab1.ipynb        # Lab 1: The Multiple Testing Problem
+│   ├── lab2.ipynb        # Lab 2: FDR in Practice
+│   ├── lab3.ipynb        # Lab 3: Dimension Reduction
+│   └── lab4.ipynb        # Lab 4: Penalized Regression
 └── data/
-    ├── all_expression.csv # 12,625 genes × 128 samples
-    ├── all_metadata.csv   # 128 samples with subtype labels
-    ├── export_all.R       # Bioconductor export script
-    └── README.md          # Data documentation
+    ├── golub_expression.csv # 3,051 genes × 72 samples (Golub 1999, ALL vs. AML)
+    ├── golub_metadata.csv   # 72 samples with class labels
+    ├── all_expression.csv   # 12,624 genes × 128 samples (Bioconductor ALL)
+    ├── all_metadata.csv     # 128 samples with B-cell / T-cell labels
+    ├── export_all.R         # Exports both Golub and full ALL CSVs
+    └── README.md            # Data documentation
 ```
 
 ## Content Architecture
 
-Each lecture exists as **two Quarto files** plus a **Colab notebook**:
+Lectures use a **mix of two formats**:
 
-- **Lecture notes** (`lectures/lecture1.qmd`): The primary artifact. Essay-style prose written in a story-driven, first-principles voice (Matt Levine style). These are the speaking notes — the instructor reads/delivers the essay while the slides provide visual support. Rendered as HTML articles.
-- **Slides** (`lectures/lecture1-slides.qmd`): Visual scaffold for the lecture. Mostly images (paper titles, key figures, data visualizations) with sparse text. The full essay text lives in Reveal.js speaker notes (`::: {.notes}`). Code is `echo: false`; students see figures, not code.
-- **Labs** (`notebooks/lab1.ipynb`): Python Colab notebooks. The primary lab format — zero-install, runs in browser. Follow structure: setup → write code → use AI → critique checklist.
+- **Lecture 1 only**: split into an essay (`lecture1.qmd`, HTML+PDF article) + a separate Reveal.js slide deck (`lecture1-slides.qmd`). The essay is the speaking text; slides are image-driven with speaker notes (`::: {.notes}`).
+- **Lectures 2, 3, 4**: single Reveal.js slide deck per lecture (`lecture2.qmd`, `lecture3.qmd`, `lecture4.qmd`). Slide-deck format combines on-slide narrative + executable Python code blocks that generate figures live. Each renders as both Reveal.js HTML *and* a printable article PDF (handout format).
+
+**Assessments and labs** follow a dual-form pattern:
+- `assessments/*.qmd` — readable HTML/PDF web reference.
+- `notebooks/*.ipynb` — interactive Colab version where students actually do the work. Linked from the navbar with a "(Colab)" suffix and from the top of each `.qmd` via a callout box.
+
+**Labs** (`notebooks/lab1.ipynb`–`lab4.ipynb`): Python Colab notebooks; zero-install for students; structure: setup → write code → use AI → critique checklist.
 
 ### Learning Outcomes
 
@@ -80,19 +90,24 @@ Each lecture exists as **two Quarto files** plus a **Colab notebook**:
 
 ## Code Conventions
 
-- Lecture notes and slides use R code blocks with Quarto syntax: `#| label:`, `#| fig-height:`, etc.
-- Lecture notes: no executable code (pure prose)
-- Slides: `echo: false` — students see figures and outputs, not code. Code in speaker notes for instructor reference.
-- Labs (Python notebooks): `numpy.random.seed(2026)` for reproducibility. `plt.style.use('seaborn-v0_8-whitegrid')` for consistent plots.
-- Labs follow structure: setup → write code → use AI → critique checklist
+- **Lecture 1 essay** (`lecture1.qmd`): pure prose, no executable code.
+- **Lecture 1 slides** (`lecture1-slides.qmd`): image-driven; `code-fold: true` in Reveal.js settings. No live code execution.
+- **Lectures 2–4** (`lecture2/3/4.qmd`): mix of prose + executable Python (`{python}` blocks with `echo: true`). Figures render live during build via the `hd-stats` Jupyter kernel.
+- **Labs** (Python notebooks): `numpy.random.seed(2026)` for reproducibility; `plt.style.use('seaborn-v0_8-whitegrid')` for plots; data loaded from Zenodo or GitHub raw URLs.
+- **Homework notebook** (R kernel): uses `limma` + `qvalue` (Bioconductor); data loaded from GitHub raw URLs.
 
 ## Key Datasets and Packages
 
-- **ALL dataset**: 12,625 genes × 128 samples, B-cell vs. T-cell leukemia
-  - Source: Bioconductor `ALL` package (exported to `data/all_expression.csv` and `data/all_metadata.csv`)
-  - Labs load from GitHub raw URL: `https://raw.githubusercontent.com/pflahert/hd-stats-workshop/main/data/`
-- **Python** (labs): scipy, statsmodels, scikit-learn, umap-learn, matplotlib, seaborn, pandas, numpy
-- **R** (slides only): limma, qvalue, glmnet, tidyverse, ggplot2, pheatmap, Rtsne, uwot
+- **Golub dataset**: 3,051 genes × 72 samples, ALL vs. AML leukemia.
+  - Source: Golub et al. (1999), *Science*; archived on Zenodo (DOI: 10.5281/zenodo.8123245).
+  - Local exports: `data/golub_expression.csv`, `data/golub_metadata.csv`.
+  - Loaded by labs from GitHub raw URLs: `https://raw.githubusercontent.com/pflahert/hd-stats-workshop/main/data/`.
+- **ALL dataset**: 12,624 genes × 128 samples, B-cell vs. T-cell ALL.
+  - Source: Bioconductor `ALL` package.
+  - Local exports: `data/all_expression.csv`, `data/all_metadata.csv`.
+- Both produced by `data/export_all.R` (run via `make data`; requires Bioconductor `ALL` + `multtest`).
+- **Python** (labs, lectures 2–4): scipy, statsmodels, scikit-learn, umap-learn, matplotlib, seaborn, pandas, numpy.
+- **R** (homework, optional local): limma, qvalue, glmnet, tidyverse, ggplot2, pheatmap, Rtsne, uwot.
 
 ## AI Integration Philosophy
 
@@ -100,11 +115,20 @@ Every lab uses AI explicitly. Students prompt AI, evaluate output, and catch err
 
 ## Editing Guidelines
 
-- The essay (lecture notes) is the source of truth. Modify the essay first, then update slides and lab notebook to match.
-- Preserve narrative flow — each lecture tells a story with an anchor paper/finding
-- Keep visual emphasis (p-value histograms, scree plots, biplots)
-- Slide image placeholders use `lectures/images/` directory — see `lecture1-slides.qmd` for the pattern
-- Update `_quarto.yml` navbar if adding new documents
-- Decision guide uses Mermaid flowcharts — test rendering after edits
-- Slides have speaker notes accessible via Reveal.js speaker view (press 'S')
-- Do not commit `_output/`, `.quarto/`, or `_pdf/` directories
+- For Lecture 1: the essay (`lecture1.qmd`) is the source of truth. Modify the essay first, then update slides + lab to match.
+- For Lectures 2/3/4: the slide deck is the only source. Edit it directly; the printable PDF is auto-generated.
+- For assessments: edit the `.qmd` and the corresponding `.ipynb` in lockstep — they should stay in sync.
+- Preserve narrative flow — each lecture tells a story with an anchor paper/finding.
+- Keep visual emphasis (p-value histograms, scree plots, biplots).
+- Slide image placeholders use `lectures/images/` — see `IMAGES_TODO.md` for the current list of missing files.
+- Update `_quarto.yml` navbar if adding new documents (and add a Colab link if the new doc has a paired `.ipynb`).
+- Decision guide uses Mermaid flowcharts — test rendering after edits.
+- Slides have speaker notes accessible via Reveal.js speaker view (press 'S').
+- Do not commit `_output/`, `.quarto/`, `_pdf/`, or `*.quarto_ipynb*` artifacts.
+
+## Distribution model
+
+- **Source on GitHub**: `pflahert/hd-stats-workshop`.
+- **Website**: served from GitHub Pages via `quarto publish gh-pages`.
+- **Labs and assessments**: distributed as `.ipynb` opened by students directly in **Google Colab** (URLs of the form `colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/<file>.ipynb`).
+- **Alternative**: students may upload the same `.ipynb` files to UMass Harmony or any other Jupyter-capable platform.

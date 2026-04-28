@@ -44,8 +44,14 @@ website:
         menu:
           - text: "Pre-Homework"
             href: assessments/pre-homework.qmd
+          - text: "Pre-Homework (Colab)"
+            href: https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/pre-homework.ipynb
           - text: "Homework"
             href: assessments/homework.qmd
+          - text: "Homework (Colab)"
+            href: https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/homework.ipynb
+
+jupyter: hd-stats
 
 execute:
   cache: false

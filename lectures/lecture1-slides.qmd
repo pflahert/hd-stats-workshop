@@ -12,7 +12,6 @@ format:
     code-fold: true
     footer: "High-Dimensional Data Analysis Workshop | BTP"
     math: mathjax
-jupyter: python3
 ---
 
 ## {background-color="black" .centered}
@@ -89,7 +88,7 @@ Pause here. Let the question hang. Then: "We're going to see this problem firsth
 
 ---
 
-# The ALL Dataset {.centered}
+# The Golub Dataset {.centered}
 
 ::: {.notes}
 Shift gears. "Let's start with a dataset."
@@ -102,7 +101,7 @@ Shift gears. "Let's start with a dataset."
 ![](images/golub-1999-title.png){fig-alt="Golub et al. 1999, Science — molecular classification of cancer" width="85%"}
 
 ::: {.notes}
-The ALL dataset — ALL stands for acute lymphoblastic leukemia. It comes from a study of 128 patients with leukemia, and each patient's tumor was profiled using a microarray: a technology that measures the expression level of thousands of genes simultaneously. In this case, 12,625 genes per patient. This is the kind of data that Golub and colleagues showed could classify cancer subtypes — we'll come back to this paper in Lecture 2.
+In 1999, Todd Golub and colleagues published a landmark paper in Science showing that gene expression patterns alone could distinguish between two types of leukemia: acute lymphoblastic leukemia (ALL) and acute myeloid leukemia (AML). Each patient's tumor was profiled using a microarray — a technology that measures the expression level of thousands of genes simultaneously. In this case, 3,051 genes per patient after preprocessing. This is the dataset we'll work with for the rest of the workshop.
 :::
 
 ---
@@ -112,25 +111,25 @@ The ALL dataset — ALL stands for acute lymphoblastic leukemia. It comes from a
 ::: {style="font-size: 1.3em;"}
 | | |
 |---|---|
-| **Patients** | 128 |
-| **Genes** | 12,625 |
-| **B-cell ALL** | 95 |
-| **T-cell ALL** | 33 |
-| **Ratio p/n** | ~100 |
+| **Patients** | 72 |
+| **Genes** | 3,051 |
+| **ALL** | 47 |
+| **AML** | 25 |
+| **Ratio p/n** | ~42 |
 :::
 
 . . .
 
 ::: {style="font-size: 1.3em; margin-top: 1em;"}
-More variables than observations. **100× more.**
+More variables than observations. **42× more.**
 :::
 
 ::: {.notes}
-The 128 patients fall into two groups: 95 with B-cell ALL and 33 with T-cell ALL. These are different subtypes of leukemia — they have different prognoses, different treatment responses, different biology. The question is: which genes are expressed differently between the two subtypes?
+The 72 patients fall into two groups: 47 with ALL and 25 with AML. These are different types of leukemia — they have different prognoses, different treatment responses, different biology. The question is: which genes are expressed differently between the two types?
 
-This is a perfectly reasonable question. A clinician might want to know which genes distinguish the subtypes so they can develop better diagnostics. A biologist might want to understand the molecular basis of the distinction.
+This is a perfectly reasonable question. A clinician might want to know which genes distinguish the types so they can develop better diagnostics. A biologist might want to understand the molecular basis of the distinction.
 
-So you do what anyone would do. You take each gene, one at a time, and ask: is this gene expressed at a different level in B-cell patients than in T-cell patients? The standard tool is a t-test. You compute a test statistic, you get a p-value, and you decide whether the difference is "statistically significant." Do this for all 12,625 genes and you get 12,625 p-values.
+So you do what anyone would do. You take each gene, one at a time, and ask: is this gene expressed at a different level in ALL patients than in AML patients? The standard tool is a t-test. You compute a test statistic, you get a p-value, and you decide whether the difference is "statistically significant." Do this for all 3,051 genes and you get 3,051 p-values.
 :::
 
 ---
@@ -138,23 +137,23 @@ So you do what anyone would do. You take each gene, one at a time, and ask: is t
 ## {.centered}
 
 ::: {style="font-size: 2em;"}
-$$12{,}625 \times 0.05 = 631$$
+$$3{,}051 \times 0.05 = 153$$
 :::
 
 . . .
 
 ::: {style="font-size: 1.3em; margin-top: 1em;"}
-**631 "significant" genes from pure noise.**
+**153 "significant" genes from pure noise.**
 :::
 
 ::: {.notes}
-Here's the thing about p-values that everyone learns in their first statistics course and then immediately forgets the implications of: a p-value of 0.05 means that if the gene is not differentially expressed — if there is truly no difference between B-cell and T-cell — there's still a 5% chance of getting a test statistic this extreme or more extreme, just by chance. That's fine for one test. You accept a 5% false positive rate as the cost of doing business.
+Here's the thing about p-values that everyone learns in their first statistics course and then immediately forgets the implications of: a p-value of 0.05 means that if the gene is not differentially expressed — if there is truly no difference between ALL and AML — there's still a 5% chance of getting a test statistic this extreme or more extreme, just by chance. That's fine for one test. You accept a 5% false positive rate as the cost of doing business.
 
-But you're not running one test. You're running 12,625.
+But you're not running one test. You're running 3,051.
 
-If none of the genes were actually different between B-cell and T-cell ALL — if the two subtypes were molecularly identical, which they're not, but bear with me — you'd still expect about 5% of your tests to come back significant at the 0.05 level. Five percent of 12,625 is 631. You'd get 631 "significant" results from pure noise.
+If none of the genes were actually different between ALL and AML — if the two types were molecularly identical, which they're not, but bear with me — you'd still expect about 5% of your tests to come back significant at the 0.05 level. Five percent of 3,051 is 153. You'd get 153 "significant" results from pure noise.
 
-The false positive rate is still 5%. The false positive count is 631. And if you're a biologist looking at your results, you don't see a rate — you see a list of genes. A long list. A list that looks like you've discovered something.
+The false positive rate is still 5%. The false positive count is 153. And if you're a biologist looking at your results, you don't see a rate — you see a list of genes. A long list. A list that looks like you've discovered something.
 
 This is the multiple testing problem. It's not subtle. The math is first-semester probability. And yet it fooled an entire field of psychiatric genetics for fifteen years.
 :::
@@ -180,11 +179,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 rng = np.random.default_rng(123)
-null_pvals = rng.uniform(size=12625)
+null_pvals = rng.uniform(size=3051)
 
 fig, ax = plt.subplots(figsize=(9, 5))
 ax.hist(null_pvals, bins=50, color="gray", edgecolor="white")
-ax.axhline(y=12625 / 50, color="red", linestyle="--", linewidth=2)
+ax.axhline(y=3051 / 50, color="red", linestyle="--", linewidth=2)
 ax.set_title("Simulated: all genes are null", fontsize=15)
 ax.set_xlabel("P-value", fontsize=13)
 ax.set_ylabel("Frequency", fontsize=13)
@@ -198,7 +197,7 @@ Here's what you'd see if none of the genes were differentially expressed: a flat
 
 ---
 
-## The ALL data
+## The Golub data
 
 ```{python}
 #| label: all-histogram
@@ -208,18 +207,18 @@ Here's what you'd see if none of the genes were differentially expressed: a flat
 import pandas as pd
 from scipy import stats
 
-expr = pd.read_csv("../data/all_expression.csv", index_col=0)
-meta = pd.read_csv("../data/all_metadata.csv", dtype={"sample_id": str})
-bt_type = meta["subtype"].values
-b_mask = bt_type == "B"
+expr = pd.read_csv("../data/golub_expression.csv", index_col=0)
+meta = pd.read_csv("../data/golub_metadata.csv", dtype={"sample_id": str})
+subtype = meta["subtype"].values
+all_mask = subtype == "ALL"
 
-_, pvals = stats.ttest_ind(expr.loc[:, b_mask].values, expr.loc[:, ~b_mask].values, axis=1)
+_, pvals = stats.ttest_ind(expr.loc[:, all_mask].values, expr.loc[:, ~all_mask].values, axis=1)
 
 fig, ax = plt.subplots(figsize=(10, 5.5))
 ax.hist(pvals, bins=100, color="steelblue", edgecolor="white")
 ax.axhline(y=len(pvals) / 100, color="red", linestyle="--", linewidth=2)
 ax.legend(["Expected if all null"], loc="upper right", fontsize=12, frameon=False)
-ax.set_title("P-value histogram: 12,625 genes, B-cell vs. T-cell ALL", fontsize=15)
+ax.set_title("P-value histogram: 3,051 genes, ALL vs. AML", fontsize=15)
 ax.set_xlabel("P-value", fontsize=13)
 ax.set_ylabel("Frequency", fontsize=13)
 plt.tight_layout()
@@ -227,7 +226,7 @@ plt.show()
 ```
 
 ::: {.notes}
-Now here's the ALL data. The histogram is not flat. There's a massive spike near zero — hundreds of genes with very small p-values — and then a roughly flat region for the rest. The spike is signal: genes that are genuinely differentially expressed between B-cell and T-cell ALL. The flat part is the null genes — the genes where nothing is going on, producing the uniform distribution we'd expect.
+Now here's the Golub data. The histogram is not flat. There's a massive spike near zero — hundreds of genes with very small p-values — and then a roughly flat region for the rest. The spike is signal: genes that are genuinely differentially expressed between ALL and AML. The flat part is the null genes — the genes where nothing is going on, producing the uniform distribution we'd expect.
 
 Don't explain yet. Ask the audience: "What do you see?" Let them describe it — spike near zero, flat region, excess above the red line. Then confirm what they said.
 :::
@@ -255,7 +254,7 @@ Don't explain yet. Ask the audience: "What do you see?" Let them describe it —
 ::: {.notes}
 This one plot tells you three things. First, whether there's signal. If the histogram is flat, go home. There's nothing to find. If there's a spike near zero, something real is happening.
 
-Second, roughly how much signal. The height of the flat part tells you the density of null p-values. If the flat part is at, say, 80% of the total, then roughly 80% of your genes are null and 20% are non-null. In the ALL data, the spike is substantial — B-cell and T-cell ALL are genuinely different diseases, and the transcriptomic differences are large.
+Second, roughly how much signal. The height of the flat part tells you the density of null p-values. If the flat part is at, say, 80% of the total, then roughly 80% of your genes are null and 20% are non-null. In the Golub data, the spike is substantial — ALL and AML are genuinely different diseases, and the transcriptomic differences are large.
 
 Third, whether your analysis is trustworthy. A well-behaved analysis produces a histogram with a flat right side and a spike on the left. But sometimes the histogram looks wrong. If the bars increase toward the right — more large p-values than expected — your test is conservative. If there's a bump in the middle, something is off with your test statistics. If the entire histogram is shifted left with no flat region, your null model is wrong. These pathological histograms are surprisingly common, and they tell you to stop and fix your analysis before interpreting any results.
 
@@ -281,7 +280,7 @@ These are the shapes you'll learn to recognize. Top left is what we just saw —
 # The Sledgehammer {.centered}
 
 ::: {.notes}
-"So you have 12,625 p-values and a histogram that shows real signal. You want to call some genes significant. But you know that if you use the standard 0.05 threshold, you'll get hundreds of false positives mixed in with the real results. What do you do?"
+"So you have 3,051 p-values and a histogram that shows real signal. You want to call some genes significant. But you know that if you use the standard 0.05 threshold, you'll get over a hundred false positives mixed in with the real results. What do you do?"
 :::
 
 ---
@@ -289,7 +288,7 @@ These are the shapes you'll learn to recognize. Top left is what we just saw —
 ## Bonferroni correction
 
 ::: {style="font-size: 1.8em; text-align: center; margin-top: 1.5em;"}
-$$\frac{0.05}{12{,}625} \approx 4 \times 10^{-6}$$
+$$\frac{0.05}{3{,}051} \approx 1.6 \times 10^{-5}$$
 :::
 
 . . .
@@ -299,13 +298,13 @@ Controls the **family-wise error rate**: P(any false positive) ≤ 0.05
 :::
 
 ::: {.notes}
-The oldest and simplest answer is Bonferroni correction. The idea is almost embarrassingly straightforward: divide your significance level by the number of tests. Instead of calling a gene significant at p < 0.05, you call it significant at p < 0.05 / 12,625 ≈ 4 × 10⁻⁶.
+The oldest and simplest answer is Bonferroni correction. The idea is almost embarrassingly straightforward: divide your significance level by the number of tests. Instead of calling a gene significant at p < 0.05, you call it significant at p < 0.05 / 3,051 ≈ 1.6 × 10⁻⁵.
 
 The logic goes like this. You want the probability of making any false positive — even one — to be at most 5%. This is called the family-wise error rate, or FWER. If each individual test has a false positive probability of α/m, then by the union bound, the probability that at least one of the m tests produces a false positive is at most m × (α/m) = α. Done.
 
 Bonferroni is clean, easy to explain, and requires no assumptions about the dependence structure of your tests. It works whether your genes are independent or correlated. It works whether you're testing 10 hypotheses or 10 million. In genome-wide association studies, where you're testing around a million genetic variants, the convention is a significance threshold of 5 × 10⁻⁸ — which is just Bonferroni at the million-variant scale. The actual number comes from a more sophisticated calculation involving linkage disequilibrium and the effective number of independent tests in the genome, but it's in the Bonferroni ballpark.
 
-And Bonferroni works, in the sense that it does what it promises. If you apply Bonferroni to 12,625 tests, the probability that any of your declared significant genes is a false positive is at most 5%.
+And Bonferroni works, in the sense that it does what it promises. If you apply Bonferroni to 3,051 tests, the probability that any of your declared significant genes is a false positive is at most 5%.
 
 But here's the problem: Bonferroni controls the wrong thing.
 :::
@@ -537,5 +536,5 @@ That's what we'll build in Lecture 2.
 :::
 
 ::: {.notes}
-The 5-HTTLPR story isn't a story about bad scientists. It's a story about what happens when a field's statistical framework doesn't match the scale of its questions. The framework to handle that scale exists — it's what we'll build in Lecture 2. But first, in the lab, you're going to see it for yourself. You'll take the ALL dataset, run those 12,625 tests, plot the histogram, apply Bonferroni, and feel the gap between "controls any error" and "gives you a useful answer." That gap is where the false discovery rate lives.
+The 5-HTTLPR story isn't a story about bad scientists. It's a story about what happens when a field's statistical framework doesn't match the scale of its questions. The framework to handle that scale exists — it's what we'll build in Lecture 2. But first, in the lab, you're going to see it for yourself. You'll take the Golub dataset, run those 3,051 tests, plot the histogram, apply Bonferroni, and feel the gap between "controls any error" and "gives you a useful answer." That gap is where the false discovery rate lives.
 :::

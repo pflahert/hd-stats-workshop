@@ -10,6 +10,11 @@ format:
     code-fold: false
     code-tools: false
     theme: cosmo
+  pdf:
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    fig-pos: 'H'
 ---
 
 ## The serotonin gene that wasn't
@@ -32,27 +37,27 @@ That's what this lecture is about. Not the serotonin gene specifically, but the 
 
 ---
 
-## Twelve thousand six hundred twenty-five tests
+## Three thousand and fifty-one tests
 
-Let's start with a dataset. It's called the ALL dataset — ALL stands for acute lymphoblastic leukemia. It comes from a study of 128 patients with leukemia, and each patient's tumor was profiled using a microarray: a technology that measures the expression level of thousands of genes simultaneously. In this case, 12,625 genes per patient.
+Let's start with a dataset. In 1999, Todd Golub and colleagues published a landmark paper in *Science* that asked a deceptively simple question: can you distinguish two types of leukemia — acute lymphoblastic leukemia (ALL) and acute myeloid leukemia (AML) — using only gene expression? They profiled 72 patients on Affymetrix microarrays, measuring thousands of genes simultaneously. After preprocessing, the dataset contains 3,051 genes per patient. We'll call it the Golub dataset, and we'll work with it for the rest of the workshop.
 
-The 128 patients fall into two groups: 95 with B-cell ALL and 33 with T-cell ALL. These are different subtypes of leukemia — they have different prognoses, different treatment responses, different biology. The question is: which genes are expressed differently between the two subtypes?
+The 72 patients fall into two groups: 47 with ALL and 25 with AML. These are different diseases — they have different prognoses, different treatment responses, different biology. The question is: which genes are expressed differently between the two types?
 
-This is a perfectly reasonable question. A clinician might want to know which genes distinguish the subtypes so they can develop better diagnostics. A biologist might want to understand the molecular basis of the distinction. An informaticist might want to build a classifier.
+This is a perfectly reasonable question. A clinician might want to know which genes distinguish the types so they can develop better diagnostics. A biologist might want to understand the molecular basis of the distinction. An informaticist might want to build a classifier.
 
-So you do what anyone would do. You take each gene, one at a time, and ask: is this gene expressed at a different level in B-cell patients than in T-cell patients? The standard tool is a t-test. You compute a test statistic, you get a p-value, and you decide whether the difference is "statistically significant."
+So you do what anyone would do. You take each gene, one at a time, and ask: is this gene expressed at a different level in ALL patients than in AML patients? The standard tool is a t-test. You compute a test statistic, you get a p-value, and you decide whether the difference is "statistically significant."
 
-Do this for all 12,625 genes and you get 12,625 p-values.
+Do this for all 3,051 genes and you get 3,051 p-values.
 
-Now, here's the thing about p-values that everyone learns in their first statistics course and then immediately forgets the implications of: a p-value of 0.05 means that if the gene is *not* differentially expressed — if there is truly no difference between B-cell and T-cell — there's still a 5% chance of getting a test statistic this extreme or more extreme, just by chance. That's fine for one test. You accept a 5% false positive rate as the cost of doing business.
+Now, here's the thing about p-values that everyone learns in their first statistics course and then immediately forgets the implications of: a p-value of 0.05 means that if the gene is *not* differentially expressed — if there is truly no difference between ALL and AML — there's still a 5% chance of getting a test statistic this extreme or more extreme, just by chance. That's fine for one test. You accept a 5% false positive rate as the cost of doing business.
 
-But you're not running one test. You're running 12,625.
+But you're not running one test. You're running 3,051.
 
-If *none* of the genes were actually different between B-cell and T-cell ALL — if the two subtypes were molecularly identical, which they're not, but bear with me — you'd still expect about 5% of your tests to come back significant at the 0.05 level. Five percent of 12,625 is 631. You'd get 631 "significant" results from pure noise.
+If *none* of the genes were actually different between ALL and AML — if the two diseases were molecularly identical, which they're not, but bear with me — you'd still expect about 5% of your tests to come back significant at the 0.05 level. Five percent of 3,051 is about 153. You'd get 153 "significant" results from pure noise.
 
-The false positive *rate* is still 5%. The false positive *count* is 631. And if you're a biologist looking at your results, you don't see a rate — you see a list of genes. A long list. A list that looks like you've discovered something.
+The false positive *rate* is still 5%. The false positive *count* is 153. And if you're a biologist looking at your results, you don't see a rate — you see a list of genes. A long list. A list that looks like you've discovered something.
 
-This is the multiple testing problem. It's not subtle. The math is first-semester probability. And yet it fooled an entire field of psychiatric genetics for fifteen years, and it still catches people in every discipline that runs many tests on the same dataset.
+This is the multiple testing problem. It's not subtle. The math is first-semester probability. And yet it fooled an entire field of psychiatric genetics for fifteen years, and it still catches people in every discipline that runs many tests on the same dataset. (And 3,051 genes is modest by modern standards — today's RNA-seq experiments measure 20,000 or more.)
 
 Let's look at what it actually looks like.
 
@@ -62,19 +67,19 @@ Let's look at what it actually looks like.
 
 I want to show you the single most useful plot in high-dimensional statistics. It's not a volcano plot. It's not a heatmap. It's a histogram of p-values.
 
-Take those 12,625 p-values from the ALL dataset and plot them in a histogram. The x-axis goes from 0 to 1. The y-axis counts how many p-values fall in each bin.
+Take those 3,051 p-values from the Golub dataset and plot them in a histogram. The x-axis goes from 0 to 1. The y-axis counts how many p-values fall in each bin.
 
 Here's what you'd see if none of the genes were differentially expressed: a flat histogram. Uniform. Equal numbers of p-values in every bin. This is because, under the null hypothesis, p-values are uniformly distributed between 0 and 1. That's not an approximation or an asymptotic result — it's exact.[^2] If nothing is going on, every bin gets the same number of p-values.
 
 [^2]: Technically, this is true for continuous test statistics. Discrete test statistics produce p-values that are stochastically larger than uniform, which makes the test conservative. For gene expression data with continuous measurements, the uniform assumption is essentially exact.
 
-Now here's the ALL data. The histogram is *not* flat. There's a massive spike near zero — hundreds of genes with very small p-values — and then a roughly flat region for the rest. The spike is signal: genes that are genuinely differentially expressed between B-cell and T-cell ALL. The flat part is the null genes — the genes where nothing is going on, producing the uniform distribution we'd expect.
+Now here's the Golub data. The histogram is *not* flat. There's a massive spike near zero — hundreds of genes with very small p-values — and then a roughly flat region for the rest. The spike is signal: genes that are genuinely differentially expressed between ALL and AML. The flat part is the null genes — the genes where nothing is going on, producing the uniform distribution we'd expect.
 
 This one plot tells you three things:
 
 **First, whether there's signal.** If the histogram is flat, go home. There's nothing to find. If there's a spike near zero, something real is happening.
 
-**Second, roughly how much signal.** The height of the flat part tells you the density of null p-values. If the flat part is at, say, 80% of the total, then roughly 80% of your genes are null and 20% are non-null. That's a lot of signal. In the ALL data, the spike is substantial — B-cell and T-cell ALL are genuinely different diseases, and the transcriptomic differences are large.
+**Second, roughly how much signal.** The height of the flat part tells you the density of null p-values. If the flat part is at, say, 80% of the total, then roughly 80% of your genes are null and 20% are non-null. That's a lot of signal. In the Golub data, the spike is substantial — ALL and AML are genuinely different diseases, and the transcriptomic differences are large.
 
 **Third, whether your analysis is trustworthy.** A well-behaved analysis produces a histogram with a flat right side and a spike on the left. But sometimes the histogram looks wrong. If the bars *increase* toward the right — more large p-values than expected — your test is conservative (too cautious). If there's a bump in the middle, something is off with your test statistics. If the entire histogram is shifted left with no flat region, your null model is wrong. These pathological histograms are surprisingly common, and they tell you to stop and fix your analysis before interpreting any results.
 
@@ -86,9 +91,9 @@ We'll come back to this histogram in Lecture 2, where it turns from a diagnostic
 
 ## The sledgehammer
 
-So you have 12,625 p-values and a histogram that shows real signal. You want to call some genes significant. But you know that if you use the standard 0.05 threshold, you'll get hundreds of false positives mixed in with the real results. What do you do?
+So you have 3,051 p-values and a histogram that shows real signal. You want to call some genes significant. But you know that if you use the standard 0.05 threshold, you'll get over a hundred false positives mixed in with the real results. What do you do?
 
-The oldest and simplest answer is Bonferroni correction. The idea is almost embarrassingly straightforward: divide your significance level by the number of tests. Instead of calling a gene significant at p < 0.05, you call it significant at p < 0.05 / 12,625 ≈ 4 × 10⁻⁶.
+The oldest and simplest answer is Bonferroni correction. The idea is almost embarrassingly straightforward: divide your significance level by the number of tests. Instead of calling a gene significant at p < 0.05, you call it significant at p < 0.05 / 3,051 ≈ 1.6 × 10⁻⁵.
 
 The logic goes like this. You want the probability of making *any* false positive — even one — to be at most 5%. This is called the family-wise error rate, or FWER. If each individual test has a false positive probability of α/m, then by the union bound, the probability that at least one of the m tests produces a false positive is at most m × (α/m) = α. Done.
 
@@ -96,7 +101,7 @@ Bonferroni is clean, easy to explain, and requires no assumptions about the depe
 
 [^3]: The actual number 5 × 10⁻⁸ comes from a more sophisticated calculation involving linkage disequilibrium and the effective number of independent tests in the genome, but it's in the Bonferroni ballpark.
 
-And Bonferroni works, in the sense that it does what it promises. If you apply Bonferroni to 12,625 tests, the probability that any of your declared significant genes is a false positive is at most 5%.
+And Bonferroni works, in the sense that it does what it promises. If you apply Bonferroni to 3,051 tests, the probability that any of your declared significant genes is a false positive is at most 5%.
 
 But here's the problem: Bonferroni controls the wrong thing.
 
@@ -104,7 +109,7 @@ Think about what the family-wise error rate actually means. It's the probability
 
 If you're an astronomer and you're about to announce the discovery of gravitational waves, yes, you want to be very sure you haven't made even one false positive. The standard there is "five sigma," roughly one in 3.5 million. The cost of a false claim is enormous.
 
-But if you're a biologist screening 12,625 genes to find candidates for follow-up experiments, you're in a completely different situation. You don't need a guarantee that every gene on your list is real. You need a *useful* list — one where most of the genes are real and the false positives are a manageable fraction. If your list of 500 genes contains 25 false positives, that's a 5% false discovery rate, and for most biological applications, that's fine. You'll validate the interesting ones in follow-up experiments anyway.
+But if you're a biologist screening thousands of genes to find candidates for follow-up experiments, you're in a completely different situation. You don't need a guarantee that every gene on your list is real. You need a *useful* list — one where most of the genes are real and the false positives are a manageable fraction. If your list of 500 genes contains 25 false positives, that's a 5% false discovery rate, and for most biological applications, that's fine. You'll validate the interesting ones in follow-up experiments anyway.
 
 Bonferroni can't give you that list. It's trying to prevent a different kind of error — any error at all — and in doing so, it throws away most of your real discoveries.
 
@@ -126,7 +131,7 @@ With a standard correction for multiple comparisons, the signal disappeared. Bec
 
 Bennett presented this as a poster at a conference, and it became famous, partly because it's funny and partly because it made a serious point: every fMRI analysis involves thousands of voxels, each tested independently, and the multiple testing problem is the same as in genomics. Bennett surveyed published fMRI studies and found that between 25% and 40% did not report correcting for multiple comparisons. The dead salmon was funny. The survey was not.
 
-The salmon is the same problem we saw with genes, just in a different domain. Instead of 12,625 genes, you have tens of thousands of voxels. Instead of expression levels, you have blood oxygenation signals. But the statistics are the same: many tests, a 5% false positive rate per test, and enough tests that false positives are guaranteed.
+The salmon is the same problem we saw with genes, just in a different domain. Instead of 3,051 genes, you have tens of thousands of voxels. Instead of expression levels, you have blood oxygenation signals. But the statistics are the same: many tests, a 5% false positive rate per test, and enough tests that false positives are guaranteed.
 
 I'm telling you the salmon story because it's memorable and because it makes the multiple testing problem feel visceral in a way that abstract calculations don't. But the salmon was caught quickly — it was a deliberate demonstration. The next story is about what happens when false positives aren't caught at all.
 
@@ -152,7 +157,7 @@ How did the false positives survive? Three mechanisms, each reinforcing the othe
 
 **Winner's curse.** The studies that did get published — the ones that found significant results — necessarily overestimated the effect size. To cross the significance threshold with a small, noisy sample, the observed effect has to be larger than the true effect. So the early estimates of the 5-HTTLPR effect were inflated, and later studies with more realistic estimates looked like "failures to replicate."
 
-**The garden of forking paths.** There are many defensible choices in any analysis: which covariates to include, which subgroups to analyze, which outcome measure to use, how to define "stressful life events." Each choice is a branch point, and the analysts — without any intent to deceive — could explore different branches until they found one that produced a significant result. This isn't the same as running 12,625 explicit tests, but it has the same effect: the number of implicit tests is much larger than the number of reported tests.
+**The garden of forking paths.** There are many defensible choices in any analysis: which covariates to include, which subgroups to analyze, which outcome measure to use, how to define "stressful life events." Each choice is a branch point, and the analysts — without any intent to deceive — could explore different branches until they found one that produced a significant result. This isn't the same as running thousands of explicit tests, but it has the same effect: the number of implicit tests is much larger than the number of reported tests.
 
 None of this required bad intentions. The researchers who studied 5-HTTLPR were, for the most part, careful scientists who believed in their hypothesis and interpreted ambiguous evidence in its favor. That's not fraud — that's human cognition. The problem wasn't the scientists. The problem was the statistical framework, which didn't account for the scale of testing that was actually happening.
 
@@ -160,4 +165,4 @@ The fix was known the entire time. GWAS adopted it from the beginning: test ever
 
 ---
 
-The 5-HTTLPR story isn't a story about bad scientists. It's a story about what happens when a field's statistical framework doesn't match the scale of its questions. The framework to handle that scale exists — it's what we'll build in Lecture 2. But first, in the lab, you're going to see it for yourself. You'll take the ALL dataset, run those 12,625 tests, plot the histogram, apply Bonferroni, and feel the gap between "controls any error" and "gives you a useful answer." That gap is where the false discovery rate lives.
+The 5-HTTLPR story isn't a story about bad scientists. It's a story about what happens when a field's statistical framework doesn't match the scale of its questions. The framework to handle that scale exists — it's what we'll build in Lecture 2. But first, in the lab, you're going to see it for yourself. You'll take the Golub dataset, run those 3,051 tests, plot the histogram, apply Bonferroni, and feel the gap between "controls any error" and "gives you a useful answer." That gap is where the false discovery rate lives.
