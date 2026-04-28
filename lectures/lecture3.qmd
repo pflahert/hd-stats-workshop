@@ -1,7 +1,7 @@
 ---
 title: "Lecture 3: Dimension Reduction"
 subtitle: "Finding Structure in High-Dimensional Data"
-date: "Day 2, 9:00–10:00"
+date: "Day 2, 8:00–9:00"
 format:
   revealjs:
     theme: default

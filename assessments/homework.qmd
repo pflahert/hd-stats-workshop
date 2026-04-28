@@ -77,7 +77,7 @@ Explain what makes Specification B better.
 
 ## Submission
 
-Bring your written answers and code output (for Q2) to Day 2. We will discuss Q1 and Q3 briefly at the start of the day.
+Bring your written answers and code output (for Q2) to Day 2. Be prepared to reference your answers during Lecture 3 and Lecture 4 discussions.
 
 ### Assessment Criteria
 

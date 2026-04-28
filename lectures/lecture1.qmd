@@ -73,11 +73,11 @@ Here's what you'd see if none of the genes were differentially expressed: a flat
 
 [^2]: Technically, this is true for continuous test statistics. Discrete test statistics produce p-values that are stochastically larger than uniform, which makes the test conservative. For gene expression data with continuous measurements, the uniform assumption is essentially exact.
 
-Now here's the Golub data. The histogram is *not* flat. There's a massive spike near zero — hundreds of genes with very small p-values — and then a roughly flat region for the rest. The spike is signal: genes that are genuinely differentially expressed between ALL and AML. The flat part is the null genes — the genes where nothing is going on, producing the uniform distribution we'd expect.
+Now consider the Golub data. The histogram is *not* flat. There is a pronounced spike near zero — hundreds of genes with very small p-values — and then a roughly flat region for the rest. The spike is signal: genes that are genuinely differentially expressed between ALL and AML. The flat part is the null genes — the genes where no real difference is present, producing the uniform distribution we would expect.
 
 This one plot tells you three things:
 
-**First, whether there's signal.** If the histogram is flat, go home. There's nothing to find. If there's a spike near zero, something real is happening.
+**First, whether there's signal.** If the histogram is flat, there is nothing to detect. If there's a spike near zero, something real is happening.
 
 **Second, roughly how much signal.** The height of the flat part tells you the density of null p-values. If the flat part is at, say, 80% of the total, then roughly 80% of your genes are null and 20% are non-null. That's a lot of signal. In the Golub data, the spike is substantial — ALL and AML are genuinely different diseases, and the transcriptomic differences are large.
 
@@ -89,7 +89,7 @@ We'll come back to this histogram in Lecture 2, where it turns from a diagnostic
 
 ---
 
-## The sledgehammer
+## Bonferroni and family-wise error rate control
 
 So you have 3,051 p-values and a histogram that shows real signal. You want to call some genes significant. But you know that if you use the standard 0.05 threshold, you'll get over a hundred false positives mixed in with the real results. What do you do?
 
@@ -129,7 +129,7 @@ Without any correction for multiple comparisons, a cluster of voxels in the salm
 
 With a standard correction for multiple comparisons, the signal disappeared. Because of course it did — the salmon was dead.
 
-Bennett presented this as a poster at a conference, and it became famous, partly because it's funny and partly because it made a serious point: every fMRI analysis involves thousands of voxels, each tested independently, and the multiple testing problem is the same as in genomics. Bennett surveyed published fMRI studies and found that between 25% and 40% did not report correcting for multiple comparisons. The dead salmon was funny. The survey was not.
+Bennett presented this as a poster at a conference, and it became widely circulated, partly for its memorable framing and partly because it made a serious point: every fMRI analysis involves thousands of voxels, each tested independently, and the multiple testing problem is the same as in genomics. Bennett surveyed published fMRI studies and found that between 25% and 40% did not report correcting for multiple comparisons. The poster was memorable. The survey was concerning.
 
 The salmon is the same problem we saw with genes, just in a different domain. Instead of 3,051 genes, you have tens of thousands of voxels. Instead of expression levels, you have blood oxygenation signals. But the statistics are the same: many tests, a 5% false positive rate per test, and enough tests that false positives are guaranteed.
 

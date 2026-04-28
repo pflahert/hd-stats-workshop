@@ -1,6 +1,6 @@
 # Lecture Outlines: High-Dimensional Data Analysis Workshop
 
-**Design principle**: Each lecture is a multi-part essay, not a textbook chapter. Real stories drive the statistics. The voice is casual, first-principles, thinking-alongside-you — modeled on Matt Levine's "Money Stuff." Code appears only in speaker notes; students see figures and outputs on slides, then write code themselves in labs.
+**Design principle**: Each lecture is a multi-part essay, not a textbook chapter. Real stories drive the statistics. The voice is engaged and first-principles — explaining the underlying logic rather than reciting results. Code appears only in speaker notes; students see figures and outputs on slides, then write code themselves in labs.
 
 **Recurring motifs** (callbacks across all four lectures):
 
@@ -14,7 +14,7 @@
 
 ### Lecture 1: "The Gene That Wasn't There"
 
-For fifteen years, the most-cited finding in psychiatric genetics was a serotonin transporter variant linked to depression. It had 8,000 citations. Then someone actually tested it in 38,000 people and found nothing. How does a false positive survive for fifteen years? Because the field was testing many hypotheses without accounting for how many they tested. Today, we'll see exactly how this happens — not in psychiatry, but in our own data. We'll take a leukemia dataset with 3,051 genes, test every one for a difference between cancer subtypes, and watch the false discovery problem unfold in a single histogram. That histogram will become your first diagnostic tool: it tells you whether there's signal, how much, and whether your analysis is trustworthy. By the end, you'll understand why the most common correction (Bonferroni) is a sledgehammer, and why biologists needed something better.
+For fifteen years, the most-cited finding in psychiatric genetics was a serotonin transporter variant linked to depression. It had 8,000 citations. Then someone actually tested it in 38,000 people and found nothing. How does a false positive survive for fifteen years? Because the field was testing many hypotheses without accounting for how many they tested. Today, we'll see exactly how this happens — not in psychiatry, but in our own data. We'll take a leukemia dataset with 3,051 genes, test every one for a difference between cancer subtypes, and watch the false discovery problem unfold in a single histogram. That histogram will become your first diagnostic tool: it tells you whether there's signal, how much, and whether your analysis is trustworthy. By the end, you'll understand why Bonferroni controls the wrong error rate for discovery work, and why biologists needed a different framework.
 
 ### Lecture 2: "The Histogram That Was Too Wide"
 
@@ -58,7 +58,7 @@ Seventy percent of breast cancer patients who receive chemotherapy would have su
 
 **Connection to next**: "So there's signal. You want to find it. The obvious thing is to lower your threshold. That's exactly what Bonferroni does."
 
-#### 1.4 — The sledgehammer: Bonferroni and FWER
+#### 1.4 — Bonferroni and family-wise error rate control
 
 **Hook**: "The simplest fix: divide your significance level by the number of tests. 0.05 / 3,051 ≈ 1.6 × 10⁻⁵. Any gene with a p-value below that threshold, you call significant." Bonferroni controls the family-wise error rate — the probability of *any* false positive. In GWAS, the threshold is 5 × 10⁻⁸ because you're testing ~1 million variants.
 
@@ -70,11 +70,11 @@ Seventy percent of breast cancer patients who receive chemotherapy would have su
 
 #### 1.5 — The dead salmon and the cost of not correcting
 
-**Hook**: One slide. Craig Bennett put a dead Atlantic salmon in an fMRI scanner and asked it to determine the emotional valence of photographs. Without multiple testing correction, the salmon showed "brain activity." With correction, nothing. Published as a poster at a conference. Funny — but 25–40% of fMRI studies at the time didn't correct for multiple comparisons.
+**Hook**: One slide. Craig Bennett put a dead Atlantic salmon in an fMRI scanner and asked it to determine the emotional valence of photographs. Without multiple testing correction, the salmon showed "brain activity." With correction, nothing. Published as a poster at a conference. The framing was memorable — but the underlying point was serious: 25–40% of fMRI studies at the time did not correct for multiple comparisons.
 
 **Statistical idea**: Voxelwise testing (same problem as genewise testing, different domain). The dead salmon makes visceral what the math says abstractly. Brief mention of Bennett's survey of published fMRI work.
 
-**Connection to next**: "The salmon is funny, but here's a case where it wasn't funny at all."
+**Connection to next**: "The salmon is a memorable cautionary tale. Here is a case where the cost of failing to correct was substantially higher."
 
 #### 1.6 — What a field-wide false positive looks like
 
@@ -90,13 +90,13 @@ Seventy percent of breast cancer patients who receive chemotherapy would have su
 
 #### 2.1 — Benjamini and Hochberg ask the right question
 
-**Hook**: "In 1995, Yoav Benjamini and Yosef Hochberg wrote a two-page paper that would eventually become one of the most cited papers in statistics. They asked a question nobody had formalized before: *of all the hypotheses I declare significant, what fraction are wrong?*" This is the false discovery rate. Lecture 1 showed why FWER is a sledgehammer. FDR is the scalpel.
+**Hook**: "In 1995, Yoav Benjamini and Yosef Hochberg wrote a two-page paper that would eventually become one of the most cited papers in statistics. They asked a question nobody had formalized before: *of all the hypotheses I declare significant, what fraction are wrong?*" This is the false discovery rate. Lecture 1 showed why FWER is the wrong criterion for discovery. FDR is the criterion that matches the question.
 
 **Statistical idea**: FDR definition — E[V/R] where V is false discoveries and R is total discoveries. The BH procedure: rank p-values, find the largest k where p_(k) ≤ (k/m)α. It controls FDR at level α under independence (and positive dependence). Walk through the procedure on the Golub dataset.
 
 **The "but" turn**: "BH controls FDR. But it relies on knowing what the null looks like — specifically, that null p-values are uniform. What if they're not?"
 
-**Connection to next**: "Which brings us to a guy staring at a histogram."
+**Connection to next**: "Which brings us to Brad Efron, looking at a histogram and noticing something everyone else missed."
 
 #### 2.2 — Efron notices the null is wrong
 

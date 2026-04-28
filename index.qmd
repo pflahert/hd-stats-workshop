@@ -68,10 +68,9 @@ By the end of this workshop, students will be able to:
 
 | Time | Session | Topics | LOs |
 |------|---------|--------|-----|
-| 8:00--8:15 | Homework discussion | Brief discussion of HW Q1 and Q3 | LO1, LO3 |
-| 8:15--9:00 | [Lecture 3](lectures/lecture3.qmd) | PCA, biplots, scree plots; nonlinear embeddings (t-SNE, UMAP); discussion | LO2 |
+| 8:00--9:00 | [Lecture 3](lectures/lecture3.qmd) | PCA, biplots, scree plots; nonlinear embeddings (t-SNE, UMAP) | LO2 |
 | 9:00--10:00 | Lab 3 ([Colab](https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab3.ipynb)) | PCA and UMAP on the Golub dataset | LO2, LO3 |
-| 10:00--11:00 | [Lecture 4](lectures/lecture4.qmd) | Ridge, LASSO, elastic net; cross-validation; discussion | LO2, LO3 |
+| 10:00--11:00 | [Lecture 4](lectures/lecture4.qmd) | Ridge, LASSO, elastic net; cross-validation | LO2, LO3 |
 | 11:00--12:00 | Lab 4 ([Colab](https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab4.ipynb)) | Penalized regression and biological interpretation | LO2, LO3 |
 
 ---

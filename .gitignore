@@ -31,10 +31,24 @@ notebooks/*_exec.ipynb
 *.toc
 *.out
 
-# Quarto figure caches that land next to source files
-**/*_files/figure-beamer/
-**/*_files/figure-latex/
-**/*_files/figure-pdf/
+# Quarto figure caches and per-document asset folders that land next to source files
+# (cover all backends: html, latex, pdf, beamer, revealjs)
+**/*_files/
+
+# Quarto-supplied asset library when individual files are rendered outside project
+/site_libs/
+
+# Rendered HTML/PDF that occasionally lands in source dirs from individual quarto render calls
+/*.html
+/*.pdf
+assessments/*.html
+assessments/*.pdf
+lectures/*.html
+lectures/*.pdf
+syllabus/*.html
+syllabus/*.pdf
 
 # Pre-rendered PDFs that should not be committed at source root
 syllabus/course-design.pdf
+
+/.quarto/

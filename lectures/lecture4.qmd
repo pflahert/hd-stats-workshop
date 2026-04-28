@@ -1,7 +1,7 @@
 ---
 title: "Lecture 4: Penalized Regression & Modern AI Tools"
 subtitle: "Regularization, Variable Selection, and LLMs in Data Analysis"
-date: "Day 2, 11:00–12:00"
+date: "Day 2, 10:00–11:00"
 format:
   revealjs:
     theme: default
