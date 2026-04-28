@@ -1,0 +1,1017 @@
+[
+  {
+    "objectID": "lectures/lecture2.html#a-picture-worth-10000-tests",
+    "href": "lectures/lecture2.html#a-picture-worth-10000-tests",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "A Picture Worth 10,000 Tests",
+    "text": "A Picture Worth 10,000 Tests\nLook at a \\(p\\)-value histogram from a gene expression study comparing two cancer subtypes:\n\nThe flat part (uniform across \\([0,1]\\)) represents null genes — no real signal\nThe spike near 0 represents true discoveries — genes that actually differ\n\n\nYou can see \\(\\pi_0\\) (the proportion of true nulls) directly: it’s the height of the flat part.\n\n\nThis remarkably simple observation — that the histogram itself encodes the answer — is the foundation of everything in this lecture. But turning visual intuition into a rigorous procedure took decades."
+  },
+  {
+    "objectID": "lectures/lecture2.html#recap-from-lecture-1",
+    "href": "lectures/lecture2.html#recap-from-lecture-1",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Recap from Lecture 1",
+    "text": "Recap from Lecture 1\n\nHigh-dimensional data: \\(p \\gg n\\)\nMultiple testing: \\(m\\) simultaneous tests generate many false positives\nFWER (Bonferroni) is too conservative for discovery settings\nFDR = \\(E[V / (R \\vee 1)]\\) is the right error metric\n\n\nThis lecture: How to control FDR, and the deeper theory behind it."
+  },
+  {
+    "objectID": "lectures/lecture2.html#the-benjaminihochberg-bh-procedure",
+    "href": "lectures/lecture2.html#the-benjaminihochberg-bh-procedure",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "The Benjamini–Hochberg (BH) Procedure",
+    "text": "The Benjamini–Hochberg (BH) Procedure\nGiven \\(m\\) hypothesis tests with \\(p\\)-values \\(p_1, \\ldots, p_m\\):\n\nOrder the \\(p\\)-values: \\(p_{(1)} \\leq p_{(2)} \\leq \\cdots \\leq p_{(m)}\\)\nFind the largest \\(k\\) such that \\(p_{(k)} \\leq \\frac{k}{m} \\alpha\\)\nReject all \\(H_{0(i)}\\) for \\(i = 1, \\ldots, k\\)\n\n\nTheorem (Benjamini & Hochberg, 1995): Under independence, \\(\\text{FDR} \\leq \\frac{m_0}{m} \\alpha \\leq \\alpha\\)."
+  },
+  {
+    "objectID": "lectures/lecture2.html#bh-geometric-interpretation",
+    "href": "lectures/lecture2.html#bh-geometric-interpretation",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "BH: Geometric Interpretation",
+    "text": "BH: Geometric Interpretation\nPlot \\(p_{(i)}\\) vs. \\(i/m\\). The BH procedure finds the rightmost point where the \\(p\\)-value curve dips below the line \\(y = \\alpha \\cdot x\\).\n\n\nCode\nimport numpy as np\nimport matplotlib.pyplot as plt\n\nrng = np.random.default_rng(42)\nm, m1 = 1000, 50\np_null = rng.uniform(size=m - m1)\np_alt = rng.beta(0.1, 1, size=m1)  # small p-values for alternatives\npvals_sim = np.sort(np.concatenate([p_null, p_alt]))\n\nfig, ax = plt.subplots(figsize=(7, 4))\nax.scatter(np.arange(1, m + 1) / m, pvals_sim, s=3, color=\"black\")\nax.plot([0, 1], [0, 0.10], color=\"red\", linewidth=2, label=\"BH line (slope = α)\")\nax.set_xlabel(\"i / m\")\nax.set_ylabel(\"Ordered p-value\")\nax.set_title(\"BH procedure (α = 0.10)\")\nax.legend(loc=\"upper left\")\nplt.tight_layout()\nplt.show()"
+  },
+  {
+    "objectID": "lectures/lecture2.html#bh-under-dependence",
+    "href": "lectures/lecture2.html#bh-under-dependence",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "BH Under Dependence",
+    "text": "BH Under Dependence\nThe original BH result assumes independence of test statistics. In genomics, genes are often correlated.\n\nBenjamini & Yekutieli (2001): Under arbitrary dependence, replace \\(\\alpha\\) with \\(\\alpha / \\sum_{i=1}^m 1/i \\approx \\alpha / \\ln(m)\\).\n\n\nBut: Under positive regression dependency on a subset (PRDS)—a condition often satisfied in practice—the original BH procedure still controls FDR at level \\(\\alpha\\)."
+  },
+  {
+    "objectID": "lectures/lecture2.html#steins-paradox-borrowing-strength",
+    "href": "lectures/lecture2.html#steins-paradox-borrowing-strength",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Stein’s Paradox: Borrowing Strength",
+    "text": "Stein’s Paradox: Borrowing Strength\nIn 1956, Charles Stein proved something that stunned the statistics world:\nThe sample mean is inadmissible for estimating 3 or more means simultaneously.\n\nEfron & Morris (1977) made this concrete with baseball. To predict a batter’s end-of-season average, you do better by shrinking each player’s early-season average toward the grand mean of all players — even though the players have nothing to do with each other.\n\n\nThe James-Stein estimator (James & Stein, 1961): \\(\\hat{\\theta}_i^{JS} = \\bar{y} + \\left(1 - \\frac{(d-3)\\sigma^2}{\\sum_j (y_j - \\bar{y})^2}\\right)(y_i - \\bar{y})\\)\nwhere \\(d \\geq 4\\) is the number of means being estimated.\n\n\nThis is the founding insight of empirical Bayes: the other observations tell you something about the observation you are looking at. Efron generalized the idea — from baseball averages to 10,000 genes."
+  },
+  {
+    "objectID": "lectures/lecture2.html#from-baseball-to-genes",
+    "href": "lectures/lecture2.html#from-baseball-to-genes",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "From Baseball to Genes",
+    "text": "From Baseball to Genes\nIn classical statistics, you test each gene in isolation. Gene #4,237 knows nothing about genes #1–4,236.\n\nEfron realized: when you test 10,000 genes simultaneously, the other 9,999 results tell you something about the gene you’re looking at — just as the other batters’ averages improve your estimate of any single batter.\n\n\nIf most genes show no signal, then the prior probability that any particular gene is non-null is low. The data itself reveals the prior — without you having to specify one.\n\n\n\n“Letting the data determine the prior turns Bayesian inference from a subjective into a largely objective technique.” — Efron, Large-Scale Inference, Ch. 1"
+  },
+  {
+    "objectID": "lectures/lecture2.html#storeys-approach-estimating-pi_0",
+    "href": "lectures/lecture2.html#storeys-approach-estimating-pi_0",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Storey’s Approach: Estimating \\(\\pi_0\\)",
+    "text": "Storey’s Approach: Estimating \\(\\pi_0\\)\nBH controls FDR at level \\(\\frac{m_0}{m}\\alpha\\), which is conservative when \\(m_0 &lt; m\\).\nStorey (2002): Estimate \\(\\pi_0 = m_0/m\\) and use an adaptive threshold.\nFor a tuning parameter \\(\\lambda\\) (e.g., \\(\\lambda = 0.5\\)):\n\\[\\hat{\\pi}_0(\\lambda) = \\frac{\\#\\{p_i &gt; \\lambda\\}}{m(1 - \\lambda)}\\]\n\nIntuition: \\(p\\)-values above \\(\\lambda\\) are mostly from true nulls (which are uniform). Count them.\nThe R package qvalue implements this with automatic \\(\\lambda\\) selection."
+  },
+  {
+    "objectID": "lectures/lecture2.html#the-q-value",
+    "href": "lectures/lecture2.html#the-q-value",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "The \\(q\\)-value",
+    "text": "The \\(q\\)-value\nDefinition (Storey, 2003): The \\(q\\)-value of test \\(i\\) is the minimum FDR at which test \\(i\\) would be called significant.\n\\[q_i = \\min_{t \\geq p_i} \\widehat{\\text{FDR}}(t)\\]\n\nAnalogous to a \\(p\\)-value, but for FDR instead of Type I error:\n\n\\(p\\)-value: “If I reject this one test, what’s the false positive probability?”\n\\(q\\)-value: “If I reject all tests at least this significant, what fraction are false positives?”"
+  },
+  {
+    "objectID": "lectures/lecture2.html#efrons-two-groups-model",
+    "href": "lectures/lecture2.html#efrons-two-groups-model",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Efron’s Two-Groups Model",
+    "text": "Efron’s Two-Groups Model\nA more foundational perspective (Efron, 2004, JASA; developed fully in Efron, 2008, Statistical Science; and Efron, 2010, Large-Scale Inference, Ch. 2–4).\nEach of the \\(m\\) cases belongs to one of two groups:\n\nNull group (proportion \\(\\pi_0\\)): \\(z_i \\sim f_0(z)\\), typically \\(N(0,1)\\)\nNon-null group (proportion \\(1 - \\pi_0\\)): \\(z_i \\sim f_1(z)\\)\n\nThe mixture density of the observed \\(z\\)-scores is:\n\\[f(z) = \\pi_0 f_0(z) + (1 - \\pi_0) f_1(z)\\]"
+  },
+  {
+    "objectID": "lectures/lecture2.html#estimating-the-mixture",
+    "href": "lectures/lecture2.html#estimating-the-mixture",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Estimating the Mixture",
+    "text": "Estimating the Mixture\nKey idea\nWe observe \\(m\\) \\(z\\)-scores. With \\(m\\) large (thousands), we can estimate \\(f(z)\\) nonparametrically.\n. . .\nEfron’s approach:\n\nEstimate \\(f(z)\\) from a histogram or density estimate of the observed \\(z\\)-scores\nAssume \\(f_0\\) is known (or estimate it—the “empirical null”)\nEstimate \\(\\pi_0\\) from the central peak of the histogram\n\n. . .\nThis is empirical Bayes: we use the aggregate data to estimate the prior, then apply Bayes’ rule case by case."
+  },
+  {
+    "objectID": "lectures/lecture2.html#the-local-false-discovery-rate",
+    "href": "lectures/lecture2.html#the-local-false-discovery-rate",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "The Local False Discovery Rate",
+    "text": "The Local False Discovery Rate\n\\[\\text{fdr}(z) = P(\\text{null} \\mid Z = z) = \\frac{\\pi_0 f_0(z)}{f(z)}\\]\n\nThis is a posterior probability—the chance that a specific case with \\(z\\)-score \\(z\\) is a false discovery.\nContrast with the (tail-area) FDR, which is an expected proportion over a set of rejections.\n\n\nRelationship\n\\[\\text{FDR}(z_0) = E[\\text{fdr}(Z) \\mid Z \\geq z_0] = \\frac{\\int_{z_0}^\\infty \\text{fdr}(z) f(z) \\, dz}{\\int_{z_0}^\\infty f(z) \\, dz}\\]\nThe tail-area FDR is the average of the local FDR over the rejection region."
+  },
+  {
+    "objectID": "lectures/lecture2.html#connections-to-bayesian-thinking",
+    "href": "lectures/lecture2.html#connections-to-bayesian-thinking",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Connections to Bayesian Thinking",
+    "text": "Connections to Bayesian Thinking\nThe two-groups model is inherently Bayesian:\n\nPrior: \\(P(\\text{null}) = \\pi_0\\)\nLikelihood: \\(f_0(z)\\) under the null, \\(f_1(z)\\) under the alternative\nPosterior: \\(\\text{fdr}(z) = P(\\text{null} \\mid z)\\)\n\n\nBut it’s empirical Bayes: instead of specifying a prior, we estimate \\(\\pi_0\\) and \\(f_1\\) from the data."
+  },
+  {
+    "objectID": "lectures/lecture2.html#efrons-prostate-cancer-surprise",
+    "href": "lectures/lecture2.html#efrons-prostate-cancer-surprise",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Efron’s Prostate Cancer Surprise",
+    "text": "Efron’s Prostate Cancer Surprise\nEfron analyzed a prostate cancer microarray study (Singh et al., 2002): 6,033 genes, 102 patients.\nHe converted the test statistics to \\(z\\)-scores expecting them to follow \\(N(0,1)\\) under the null. Instead, the central peak of the histogram was wider than expected: the empirical null was closer to \\(N(\\hat{\\delta}_0, \\hat{\\sigma}_0^2)\\) with \\(\\hat{\\sigma}_0 &gt; 1\\).\n\nUsing the theoretical \\(N(0,1)\\) null would overstate significance — genes whose \\(z\\)-scores fell in the inflated tails would be called discoveries when they were actually consistent with the (wider) true null.\n\n\nThe “empirical null” saved the analysis — and showed that blindly trusting \\(N(0,1)\\) can be dangerous. The exact parameters depend on the dataset and estimation method; the key insight is that \\(\\hat{\\sigma}_0 \\neq 1\\)."
+  },
+  {
+    "objectID": "lectures/lecture2.html#the-empirical-null",
+    "href": "lectures/lecture2.html#the-empirical-null",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "The Empirical Null",
+    "text": "The Empirical Null\nWhy the theoretical null might be wrong\nEfron observed that in many real datasets, the central peak of the \\(z\\)-score histogram is wider than \\(N(0,1)\\).\nPossible causes:\n\nUnobserved covariates (batch effects, population structure)\nCorrelation among tests\nModel misspecification\n\n. . .\nEmpirical null\nFit \\(f_0(z) = N(\\hat{\\delta}_0, \\hat{\\sigma}_0^2)\\) from the central part of the observed \\(z\\)-score distribution.\nIf \\(\\hat{\\sigma}_0 &gt; 1\\), the theoretical null is too narrow and we’d get too many false discoveries."
+  },
+  {
+    "objectID": "lectures/lecture2.html#empirical-null-illustration",
+    "href": "lectures/lecture2.html#empirical-null-illustration",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Empirical Null: Illustration",
+    "text": "Empirical Null: Illustration\n\n\nCode\nfrom scipy.stats import norm\n\nrng = np.random.default_rng(123)\nm, m1 = 5000, 200\nz_null = rng.normal(loc=0.2, scale=1.3, size=m - m1)  # empirical null ≠ N(0,1)\nz_alt = rng.normal(loc=3, scale=1, size=m1)\nz = np.concatenate([z_null, z_alt])\n\nfig, ax = plt.subplots(figsize=(7, 4.5))\nax.hist(z, bins=80, density=True, color=\"lightblue\", edgecolor=\"white\")\nx_grid = np.linspace(z.min(), z.max(), 300)\nax.plot(x_grid, norm.pdf(x_grid, 0, 1), color=\"red\", linewidth=2, linestyle=\"--\",\n        label=\"Theoretical N(0,1)\")\nax.plot(x_grid, norm.pdf(x_grid, 0.2, 1.3), color=\"blue\", linewidth=2,\n        label=\"Empirical null N(0.2, 1.3²)\")\nax.set_title(\"Observed z-scores with empirical null\")\nax.set_xlabel(\"z-score\")\nax.legend(loc=\"upper right\")\nplt.tight_layout()\nplt.show()"
+  },
+  {
+    "objectID": "lectures/lecture2.html#efrons-estimation-procedure",
+    "href": "lectures/lecture2.html#efrons-estimation-procedure",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Efron’s Estimation Procedure",
+    "text": "Efron’s Estimation Procedure\nStep by step (Efron, Large-Scale Inference, Ch. 4–5)\n\nConvert test statistics to \\(z\\)-scores: \\(z_i = \\Phi^{-1}(1 - p_i)\\) or use the statistic directly\nEstimate \\(f(z)\\) using Poisson regression on binned counts (Lindsey’s method)\nEstimate \\(\\pi_0\\) and \\(f_0\\) (theoretical or empirical null)\nCompute \\(\\widehat{\\text{fdr}}(z) = \\hat{\\pi}_0 \\hat{f}_0(z) / \\hat{f}(z)\\)\n\n. . .\nThe R package locfdr automates this."
+  },
+  {
+    "objectID": "lectures/lecture2.html#when-does-this-work",
+    "href": "lectures/lecture2.html#when-does-this-work",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "When Does This Work?",
+    "text": "When Does This Work?\nRequirements for empirical Bayes FDR\n\nLarge \\(m\\): Need thousands of tests to estimate \\(f(z)\\) well\nExchangeability: Tests should be “comparable” (same type of measurement, similar noise structure)\nMixture model is reasonable: The two-groups framework is a good approximation\n\n. . .\nWhen it can fail\n\nSmall \\(m\\) (say \\(&lt; 100\\)): not enough data to estimate the mixture\nStrong correlation structure that distorts the null distribution\nHeterogeneous tests (mixing gene expression with methylation, for example)"
+  },
+  {
+    "objectID": "lectures/lecture2.html#multiple-testing-in-practice-a-decision-framework",
+    "href": "lectures/lecture2.html#multiple-testing-in-practice-a-decision-framework",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Multiple Testing in Practice: A Decision Framework",
+    "text": "Multiple Testing in Practice: A Decision Framework\n\n\n\n\n\nflowchart TD\n    A[How many tests?] --&gt;|Few: 1–20| B[Use FWER: Bonferroni or Holm]\n    A --&gt;|Many: 100+| C{Goal?}\n    C --&gt;|Confirmation| D[Use FWER: Bonferroni-Holm]\n    C --&gt;|Discovery| E{How many tests?}\n    E --&gt;|100–1000| F[BH or Storey q-values]\n    E --&gt;|1000+| G[Efron local FDR / empirical Bayes]\n\n\n Choosing an error rate"
+  },
+  {
+    "objectID": "lectures/lecture2.html#software-ecosystem",
+    "href": "lectures/lecture2.html#software-ecosystem",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Software Ecosystem",
+    "text": "Software Ecosystem\n\n\n\n\n\n\n\n\nMethod\nR\nPython\n\n\n\n\nBonferroni / Holm\np.adjust()\nstatsmodels.stats.multitest\n\n\nBenjamini–Hochberg\np.adjust(method=\"BH\")\nmultipletests(method='fdr_bh')\n\n\nStorey \\(q\\)-values\nqvalue::qvalue()\n-- (custom or qvalue port)\n\n\nLocal FDR\nlocfdr::locfdr()\n-- (custom implementation)\n\n\nEmpirical Bayes (limma)\nlimma::eBayes()\n-- (use R via rpy2)"
+  },
+  {
+    "objectID": "lectures/lecture2.html#summary",
+    "href": "lectures/lecture2.html#summary",
+    "title": "Lecture 2: False Discovery Rates & Empirical Bayes",
+    "section": "Summary",
+    "text": "Summary\n\nBH procedure: Simple, controls FDR under independence (or PRDS). Your go-to tool.\nStorey’s \\(q\\)-value: Adaptive FDR control using \\(\\hat{\\pi}_0\\). More powerful when many nulls.\nEfron’s two-groups model: The foundational framework. The mixture \\(f = \\pi_0 f_0 + (1-\\pi_0)f_1\\) unifies everything.\nLocal FDR: A test-specific posterior probability of being null. The most informative single summary.\nEmpirical null: Always check whether \\(f_0 = N(0,1)\\) is reasonable. If not, estimate it.\n\nUp Next\nLab 2: Apply BH, \\(q\\)-values, and local FDR to a real gene-expression dataset."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "High-Dimensional Data Analysis Workshop",
+    "section": "",
+    "text": "This two-day workshop introduces graduate students in the Biotechnology Training Program to the statistical challenges and modern methods for analyzing high-dimensional data—the setting where the number of measured variables \\(p\\) far exceeds the number of observations \\(n\\). This regime is now routine in genomics, proteomics, imaging, and many other areas of biotechnology.\n\n\n\nEfron, B. (2010). Large-Scale Inference: Empirical Bayes Methods for Estimation, Testing, and Prediction. Cambridge University Press.\nHastie, T., Tibshirani, R., & Friedman, J. (2009). The Elements of Statistical Learning (2nd ed.). Springer.\nHastie, T., Tibshirani, R., & Wainwright, M. (2015). Statistical Learning with Sparsity. CRC Press.\nJames, G., Witten, D., Hastie, T., & Tibshirani, R. (2021). An Introduction to Statistical Learning (2nd ed.). Springer."
+  },
+  {
+    "objectID": "index.html#workshop-overview",
+    "href": "index.html#workshop-overview",
+    "title": "High-Dimensional Data Analysis Workshop",
+    "section": "",
+    "text": "This two-day workshop introduces graduate students in the Biotechnology Training Program to the statistical challenges and modern methods for analyzing high-dimensional data—the setting where the number of measured variables \\(p\\) far exceeds the number of observations \\(n\\). This regime is now routine in genomics, proteomics, imaging, and many other areas of biotechnology.\n\n\n\nEfron, B. (2010). Large-Scale Inference: Empirical Bayes Methods for Estimation, Testing, and Prediction. Cambridge University Press.\nHastie, T., Tibshirani, R., & Friedman, J. (2009). The Elements of Statistical Learning (2nd ed.). Springer.\nHastie, T., Tibshirani, R., & Wainwright, M. (2015). Statistical Learning with Sparsity. CRC Press.\nJames, G., Witten, D., Hastie, T., & Tibshirani, R. (2021). An Introduction to Statistical Learning (2nd ed.). Springer."
+  },
+  {
+    "objectID": "index.html#learning-outcomes",
+    "href": "index.html#learning-outcomes",
+    "title": "High-Dimensional Data Analysis Workshop",
+    "section": "Learning Outcomes",
+    "text": "Learning Outcomes\nBy the end of this workshop, students will be able to:\n\n\n\n\n\n\n\n\n#\nLearning Outcome\nKey Assessments\n\n\n\n\nLO1\nExplain why classical statistical inference breaks down when \\(p \\gg n\\) and apply false discovery rate (FDR) controlling procedures to large-scale testing problems.\nPre-HW, Lab 1, Lab 2, HW Q1–Q2\n\n\nLO2\nApply dimension reduction and regularized regression methods to extract meaningful structure from high-dimensional biological datasets.\nLecture 3 discussion, Lab 3, Lecture 4 discussion, Lab 4\n\n\nLO3\nCritically evaluate computational analysis output—including catching errors in code, questioning default choices, and verifying biological interpretations against primary sources.\nAll Labs, Pre-HW, HW Q3"
+  },
+  {
+    "objectID": "index.html#workshop-plan",
+    "href": "index.html#workshop-plan",
+    "title": "High-Dimensional Data Analysis Workshop",
+    "section": "Workshop Plan",
+    "text": "Workshop Plan\n\n\n\n\n\n\n\n\nSession\nLecture → Lab\nLearning Outcomes\n\n\n\n\nDay 1 AM\nLecture 1: High-D Challenge → Lab 1: Simulating High-D\nLO1, LO3\n\n\nDay 1 PM\nLecture 2: FDR & Empirical Bayes → Lab 2: FDR on Gene Expression\nLO1, LO3\n\n\nDay 2 AM\nLecture 3: Dimension Reduction → Lab 3: PCA/UMAP on Real Data\nLO2, LO3\n\n\nDay 2 PM\nLecture 4: Penalized Regression & AI → Lab 4: Gene Signature & Interpretation\nLO2, LO3\n\n\nIndependent\nPre-Homework, Homework\nLO1, LO3"
+  },
+  {
+    "objectID": "index.html#schedule",
+    "href": "index.html#schedule",
+    "title": "High-Dimensional Data Analysis Workshop",
+    "section": "Schedule",
+    "text": "Schedule\n\nPre-Work (Due Before Day 1)\n\n\n\nAssignment\nDuration\nDescription\n\n\n\n\nPre-Homework\n~1.5 hr\nReview of hypothesis testing and \\(p\\)-values; software check.\n\n\n\n\n\nDay 1: Large-Scale Inference\n\n\n\nTime\nSession\nTopics\nLOs\n\n\n\n\n8:00–9:00\nLecture 1\nWhy \\(p \\gg n\\) breaks everything: curse of dimensionality, multiple testing, Bonferroni\nLO1\n\n\n9:00–10:00\nLab 1 (Colab)\nSimulate the multiple testing problem; compare FWER vs. FDR\nLO1, LO3\n\n\n10:00–11:00\nLecture 2\nBenjamini–Hochberg, empirical Bayes, local FDR, two-groups model\nLO1\n\n\n11:00–12:00\nLab 2 (Colab)\nFDR analysis of a real gene-expression dataset\nLO1, LO3\n\n\n\nHomework assigned — Homework (due start of Day 2)\n\n\nDay 2: Structure Discovery & Modern Tools\n\n\n\nTime\nSession\nTopics\nLOs\n\n\n\n\n8:00–9:00\nLecture 3\nPCA, biplots, scree plots; nonlinear embeddings (t-SNE, UMAP)\nLO2\n\n\n9:00–10:00\nLab 3 (Colab)\nPCA and UMAP on the Golub dataset\nLO2, LO3\n\n\n10:00–11:00\nLecture 4\nRidge, LASSO, elastic net; cross-validation\nLO2, LO3\n\n\n11:00–12:00\nLab 4 (Colab)\nPenalized regression and biological interpretation\nLO2, LO3"
+  },
+  {
+    "objectID": "index.html#software-requirements",
+    "href": "index.html#software-requirements",
+    "title": "High-Dimensional Data Analysis Workshop",
+    "section": "Software Requirements",
+    "text": "Software Requirements\nStudents should have the following installed before Day 1:\n\nR (≥ 4.3) with packages: tidyverse, limma, qvalue, glmnet, ggplot2, pheatmap, Rtsne, uwot\nPython (≥ 3.10) with packages: numpy, scipy, pandas, scikit-learn, statsmodels, matplotlib, seaborn, umap-learn\nQuarto (≥ 1.4) for rendering notebooks\nUniversity AI platform (or Claude / ChatGPT) — used in every lab session"
+  },
+  {
+    "objectID": "index.html#reference-materials",
+    "href": "index.html#reference-materials",
+    "title": "High-Dimensional Data Analysis Workshop",
+    "section": "Reference Materials",
+    "text": "Reference Materials\n\nDecision Guide for High-Dimensional Analysis — A one-page reference with flowcharts for choosing methods (error rates, dimension reduction, penalized regression) and a typical analysis workflow. Use this during the labs and take it with you."
+  },
+  {
+    "objectID": "index.html#grading-philosophy",
+    "href": "index.html#grading-philosophy",
+    "title": "High-Dimensional Data Analysis Workshop",
+    "section": "Grading Philosophy",
+    "text": "Grading Philosophy\nThis is a training workshop, not a graded course. Assessments are formative—they exist to consolidate understanding and give you feedback. Engage seriously with them; the value is in the doing.\n\nAI Use\nYou may use generative AI tools in the labs and homework. Some exercises will ask you to do so explicitly. The assessment focuses on whether you understand what the analysis does, whether it’s correct, and what the results mean."
+  },
+  {
+    "objectID": "assessments/pre-homework.html",
+    "href": "assessments/pre-homework.html",
+    "title": "Pre-Homework: Review & Software Check",
+    "section": "",
+    "text": "TipDo this assignment in Colab\n\n\n\nThe interactive version with answer cells lives in a Colab notebook: Open Pre-Homework in Colab\nThis page is the readable web reference. Type your answers in the Colab notebook (File → Save a copy in Drive to keep your work)."
+  },
+  {
+    "objectID": "assessments/pre-homework.html#purpose",
+    "href": "assessments/pre-homework.html#purpose",
+    "title": "Pre-Homework: Review & Software Check",
+    "section": "Purpose",
+    "text": "Purpose\nThis pre-homework ensures everyone starts Day 1 with a shared foundation in hypothesis testing and \\(p\\)-values. It also introduces the multiple testing problem and includes a short exercise using AI tools.\nLearning Outcomes: LO1, LO3"
+  },
+  {
+    "objectID": "assessments/pre-homework.html#part-1-review-of-hypothesis-testing-30-min",
+    "href": "assessments/pre-homework.html#part-1-review-of-hypothesis-testing-30-min",
+    "title": "Pre-Homework: Review & Software Check",
+    "section": "Part 1: Review of Hypothesis Testing (30 min)",
+    "text": "Part 1: Review of Hypothesis Testing (30 min)\n\nReading\nReview the basics of hypothesis testing from your introductory statistics course or one of these free references:\n\nOpenIntro Statistics, Ch. 5: openintro.org\nAn Introduction to Statistical Learning, Ch. 13 (Multiple Testing): statlearning.com\n\n\n\nQuestions\nQ1.1: In your own words, define: (a) Null hypothesis (\\(H_0\\)), (b) Alternative hypothesis (\\(H_1\\)), (c) \\(p\\)-value, (d) Type I error, (e) Type II error.\nQ1.2: A researcher tests whether a new drug reduces blood pressure. They report \\(p = 0.03\\).\n\nState the null and alternative hypotheses.\nAt significance level \\(\\alpha = 0.05\\), do they reject \\(H_0\\)?\nThe \\(p\\)-value is NOT the probability that \\(H_0\\) is true. Explain why not, in one or two sentences.\n\nQ1.3: If you perform a test at \\(\\alpha = 0.05\\) and the null hypothesis is actually true, what is the probability of a Type I error? If you perform 20 such independent tests (all with true nulls), what is the probability of getting at least one Type I error?\nHint: \\(P(\\text{at least one}) = 1 - P(\\text{none}) = 1 - (1 - 0.05)^{20}\\)."
+  },
+  {
+    "objectID": "assessments/pre-homework.html#part-2-the-multiple-testing-problem-20-min",
+    "href": "assessments/pre-homework.html#part-2-the-multiple-testing-problem-20-min",
+    "title": "Pre-Homework: Review & Software Check",
+    "section": "Part 2: The Multiple Testing Problem (20 min)",
+    "text": "Part 2: The Multiple Testing Problem (20 min)\n\nA thought experiment\nImagine you are a genomics researcher. You have gene expression data for 10,000 genes measured on 40 patients (20 with disease, 20 healthy controls). You run a \\(t\\)-test for each gene to see if its expression differs between the two groups.\nQ2.1: If none of the 10,000 genes are truly associated with the disease, how many genes would you expect to have \\(p &lt; 0.05\\) by chance alone?\nQ2.2: Now suppose 100 of the 10,000 genes are truly associated. The remaining 9,900 null genes still produce approximately \\(9{,}900 \\times 0.05 \\approx 495\\) false positives, plus some additional true positives. If you report all genes with \\(p &lt; 0.05\\) as “significant,” roughly what fraction of your reported genes would be false positives?\nQ2.3: Suggest at least one approach to deal with this problem. You don’t need to know the formal name—just describe the idea intuitively."
+  },
+  {
+    "objectID": "assessments/pre-homework.html#part-3-working-with-ai-tools-30-min",
+    "href": "assessments/pre-homework.html#part-3-working-with-ai-tools-30-min",
+    "title": "Pre-Homework: Review & Software Check",
+    "section": "Part 3: Working with AI Tools (30 min)",
+    "text": "Part 3: Working with AI Tools (30 min)\n\nExercise: Test the AI on something you know\nQ3.1: Ask the university AI platform (or Claude/ChatGPT) the following question:\n\n“What is a \\(p\\)-value? Explain it in two sentences.”\n\nRecord the AI’s response. Then evaluate:\n\nIs the response correct?\nIs it complete?\nDoes it avoid the common mistake of saying “\\(p\\)-value = probability that \\(H_0\\) is true”?\n\nAI's response:\n\nYour evaluation:\nQ3.2: Now ask the AI a question where it’s more likely to make a mistake:\n\n“I ran 10,000 \\(t\\)-tests on gene expression data and found 600 genes with \\(p &lt; 0.05\\). I corrected with Bonferroni and now only 15 genes are significant. A reviewer says I should use FDR instead of Bonferroni. Write 2 sentences explaining why the reviewer might be right.”\n\nEvaluate:\n\nDid the AI correctly explain the difference between FWER and FDR?\nDid it explain why FDR is more appropriate for discovery?\nDid it get anything wrong or leave anything important out?\n\nAI's response:\n\nYour evaluation:\nQ3.3: Ask the AI to write code:\n\n“In R, generate 1000 \\(p\\)-values from a uniform distribution and make a histogram. Then generate 1000 \\(p\\)-values where 950 are uniform and 50 are from Beta(0.1, 1). Make a histogram of each. Use base R graphics.”\n\nRun the code. Did it work? If not, what was wrong?\n#| label: ai-code-exercise\n#| eval: false\n# PASTE AI-GENERATED CODE HERE\nDid it work on the first try?\nIf not, what did you fix?"
+  },
+  {
+    "objectID": "assessments/pre-homework.html#part-4-software-check-10-min",
+    "href": "assessments/pre-homework.html#part-4-software-check-10-min",
+    "title": "Pre-Homework: Review & Software Check",
+    "section": "Part 4: Software Check (10 min)",
+    "text": "Part 4: Software Check (10 min)\nEnsure you have R and Python installed with the required packages.\n\nR\n#| label: software-check-r\n#| eval: false\ncat(\"R version:\", R.version.string, \"\\n\")\n\npackages &lt;- c(\"tidyverse\", \"ggplot2\", \"glmnet\", \"Rtsne\", \"uwot\", \"pheatmap\")\nfor (pkg in packages) {\n  if (requireNamespace(pkg, quietly = TRUE)) {\n    cat(pkg, \"OK\\n\")\n  } else {\n    cat(pkg, \"MISSING — install with: install.packages('\", pkg, \"')\\n\")\n  }\n}\n\n# Bioconductor packages\nbioc_packages &lt;- c(\"limma\", \"qvalue\", \"ALL\")\nfor (pkg in bioc_packages) {\n  if (requireNamespace(pkg, quietly = TRUE)) {\n    cat(pkg, \"OK\\n\")\n  } else {\n    cat(pkg, \"MISSING — install with: BiocManager::install('\", pkg, \"')\\n\")\n  }\n}\n\n\nPython\n#| label: software-check-py\n#| eval: false\nimport sys\nprint(f\"Python {sys.version}\")\n\npackages = [\"numpy\", \"scipy\", \"pandas\", \"sklearn\", \"matplotlib\",\n            \"seaborn\", \"statsmodels\", \"umap\"]\nfor pkg in packages:\n    try:\n        __import__(pkg)\n        print(f\"{pkg} OK\")\n    except ImportError:\n        pip_names = {\"sklearn\": \"scikit-learn\", \"umap\": \"umap-learn\"}\n        install_name = pip_names.get(pkg, pkg)\n        print(f\"{pkg} MISSING — install with: pip install {install_name}\")\nAlso verify you have access to the university AI platform and can paste code into it and receive responses."
+  },
+  {
+    "objectID": "assessments/pre-homework.html#submission",
+    "href": "assessments/pre-homework.html#submission",
+    "title": "Pre-Homework: Review & Software Check",
+    "section": "Submission",
+    "text": "Submission\nBring your written answers and code output to Day 1. We will briefly discuss the answers at the start of Lecture 1."
+  },
+  {
+    "objectID": "assessments/homework.html",
+    "href": "assessments/homework.html",
+    "title": "Homework: Day 1 → Day 2",
+    "section": "",
+    "text": "TipDo this assignment in Colab\n\n\n\nThe interactive version with answer cells lives in a Colab notebook (R kernel — Q2 uses limma + qvalue): Open Homework in Colab\nIn Colab: Runtime → Change runtime type → R before running cells.\nThis page is the readable web reference."
+  },
+  {
+    "objectID": "assessments/homework.html#purpose",
+    "href": "assessments/homework.html#purpose",
+    "title": "Homework: Day 1 → Day 2",
+    "section": "Purpose",
+    "text": "Purpose\nThis homework consolidates Day 1 material (multiple testing, FDR, critical evaluation). It connects directly to the learning outcomes. You are welcome to use AI for coding tasks, but the conceptual and interpretation questions must reflect your own understanding."
+  },
+  {
+    "objectID": "assessments/homework.html#q1-multiple-testing-concepts-lo1",
+    "href": "assessments/homework.html#q1-multiple-testing-concepts-lo1",
+    "title": "Homework: Day 1 → Day 2",
+    "section": "Q1: Multiple Testing Concepts (LO1)",
+    "text": "Q1: Multiple Testing Concepts (LO1)\nA proteomics experiment measures the abundance of \\(p = 5{,}000\\) proteins in \\(n = 30\\) tissue samples (15 tumor, 15 normal). For each protein, a two-sample \\(t\\)-test is performed.\n(a) Under the global null (no protein is differentially abundant), how many proteins would you expect to reject at \\(\\alpha = 0.05\\) without any correction?\n(b) The Bonferroni-corrected threshold is \\(\\alpha / m\\). Compute this threshold. A protein with a “real” effect has a \\(p\\)-value of \\(3 \\times 10^{-4}\\). Would it survive Bonferroni correction?\n(c) You apply the BH procedure at FDR \\(= 0.10\\) and get 120 rejections. Give an interpretation of this result in plain language that a biologist would understand.\n(d) Your collaborator says “We found 120 significant proteins.” A reviewer replies “But 12 of those are probably false positives!” Is the reviewer being unreasonable? Explain."
+  },
+  {
+    "objectID": "assessments/homework.html#q2-fdr-in-practice-lo1-lo3",
+    "href": "assessments/homework.html#q2-fdr-in-practice-lo1-lo3",
+    "title": "Homework: Day 1 → Day 2",
+    "section": "Q2: FDR in Practice (LO1, LO3)",
+    "text": "Q2: FDR in Practice (LO1, LO3)\nUsing the Golub dataset from Lab 2 (or your own dataset), perform the following analysis. You should use AI to write the code, but you must evaluate its correctness and interpret the results yourself.\n(a) Direct an AI to compute BH-adjusted \\(p\\)-values for the ALL vs. AML comparison using limma (not raw \\(t\\)-tests). Report:\n\nNumber of genes significant at FDR \\(&lt; 0.01\\), \\(&lt; 0.05\\), \\(&lt; 0.10\\)\n\nInclude the prompt you used and note whether the AI spontaneously chose limma or whether you had to direct it.\n(b) Use the qvalue package to estimate \\(\\hat{\\pi}_0\\). What does this estimate tell you about the dataset?\n(c) Make a \\(p\\)-value histogram. Annotate it: mark the region where you think the true alternatives are concentrated, and the region dominated by true nulls.\nInclude your code (noting what was AI-generated vs. your own) and a one-paragraph interpretation."
+  },
+  {
+    "objectID": "assessments/homework.html#q3-evaluating-analysis-output-lo3",
+    "href": "assessments/homework.html#q3-evaluating-analysis-output-lo3",
+    "title": "Homework: Day 1 → Day 2",
+    "section": "Q3: Evaluating Analysis Output (LO3)",
+    "text": "Q3: Evaluating Analysis Output (LO3)\n(a) Write two specifications for the same analysis task: “Perform differential expression analysis on a microarray dataset comparing treatment and control groups.”\n\nSpecification A: Vague enough that it would likely produce an incorrect or incomplete analysis.\nSpecification B: Precise enough that it would likely produce a correct analysis on the first attempt.\n\nExplain what makes Specification B better.\n(b) You read (in a paper or AI output) the claim: “Gene XYZ promotes cell proliferation in breast cancer through the PI3K/AKT pathway (Smith et al., 2019).” Describe the steps you would take to verify this before including it in your own work.\n(c) Describe one specific error you encountered during today’s labs—whether in AI-generated code, your own code, or a collaborator’s analysis. What was the error? How did you catch it? What statistical knowledge was required to recognize it?\n(d) You receive a complete differential expression analysis from a collaborator. It uses raw \\(t\\)-tests with BH correction on a microarray dataset with 72 samples. Write a short review (3–4 sentences) describing what’s adequate and what should be changed, and why. (Hint: consult the Decision Guide for recommended methods.)"
+  },
+  {
+    "objectID": "assessments/homework.html#submission",
+    "href": "assessments/homework.html#submission",
+    "title": "Homework: Day 1 → Day 2",
+    "section": "Submission",
+    "text": "Submission\nBring your written answers and code output (for Q2) to Day 2. Be prepared to reference your answers during Lecture 3 and Lecture 4 discussions.\n\nAssessment Criteria\nThis is a formative assessment. Completeness and engagement matter more than getting every detail right. We are particularly interested in your interpretation of statistical results in your own words and your ability to identify errors in analysis code or output."
+  },
+  {
+    "objectID": "syllabus/decision-guide.html",
+    "href": "syllabus/decision-guide.html",
+    "title": "Decision Guide for High-Dimensional Analysis",
+    "section": "",
+    "text": "This is a reference document for making methodological decisions in high-dimensional data analysis. It summarizes the key choice points from the workshop. Keep it handy when starting a new analysis."
+  },
+  {
+    "objectID": "syllabus/decision-guide.html#how-to-use-this-guide",
+    "href": "syllabus/decision-guide.html#how-to-use-this-guide",
+    "title": "Decision Guide for High-Dimensional Analysis",
+    "section": "",
+    "text": "This is a reference document for making methodological decisions in high-dimensional data analysis. It summarizes the key choice points from the workshop. Keep it handy when starting a new analysis."
+  },
+  {
+    "objectID": "syllabus/decision-guide.html#multiple-testing-which-error-rate",
+    "href": "syllabus/decision-guide.html#multiple-testing-which-error-rate",
+    "title": "Decision Guide for High-Dimensional Analysis",
+    "section": "1. Multiple Testing: Which Error Rate?",
+    "text": "1. Multiple Testing: Which Error Rate?\n\n\n\n\n\nflowchart TD\n    A[How many tests?] --&gt;|1–20| B[\"FWER: Bonferroni or Holm\"]\n    A --&gt;|\"100+\"| C{What is the goal?}\n    C --&gt;|Confirm a specific hypothesis| D[\"FWER: Bonferroni or Holm\"]\n    C --&gt;|Discover candidates for follow-up| E{How many tests?}\n    E --&gt;|100–1000| F[\"BH or Storey q-values\"]\n    E --&gt;|\"1000+\"| G{Do you need per-test probabilities?}\n    G --&gt;|No — just a list| F\n    G --&gt;|Yes| H[\"Efron local FDR\"]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSituation\nMethod\nControls\nR function\n\n\n\n\nFew tests, confirmatory\nBonferroni\nFWER \\(\\leq \\alpha\\)\np.adjust(method=\"bonferroni\")\n\n\nFew tests, want more power\nHolm\nFWER \\(\\leq \\alpha\\)\np.adjust(method=\"holm\")\n\n\nMany tests, discovery\nBenjamini–Hochberg\nFDR \\(\\leq \\alpha\\)\np.adjust(method=\"BH\")\n\n\nMany tests, want \\(\\hat{\\pi}_0\\)\nStorey \\(q\\)-value\nFDR \\(\\leq \\alpha\\) (adaptive)\nqvalue::qvalue()\n\n\nThousands of tests, want per-test probability\nLocal FDR\n\\(P(\\text{null} \\mid z)\\)\nlocfdr::locfdr()\n\n\n\nAlways check: Does your \\(p\\)-value histogram look right? If the central peak of the \\(z\\)-score distribution is wider than \\(N(0,1)\\), the theoretical null is wrong—use the empirical null."
+  },
+  {
+    "objectID": "syllabus/decision-guide.html#differential-expression-which-test",
+    "href": "syllabus/decision-guide.html#differential-expression-which-test",
+    "title": "Decision Guide for High-Dimensional Analysis",
+    "section": "2. Differential Expression: Which Test?",
+    "text": "2. Differential Expression: Which Test?\n\n\n\n\n\nflowchart TD\n    A[Data type?] --&gt;|Microarray, log-transformed| B[\"limma: lmFit → eBayes\"]\n    A --&gt;|RNA-seq counts| C[\"DESeq2 or edgeR\"]\n    A --&gt;|Other continuous| D{Sample size per group?}\n    D --&gt;|\"Large (n &gt; 30/group)\"| E[\"t-tests + BH correction\"]\n    D --&gt;|\"Small (n &lt; 30/group)\"| F[\"limma (borrows strength across features)\"]\n\n\n\n\n\n\nWhy not raw \\(t\\)-tests? With small samples, variance estimates are noisy. limma uses empirical Bayes to shrink gene-specific variance estimates toward a common value, producing more stable (moderated) \\(t\\)-statistics and better power."
+  },
+  {
+    "objectID": "syllabus/decision-guide.html#dimension-reduction-which-method",
+    "href": "syllabus/decision-guide.html#dimension-reduction-which-method",
+    "title": "Decision Guide for High-Dimensional Analysis",
+    "section": "3. Dimension Reduction: Which Method?",
+    "text": "3. Dimension Reduction: Which Method?\n\n\n\n\n\nflowchart TD\n    A[Goal?] --&gt;|Preprocessing for downstream analysis| B[\"PCA\"]\n    A --&gt;|Visualization| C{Need interpretable axes?}\n    A --&gt;|Denoising| B\n    C --&gt;|Yes| B\n    C --&gt;|No — want cluster separation| D{Dataset size?}\n    D --&gt;|\"n &lt; 5000\"| E[\"t-SNE (on top PCs)\"]\n    D --&gt;|\"n &gt; 5000\"| F[\"UMAP (on top PCs)\"]\n\n\n\n\n\n\n\nHow many PCs to keep?\n\n\n\n\n\n\n\nMethod\nWhen to use\n\n\n\n\nScree plot (look for elbow)\nQuick visual check; always do this first\n\n\nCumulative variance \\(\\geq 80\\%\\)\nSimple rule of thumb\n\n\nMarchenko–Pastur threshold\nFormal: keep eigenvalues above \\((1 + \\sqrt{p/n})^2\\)\n\n\nParallel analysis\nCompare to eigenvalues from permuted data\n\n\n\n\n\nWhat NOT to conclude from t-SNE / UMAP\n\nDistances between clusters are meaningful → No. Distorted.\nCluster sizes reflect true population sizes → No. Distorted.\nThe number of visible clusters = number of real groups → Not necessarily. Artifacts can split or merge groups.\nA trajectory from A to B is real → Needs independent evidence.\n\nAlways: Run PCA first. Apply t-SNE/UMAP to the top \\(k\\) PCs, not to the raw data."
+  },
+  {
+    "objectID": "syllabus/decision-guide.html#penalized-regression-which-penalty",
+    "href": "syllabus/decision-guide.html#penalized-regression-which-penalty",
+    "title": "Decision Guide for High-Dimensional Analysis",
+    "section": "4. Penalized Regression: Which Penalty?",
+    "text": "4. Penalized Regression: Which Penalty?\n\n\n\n\n\nflowchart TD\n    A[\"Goal?\"] --&gt;|Prediction only| B{Expected signal structure?}\n    A --&gt;|Variable selection + prediction| C{Correlated predictors?}\n    B --&gt;|Many small effects| D[\"Ridge (α = 0)\"]\n    B --&gt;|Few large effects| E[\"LASSO (α = 1)\"]\n    B --&gt;|Unsure| F[\"Elastic net (α = 0.5), tune α by CV\"]\n    C --&gt;|No| E\n    C --&gt;|\"Yes (e.g., co-regulated genes)\"| G[\"Elastic net (0 &lt; α &lt; 1)\"]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nMethod\nPenalty\nSparsity?\nUse when\n\n\n\n\nRidge\n\\(\\lambda\\|\\beta\\|_2^2\\)\nNo\nMany small effects, want stable prediction\n\n\nLASSO\n\\(\\lambda\\|\\beta\\|_1\\)\nYes\nFew large effects, want interpretable model\n\n\nElastic net\n\\(\\lambda[\\alpha\\|\\beta\\|_1 + \\frac{1-\\alpha}{2}\\|\\beta\\|_2^2]\\)\nYes\nCorrelated predictors\n\n\n\nPenalty parameterization follows glmnet; some textbooks use different scaling conventions.\n\nChoosing \\(\\lambda\\)\n\n\\(\\lambda_{\\min}\\): Minimizes CV error. Best prediction. More variables selected.\n\\(\\lambda_{1\\text{se}}\\): Largest \\(\\lambda\\) within 1 SE of the minimum. Sparser, more interpretable.\nFor a gene signature: report \\(\\lambda_{1\\text{se}}\\).\nFor prediction accuracy: report \\(\\lambda_{\\min}\\).\n\n\n\nStability\nLASSO selection can be unstable—run bootstrap resampling and report genes selected in \\(&gt;50\\%\\) of resamples."
+  },
+  {
+    "objectID": "syllabus/decision-guide.html#putting-it-together-a-typical-workflow",
+    "href": "syllabus/decision-guide.html#putting-it-together-a-typical-workflow",
+    "title": "Decision Guide for High-Dimensional Analysis",
+    "section": "5. Putting It Together: A Typical Workflow",
+    "text": "5. Putting It Together: A Typical Workflow\n\n\n\n\n\nflowchart TD\n    A[High-dimensional dataset] --&gt; B[Explore: PCA, check for batch effects]\n    B --&gt; C{Analysis goal?}\n    C --&gt;|Which features differ between groups?| D[Differential expression: limma/DESeq2 + FDR]\n    C --&gt;|Visualize sample structure| E[PCA → t-SNE or UMAP]\n    C --&gt;|Predict outcome from features| F[Penalized regression: LASSO/elastic net + CV]\n    C --&gt;|All of the above| G[Do all three and compare gene lists]\n    D --&gt; H[Volcano plot, gene set enrichment]\n    E --&gt; I[Color by known covariates, check for batch effects]\n    F --&gt; J[Bootstrap stability, interpret selected features]\n    G --&gt; K[Overlap: FDR genes ∩ LASSO genes?]\n\n\n\n\n\n\n\nKey questions to ask at each stage\n\n\n\n\n\n\n\nStage\nQuestion\n\n\n\n\nBefore anything\nIs the data normalized? Are there batch effects?\n\n\nMultiple testing\nIs the \\(p\\)-value histogram flat in the right half? Is the empirical null close to \\(N(0,1)\\)?\n\n\nDimension reduction\nDid I scale the data? Did I run t-SNE/UMAP on PCs (not raw data)?\n\n\nPenalized regression\nDid I use family = \"binomial\" for classification? Did I check stability?\n\n\nBiological interpretation\nDid I verify gene functions against a primary database (not just AI output)?"
+  },
+  {
+    "objectID": "syllabus/decision-guide.html#verifying-biological-claims",
+    "href": "syllabus/decision-guide.html#verifying-biological-claims",
+    "title": "Decision Guide for High-Dimensional Analysis",
+    "section": "6. Verifying Biological Claims",
+    "text": "6. Verifying Biological Claims\nWhether the claim comes from a paper, a collaborator, or an AI:\n\nLook up genes on GeneCards or NCBI Gene\nCheck cited papers on PubMed—do they exist? Do they say what’s claimed?\nCross-reference with pathway databases: KEGG, Gene Ontology\nFor gene set enrichment: use clusterProfiler (R) or Enrichr (web)"
+  },
+  {
+    "objectID": "syllabus/decision-guide.html#quick-reference-card",
+    "href": "syllabus/decision-guide.html#quick-reference-card",
+    "title": "Decision Guide for High-Dimensional Analysis",
+    "section": "Quick Reference Card",
+    "text": "Quick Reference Card\n\n\n\n\n\n\n\n\nI want to…\nUse…\nR package\n\n\n\n\nTest thousands of hypotheses\nBH-FDR or \\(q\\)-values\np.adjust(), qvalue\n\n\nTest with per-gene posterior probability\nLocal FDR\nlocfdr\n\n\nFind DE genes (microarray)\nModerated \\(t\\)-test\nlimma\n\n\nFind DE genes (RNA-seq)\nNegative binomial GLM\nDESeq2, edgeR\n\n\nReduce dimensions (linear)\nPCA\nprcomp()\n\n\nReduce dimensions (nonlinear)\nUMAP or t-SNE\nuwot, Rtsne\n\n\nPredict with variable selection\nLASSO or elastic net\nglmnet\n\n\nPredict without variable selection\nRidge\nglmnet(alpha=0)\n\n\nCheck LASSO stability\nBootstrap resampling\nmanual loop + glmnet"
+  },
+  {
+    "objectID": "syllabus/course-design.html",
+    "href": "syllabus/course-design.html",
+    "title": "Workshop Design",
+    "section": "",
+    "text": "Each lecture is anchored by a real scientific story — a finding that surprised, failed, or changed a field. Students remember the story, learn the statistics through it, and connect the method to the problem it solves. The story is the mental handle; the method is what the story teaches. Some stories involve spectacular failure (5-HTTLPR, the dead salmon, the Duke fraud), some involve unexpected success (MammaPrint, Allen Brain Atlas), and some involve beautiful mistakes (Cavalli-Sforza’s maps). Each is memorable, concrete, and true.\n\n\n\n\n\n\n\n\n\n\n\nLecture\nNamed Story\nMethod It Teaches\n\n\n\n\n1: “The Gene That Wasn’t There”\nCaspi 2003 / Border 2019 (5-HTTLPR)\nMultiple testing, FWER, p-value histogram\n\n\n1\nDead salmon fMRI (Bennett et al.)\nCost of not correcting\n\n\n2: “The Histogram That Was Too Wide”\nEfron’s prostate cancer z-scores\nEmpirical null, two-groups model, local FDR\n\n\n2\nEfron & Morris baseball shrinkage\nEmpirical Bayes, James-Stein estimation\n\n\n2\nOpen Science Collaboration (2015)\nReplication crisis as calibration failure\n\n\n3: “The Map That Drew Itself”\nCavalli-Sforza’s PCA maps / Novembre 2008\nPCA artifacts on spatial data\n\n\n3\nNetflix Prize (2006)\nLow-rank approximation, latent factors\n\n\n3\nAllen Brain Cell Atlas (single-cell)\nUMAP as genuine discovery tool\n\n\n4: “Seventy Genes and a Fraud”\nvan ’t Veer 2002 / MINDACT trial\nPenalized regression, external validation\n\n\n4\nAnil Potti / Duke fraud\nReproducibility, cross-validation leakage\n\n\n4\nHoerl & Kennard 1970\nRidge regression, bias-variance tradeoff\n\n\n4\nTibshirani 1996\nLASSO, geometry of sparsity\n\n\n\n\n\n\nEach 45–60 minute lecture is an essay structured as three to six connected sections (~8–12 minutes each). Each section has:\n\nA named story or vivid example: teach through narrative, make it concrete.\nA statistical idea: the formal concept the story illustrates — definition, method, diagnostic.\nA “but” turn: the limitation, failure mode, or complication that motivates the next section.\n\nThe sections are loosely coupled: students who lose the thread in one section can re-enter at the next story. The “but” turns create forward momentum — each answer raises a new question.\n\n\n\n\n“What does the histogram tell you?” — p-value histogram (L1–L2), z-score distribution (L2), scree plot (L3), coefficient path (L4).\n“Would this replicate?” — 5-HTTLPR didn’t (L1). 64% of psychology didn’t (L2). PCA artifacts replicate perfectly but mean nothing (L3). LASSO picks different genes on different bootstrap samples (L4).\n“What are you actually asking?” — FWER vs. FDR (L1–L2). Visualization vs. classification (L3). Prediction vs. inference (L4).\n\n\n\n\nEach lecture is immediately followed by a hands-on lab. The lecture provides conceptual understanding through narrative; the lab provides procedural understanding through code. Students hear the story, then build the analysis themselves on the same dataset.\n\n\n\n\n\n\n\n\nLecture\nPaired Lab\nStudents Will…\n\n\n\n\nL1: The Gene That Wasn’t There\nLab 1: The Multiple Testing Problem\nRun 3,051 t-tests, read the p-value histogram, apply Bonferroni vs. BH\n\n\nL2: The Histogram That Was Too Wide\nLab 2: FDR in Practice\nApply BH and Storey’s q-values to the Golub dataset, estimate \\(\\pi_0\\)\n\n\nL3: The Map That Drew Itself\nLab 3: Dimension Reduction\nRun PCA and UMAP on the Golub dataset, read scree plots, compare projections\n\n\nL4: Seventy Genes and a Fraud\nLab 4: Penalized Regression\nFit ridge/LASSO/elastic net, examine coefficient paths, cross-validate"
+  },
+  {
+    "objectID": "syllabus/course-design.html#story-driven-inquiry",
+    "href": "syllabus/course-design.html#story-driven-inquiry",
+    "title": "Workshop Design",
+    "section": "",
+    "text": "Each lecture is anchored by a real scientific story — a finding that surprised, failed, or changed a field. Students remember the story, learn the statistics through it, and connect the method to the problem it solves. The story is the mental handle; the method is what the story teaches. Some stories involve spectacular failure (5-HTTLPR, the dead salmon, the Duke fraud), some involve unexpected success (MammaPrint, Allen Brain Atlas), and some involve beautiful mistakes (Cavalli-Sforza’s maps). Each is memorable, concrete, and true."
+  },
+  {
+    "objectID": "syllabus/course-design.html#named-stories-by-lecture",
+    "href": "syllabus/course-design.html#named-stories-by-lecture",
+    "title": "Workshop Design",
+    "section": "",
+    "text": "Lecture\nNamed Story\nMethod It Teaches\n\n\n\n\n1: “The Gene That Wasn’t There”\nCaspi 2003 / Border 2019 (5-HTTLPR)\nMultiple testing, FWER, p-value histogram\n\n\n1\nDead salmon fMRI (Bennett et al.)\nCost of not correcting\n\n\n2: “The Histogram That Was Too Wide”\nEfron’s prostate cancer z-scores\nEmpirical null, two-groups model, local FDR\n\n\n2\nEfron & Morris baseball shrinkage\nEmpirical Bayes, James-Stein estimation\n\n\n2\nOpen Science Collaboration (2015)\nReplication crisis as calibration failure\n\n\n3: “The Map That Drew Itself”\nCavalli-Sforza’s PCA maps / Novembre 2008\nPCA artifacts on spatial data\n\n\n3\nNetflix Prize (2006)\nLow-rank approximation, latent factors\n\n\n3\nAllen Brain Cell Atlas (single-cell)\nUMAP as genuine discovery tool\n\n\n4: “Seventy Genes and a Fraud”\nvan ’t Veer 2002 / MINDACT trial\nPenalized regression, external validation\n\n\n4\nAnil Potti / Duke fraud\nReproducibility, cross-validation leakage\n\n\n4\nHoerl & Kennard 1970\nRidge regression, bias-variance tradeoff\n\n\n4\nTibshirani 1996\nLASSO, geometry of sparsity"
+  },
+  {
+    "objectID": "syllabus/course-design.html#three-part-lecture-structure",
+    "href": "syllabus/course-design.html#three-part-lecture-structure",
+    "title": "Workshop Design",
+    "section": "",
+    "text": "Each 45–60 minute lecture is an essay structured as three to six connected sections (~8–12 minutes each). Each section has:\n\nA named story or vivid example: teach through narrative, make it concrete.\nA statistical idea: the formal concept the story illustrates — definition, method, diagnostic.\nA “but” turn: the limitation, failure mode, or complication that motivates the next section.\n\nThe sections are loosely coupled: students who lose the thread in one section can re-enter at the next story. The “but” turns create forward momentum — each answer raises a new question."
+  },
+  {
+    "objectID": "syllabus/course-design.html#recurring-motifs-callbacks-across-all-four-lectures",
+    "href": "syllabus/course-design.html#recurring-motifs-callbacks-across-all-four-lectures",
+    "title": "Workshop Design",
+    "section": "",
+    "text": "“What does the histogram tell you?” — p-value histogram (L1–L2), z-score distribution (L2), scree plot (L3), coefficient path (L4).\n“Would this replicate?” — 5-HTTLPR didn’t (L1). 64% of psychology didn’t (L2). PCA artifacts replicate perfectly but mean nothing (L3). LASSO picks different genes on different bootstrap samples (L4).\n“What are you actually asking?” — FWER vs. FDR (L1–L2). Visualization vs. classification (L3). Prediction vs. inference (L4)."
+  },
+  {
+    "objectID": "syllabus/course-design.html#lecture-lab-pairing",
+    "href": "syllabus/course-design.html#lecture-lab-pairing",
+    "title": "Workshop Design",
+    "section": "",
+    "text": "Each lecture is immediately followed by a hands-on lab. The lecture provides conceptual understanding through narrative; the lab provides procedural understanding through code. Students hear the story, then build the analysis themselves on the same dataset.\n\n\n\n\n\n\n\n\nLecture\nPaired Lab\nStudents Will…\n\n\n\n\nL1: The Gene That Wasn’t There\nLab 1: The Multiple Testing Problem\nRun 3,051 t-tests, read the p-value histogram, apply Bonferroni vs. BH\n\n\nL2: The Histogram That Was Too Wide\nLab 2: FDR in Practice\nApply BH and Storey’s q-values to the Golub dataset, estimate \\(\\pi_0\\)\n\n\nL3: The Map That Drew Itself\nLab 3: Dimension Reduction\nRun PCA and UMAP on the Golub dataset, read scree plots, compare projections\n\n\nL4: Seventy Genes and a Fraud\nLab 4: Penalized Regression\nFit ridge/LASSO/elastic net, examine coefficient paths, cross-validate"
+  },
+  {
+    "objectID": "syllabus/course-design.html#enduring-understandings",
+    "href": "syllabus/course-design.html#enduring-understandings",
+    "title": "Workshop Design",
+    "section": "Enduring Understandings",
+    "text": "Enduring Understandings\nThese are the big ideas students should internalize and carry beyond the workshop.\n\nClassical statistical inference breaks down when \\(p \\gg n\\), and the breakdown is predictable. Testing thousands of hypotheses at the standard 5% level guarantees hundreds of false positives. This is not a flaw in the statistics — it is the statistics working exactly as designed for a single test, applied to a problem it was not designed for. The tools to handle this exist; the challenge is knowing when and how to use them.\nHigh-dimensional data always shows structure — the question is whether the structure is real. PCA produces gradients. UMAP produces clusters. LASSO produces gene lists. These methods are designed to find patterns, and they will find patterns even in pure noise. The discipline of high-dimensional analysis is validation: checking whether the patterns replicate, whether they correspond to known biology, and whether they survive alternative analysis choices.\nBorrowing information across features transforms the multiple testing problem from a curse into a resource. When you test thousands of genes, you have thousands of problems — but you also have thousands of data points about the behavior of the null. Empirical Bayes methods (Efron’s two-groups model, Storey’s q-values, limma’s moderated t-statistics) exploit this: the ensemble teaches you about each individual test. This is the central insight of large-scale inference.\nThe gap between fitting data and predicting outcomes is the core challenge of high-dimensional modeling. With \\(p &gt; n\\), any method can achieve perfect fit on training data. The bias-variance tradeoff — deliberately introducing bias through regularization to reduce variance — is not a compromise but a necessity. The choice of regularizer (L1, L2, elastic net) encodes assumptions about the structure of the signal.\nReproducibility is a statistical property, not just an ethical norm. The difference between MammaPrint (saved lives) and the Duke fraud (harmed patients) is not statistical sophistication — both used penalized regression on microarray data. The difference is validation discipline: proper cross-validation, external replication, and honesty about uncertainty. Reproducibility requires both statistical tools and the judgment to use them correctly."
+  },
+  {
+    "objectID": "syllabus/course-design.html#essential-questions",
+    "href": "syllabus/course-design.html#essential-questions",
+    "title": "Workshop Design",
+    "section": "Essential Questions",
+    "text": "Essential Questions\nThese are recurring, open-ended questions that thread across all four lectures and labs, provoking deeper inquiry.\n\nWhen should you believe a statistical finding, and what would it take to change your mind? (Threads through: 5-HTTLPR survival for 15 years (L1), the replication crisis (L2), PCA artifacts that look convincing (L3), MammaPrint vs. Duke fraud (L4))\nWhat does the histogram tell you — and what can’t it tell you? (Threads through: p-value histogram as diagnostic (L1), z-score distribution and empirical null (L2), scree plot (L3), coefficient path (L4))\nWhen you run thousands of tests simultaneously, who benefits — and what are the hidden costs? (Threads through: multiple testing problem (L1), FDR as a negotiated tradeoff (L2), overclustering in UMAP (L3), LASSO instability (L4))\nHow do you tell the difference between a pattern in the data and a pattern in the method? (Threads through: Bonferroni as conservative overcorrection (L1), empirical vs. theoretical null (L2), Cavalli-Sforza’s PCA maps (L3), overfitting in p &gt;&gt; n (L4))\nWhat does it mean to use a computational tool responsibly — and what goes wrong when you don’t? (Threads through: dead salmon (L1), winner’s curse and publication bias (L2), UMAP hallucinations (L3), Duke fraud (L4), AI-generated analysis in all labs)"
+  },
+  {
+    "objectID": "syllabus/course-design.html#transfer-goals",
+    "href": "syllabus/course-design.html#transfer-goals",
+    "title": "Workshop Design",
+    "section": "Transfer Goals",
+    "text": "Transfer Goals\nBy the end of this workshop, students should be able to:\n\nGiven a high-dimensional dataset, diagnose the testing regime (how many tests, what error rate to control) and select an appropriate correction procedure (Bonferroni, BH, q-values) with justification.\nRead a p-value histogram and identify signal, noise, the null proportion \\(\\pi_0\\), and signs of problems (anti-conservative or conservative behavior).\nApply PCA and UMAP to a biological dataset, interpret the output critically (scree plots, loadings, cluster stability), and articulate what the projection does and does not show.\nFit regularized regression models (ridge, LASSO, elastic net) using cross-validation, interpret coefficient paths, and explain why variable selection is unstable.\nEvaluate computational output — from their own code or from AI — by checking for common errors, questioning default choices, and verifying interpretations against primary sources.\nArticulate the difference between exploratory visualization, confirmatory testing, and predictive modeling, and choose methods appropriate to each goal."
+  },
+  {
+    "objectID": "syllabus/course-design.html#assessment-philosophy",
+    "href": "syllabus/course-design.html#assessment-philosophy",
+    "title": "Workshop Design",
+    "section": "Assessment Philosophy",
+    "text": "Assessment Philosophy\nThis is a two-day training workshop, not a graded course. All assessments are formative — they exist to consolidate understanding and provide feedback, not to assign grades. The value is in the doing.\nAssessments serve three roles:\n\nPreparation (Pre-Homework): Activate prerequisite knowledge and verify software setup before Day 1. Students arrive ready to engage.\nPractice (Labs 1–4): Build procedural skills on the same dataset used in the lectures. Labs pair with lectures: hear the story, then build the analysis.\nIntegration (Homework): Connect ideas across lectures, apply methods to new scenarios, and practice evaluating AI-generated analysis.\n\n\nAI Use\nAI tools are permitted and explicitly used in every lab and in the homework. Some exercises require students to prompt AI, evaluate its output, and catch errors. Assessment focuses on whether students understand what the analysis does, whether it’s correct, and what the results mean — not on whether they can code everything from scratch."
+  },
+  {
+    "objectID": "syllabus/course-design.html#assessment-structure",
+    "href": "syllabus/course-design.html#assessment-structure",
+    "title": "Workshop Design",
+    "section": "Assessment Structure",
+    "text": "Assessment Structure\n\n\n\n\n\n\n\n\n\nAssessment\nTiming\nPrimary EUs\nPurpose\n\n\n\n\nPre-Homework\nBefore Day 1 (~1.5 hr)\nEU1, EU5\nActivate prerequisite knowledge; software check; first AI evaluation exercise\n\n\nLab 1\nDay 1 AM (1 hr)\nEU1, EU3\nPractice: 3,051 t-tests, p-value histogram, Bonferroni vs. BH\n\n\nLab 2\nDay 1 PM (1 hr)\nEU1, EU3\nPractice: BH on Golub dataset, estimate \\(\\pi_0\\), empirical Bayes\n\n\nHomework\nDay 1 evening (~1.5 hr)\nEU1, EU3, EU5\nIntegration: new scenarios, AI-assisted limma analysis, error evaluation\n\n\nLab 3\nDay 2 AM (1 hr)\nEU2, EU4\nPractice: PCA and UMAP on ALL, scree plots, cluster validation\n\n\nLab 4\nDay 2 PM (1 hr)\nEU2, EU4, EU5\nPractice: ridge/LASSO/elastic net, coefficient paths, cross-validation\n\n\n\n\nBloom’s Taxonomy Distribution\n\n\n\n\n\n\n\n\n\n\nBloom’s Level\nPre-HW\nLabs 1–2\nHomework\nLabs 3–4\n\n\n\n\nRemember / Understand\nHeavy\nLight\nLight\nLight\n\n\nApply\nModerate\nHeavy\nModerate\nHeavy\n\n\nAnalyze\nLight\nModerate\nHeavy\nModerate\n\n\nEvaluate\nModerate\nModerate\nHeavy\nModerate\n\n\nCreate\n—\nLight (AI extension)\nLight (write specs)\nLight (AI extension)"
+  },
+  {
+    "objectID": "syllabus/course-design.html#lab-design-principles",
+    "href": "syllabus/course-design.html#lab-design-principles",
+    "title": "Workshop Design",
+    "section": "Lab Design Principles",
+    "text": "Lab Design Principles\n\nEach lab follows the structure: setup \\(\\to\\) write code \\(\\to\\) use AI \\(\\to\\) critique checklist.\nLabs use the Golub dataset (3,051 genes \\(\\times\\) 72 samples) throughout — continuity across all four labs builds familiarity and allows comparison across methods.\nLabs include deliberately subtle errors for students to identify — training critical evaluation, not just execution.\nAI extension exercises provide a suggested prompt and a critique checklist so students practice evaluating AI output systematically.\nPython Colab notebooks require zero local installation — students run everything in a browser.\nReproducibility: numpy.random.seed(2026) and plt.style.use('seaborn-v0_8-whitegrid') in every notebook."
+  },
+  {
+    "objectID": "syllabus/course-design.html#homework-design-principles",
+    "href": "syllabus/course-design.html#homework-design-principles",
+    "title": "Workshop Design",
+    "section": "Homework Design Principles",
+    "text": "Homework Design Principles\n\nThe homework bridges Day 1 and Day 2 — it reinforces large-scale inference concepts (L1–L2) and previews the critical evaluation skills needed for Day 2.\nThree questions span different Bloom’s levels:\n\nQ1 (Apply/Analyze): Multiple testing concepts applied to a new scenario (proteomics, 5,000 proteins).\nQ2 (Apply/Evaluate): AI-assisted FDR analysis using limma (not raw t-tests) — students evaluate whether AI makes good methodological choices.\nQ3 (Evaluate/Create): Evaluate analysis output, write specifications, verify claims, review a collaborator’s analysis.\n\nThe homework is not graded. Completeness and engagement matter more than correctness."
+  },
+  {
+    "objectID": "syllabus/course-design.html#pre-homework-design-principles",
+    "href": "syllabus/course-design.html#pre-homework-design-principles",
+    "title": "Workshop Design",
+    "section": "Pre-Homework Design Principles",
+    "text": "Pre-Homework Design Principles\n\nThree parts activate different prerequisites:\n\nPart 1 (Remember): Hypothesis testing vocabulary (H\\(_0\\), H\\(_1\\), p-value, Type I/II error).\nPart 2 (Analyze): Thought experiment about 10,000 genes — students derive the multiple testing problem intuitively before Lecture 1 formalizes it.\nPart 3 (Evaluate): First encounter with AI evaluation — students prompt AI for statistical definitions and assess correctness."
+  },
+  {
+    "objectID": "syllabus/course-design.html#scaffolding-logic",
+    "href": "syllabus/course-design.html#scaffolding-logic",
+    "title": "Workshop Design",
+    "section": "Scaffolding Logic",
+    "text": "Scaffolding Logic\nThe workshop follows a two-day arc with a consistent pedagogical rhythm:\n\nPre-Homework activates prerequisites — students arrive having reviewed hypothesis testing and attempted an intuitive version of the multiple testing problem.\nLecture introduces concepts through stories — each lecture is an essay with named stories, statistical ideas, and “but” turns that motivate the next idea.\nLab practices the skills on the same dataset — students build the analysis they just heard about, on the Golub dataset, with AI assistance.\nHomework integrates and transfers — students apply Day 1 concepts to new scenarios and practice evaluating AI output.\nDay 2 builds on Day 1 — dimension reduction (L3) and penalized regression (L4) use the same dataset and the same critical evaluation framework, but for different statistical problems.\n\nThe connecting thread is the Golub dataset: 3,051 genes, 72 patients, ALL vs. AML leukemia. Every lecture, every lab, and the homework use this dataset. By the end, students have seen the same data through four different statistical lenses."
+  },
+  {
+    "objectID": "syllabus/course-design.html#lecture-plan",
+    "href": "syllabus/course-design.html#lecture-plan",
+    "title": "Workshop Design",
+    "section": "Lecture Plan",
+    "text": "Lecture Plan\nFour lectures across two days. Each lecture is a multi-section essay (~45–60 minutes) followed by a one-hour hands-on lab.\n\nDay 1: Large-Scale Inference\nPrimary textbook: Efron (2010), Large-Scale Inference, Ch. 1–7\nLecture 1 — “The Gene That Wasn’t There”\nHow false positives survive — and how a histogram catches them.\n\n\n\n\n\n\n\n\nSection\nNamed Story\nStatistical Idea\n\n\n\n\n1.1\nCaspi 2003: 5-HTTLPR and depression (8,000 citations, then nothing)\nHypothesis testing logic; one test works, many tests break\n\n\n1.2\nGolub dataset: 3,051 genes, 72 patients\nMultiple testing from first principles; 3,051 \\(\\times\\) 0.05 \\(\\approx\\) 153 expected false positives\n\n\n1.3\nTwo histograms: pure-null (uniform) vs. Golub (spike + flat)\nP-value histogram as diagnostic; excess near zero = signal; flat height \\(\\approx \\pi_0\\)\n\n\n1.4\nBonferroni: \\(0.05/3{,}051 \\approx 1.6 \\times 10^{-5}\\); GWAS threshold: \\(5 \\times 10^{-8}\\)\nBonferroni and FWER; controls the wrong thing for discovery\n\n\n1.5\nDead salmon with “brain activity” (Bennett et al.)\nVoxelwise testing without correction; 25–40% of fMRI studies didn’t correct\n\n\n1.6\nBorder 2019: 18 candidate genes, 62K–443K people, none replicate\nPublication bias, winner’s curse, garden of forking paths\n\n\n\n\nLab 1 follows immediately: students run the 3,051 tests themselves.\n\nLecture 2 — “The Histogram That Was Too Wide”\nFrom Benjamini–Hochberg to Efron’s local FDR.\n\n\n\n\n\n\n\n\nSection\nNamed Story\nStatistical Idea\n\n\n\n\n2.1\nBenjamini & Hochberg 1995 (2-page paper, now 60K+ citations)\nFDR definition: \\(E[V/R]\\); the BH procedure; controls FDR under independence\n\n\n2.2\nEfron’s prostate cancer z-scores: the center was too wide\nTheoretical vs. empirical null; sources of null inflation (correlations, batch effects)\n\n\n2.3\nThe mixture model: \\(f(z) = \\pi_0 f_0(z) + (1-\\pi_0) f_1(z)\\)\nTwo-groups model; local fdr: \\(\\text{fdr}(z) = \\pi_0 f_0(z) / f(z)\\)\n\n\n2.4\nEfron & Morris baseball shrinkage (1977)\nEmpirical Bayes; James-Stein; Storey’s q-values; borrowing strength\n\n\n2.5\nOpen Science Collaboration 2015: 97% \\(\\to\\) 36% replication\nReplication crisis as predicted by FDR framework when \\(\\pi_0\\) is high and power is low\n\n\n\n\nLab 2 follows after lunch: students apply BH and q-values to the Golub dataset.\n\n\n\n\nDay 2: Structure Discovery and Modern Tools\nPrimary textbook: Hastie, Tibshirani & Friedman (2009), Elements of Statistical Learning, Ch. 3, 14, 18\nLecture 3 — “The Map That Drew Itself”\nFinding structure in high-dimensional data — and learning not to trust everything you see.\n\n\n\n\n\n\n\n\nSection\nNamed Story\nStatistical Idea\n\n\n\n\n3.1\nCavalli-Sforza 1978: PCA maps of European gene frequencies\nPCA finds orthogonal directions of max variance; eigenvectors on spatial grids produce sinusoidal artifacts\n\n\n3.2\nGolub dataset: PC1 vs. PC2 separates ALL from AML\nScree plot, loadings, biplots; Marchenko-Pastur law for distinguishing signal from noise\n\n\n3.3\nNetflix Prize 2006: matrix factorization for recommendations\nSVD and low-rank approximation; choosing rank; latent factors\n\n\n3.4\nAllen Brain Cell Atlas: 5,000+ cell types from UMAP\nt-SNE and UMAP; neighborhood graphs; what is preserved (local clusters) and what is not (distances)\n\n\n3.5\nUMAP on permuted Golub data: clusters in pure noise\nStability analysis; validation strategies; PCA as GWAS covariate (Price 2006)\n\n\n\n\nLab 3 follows immediately: students run PCA and UMAP on the Golub dataset.\n\nLecture 4 — “Seventy Genes and a Fraud”\nRegularization, variable selection, and the discipline of validation.\n\n\n\n\n\n\n\n\nSection\nNamed Story\nStatistical Idea\n\n\n\n\n4.1\n98 patients, 25,000 genes: perfect fit, zero information\nRank deficiency when \\(p &gt; n\\); overfitting guaranteed; bias-variance at its extreme\n\n\n4.2\nHoerl & Kennard 1970: deliberately biased estimates predict better\nRidge: \\(\\|\\mathbf{y} - \\mathbf{X}\\boldsymbol{\\beta}\\|^2 + \\lambda\\|\\boldsymbol{\\beta}\\|^2\\); regularization path; cross-validation\n\n\n4.3\nTibshirani 1996: L1 geometry produces sparsity\nLASSO: diamond vs. circle; corners \\(\\Rightarrow\\) exact zeros; instability of selected variables\n\n\n4.4\nZou & Hastie 2005: correlated genes need grouping\nElastic net: \\(\\alpha\\) mixing parameter; grouping property; stable sparse models\n\n\n4.5\nvan ’t Veer 2002 / MINDACT 2016: 46% spared chemotherapy\nExternal validation; why MammaPrint worked (strong signal, proper CV, prospective trial)\n\n\n4.6\nPotti / Duke fraud: 18 retractions, patients harmed\nCross-validation leakage; mislabeled samples; reproducibility as statistical practice\n\n\n\n\nLab 4 follows after lunch: students fit penalized models to the Golub dataset."
+  },
+  {
+    "objectID": "syllabus/course-design.html#textbook-and-reference-mapping",
+    "href": "syllabus/course-design.html#textbook-and-reference-mapping",
+    "title": "Workshop Design",
+    "section": "Textbook and Reference Mapping",
+    "text": "Textbook and Reference Mapping\n\nPrimary Texts\n\n\n\n\n\n\n\n\nText\nCoverage\nLectures\n\n\n\n\nEfron (2010), Large-Scale Inference\nCh. 1–2 (large-scale testing), Ch. 3–4 (FDR), Ch. 5–7 (empirical Bayes, two-groups)\nL1, L2\n\n\nHastie, Tibshirani & Friedman (2009), Elements of Statistical Learning\nCh. 3 (linear regression), Ch. 14 (unsupervised learning), Ch. 18 (high-dimensional)\nL3, L4\n\n\nHastie, Tibshirani & Wainwright (2015), Statistical Learning with Sparsity\nCh. 2 (LASSO), Ch. 4 (elastic net), Ch. 6 (inference after selection)\nL4\n\n\nJames, Witten, Hastie & Tibshirani (2021), Introduction to Statistical Learning\nCh. 6 (regularization), Ch. 12 (unsupervised)\nL3, L4\n\n\n\n\n\nKey Papers by Lecture\n\n\n\n\n\n\n\n\nLecture\nPaper\nRole\n\n\n\n\nL1\nCaspi et al. (2003), Science\nAnchor story: 5-HTTLPR\n\n\nL1\nBorder et al. (2019), Am J Psychiatry\nThe replication failure\n\n\nL1\nBennett et al. (2009), poster\nDead salmon fMRI\n\n\nL2\nBenjamini & Hochberg (1995), JRSS-B\nFDR procedure\n\n\nL2\nStorey (2002), JRSS-B\nQ-values and \\(\\pi_0\\) estimation\n\n\nL2\nEfron (2004), JASA\nEmpirical null and local FDR\n\n\nL2\nEfron & Morris (1977), Sci Am\nBaseball shrinkage\n\n\nL2\nOpen Science Collaboration (2015), Science\nReplication crisis\n\n\nL3\nCavalli-Sforza et al. (1978), PNAS\nPCA maps of European gene frequencies\n\n\nL3\nNovembre & Stephens (2008), Nature Genetics\nPCA artifacts\n\n\nL3\nMcInnes, Healy & Melville (2018), arXiv\nUMAP\n\n\nL3\nPrice et al. (2006), Nature Genetics\nPCA for population structure correction\n\n\nL4\nHoerl & Kennard (1970), Technometrics\nRidge regression\n\n\nL4\nTibshirani (1996), JRSS-B\nLASSO\n\n\nL4\nZou & Hastie (2005), JRSS-B\nElastic net\n\n\nL4\nvan ’t Veer et al. (2002), Nature\nMammaPrint 70-gene signature\n\n\nL4\nCardoso et al. (2016), NEJM\nMINDACT trial\n\n\nL4\nBaggerly & Coombes (2009), Ann Appl Stat\nDuke fraud forensics\n\n\n\n\n\nLecture-to-Chapter Mapping\n\n\n\nLecture\nEfron (2010)\nESL (2009)\nSLS (2015)\nISLR (2021)\n\n\n\n\nL1\nCh. 1–2\n—\n—\n—\n\n\nL2\nCh. 3–7\n—\n—\n—\n\n\nL3\n—\nCh. 14 (§14.5–14.9)\n—\nCh. 12\n\n\nL4\n—\nCh. 3 (§3.4), Ch. 18\nCh. 2, 4\nCh. 6"
+  },
+  {
+    "objectID": "syllabus/course-design.html#the-golub-dataset-as-unifying-thread",
+    "href": "syllabus/course-design.html#the-golub-dataset-as-unifying-thread",
+    "title": "Workshop Design",
+    "section": "The Golub Dataset as Unifying Thread",
+    "text": "The Golub Dataset as Unifying Thread\nThe Golub leukemia dataset is used in every lecture, every lab, and the homework. This continuity is a deliberate design choice:\n\n\n\n\n\n\n\nComponent\nHow the Golub Dataset Is Used\n\n\n\n\nLecture 1\n3,051 t-tests; p-value histogram; multiple testing problem\n\n\nLab 1\nStudents run the 3,051 tests; read the histogram; apply corrections\n\n\nLecture 2\nBH procedure applied; \\(\\pi_0\\) estimated; empirical null discussed\n\n\nLab 2\nStudents apply BH and q-values; estimate \\(\\pi_0\\); make the p-value histogram\n\n\nHomework\nQ2: limma analysis of Golub data with AI; compare to raw t-tests\n\n\nLecture 3\nPCA separates ALL from AML; UMAP clusters; scree plot\n\n\nLab 3\nStudents run PCA and UMAP; compare projections; check stability\n\n\nLecture 4\nPenalized regression to classify leukemia types; gene selection\n\n\nLab 4\nStudents fit ridge/LASSO/elastic net; examine which genes are selected\n\n\n\nDataset specifications:\n\nSource: Golub et al. (1999), Science, 286(5439), 531–537; archived on Zenodo (DOI: 10.5281/zenodo.8123245)\nPlatform: Affymetrix Hu6800 microarray\nDimensions: 3,051 genes (probesets) \\(\\times\\) 72 samples\nClasses: 47 ALL, 25 AML\nFormat: Log2-scale expression values exported to CSV"
+  },
+  {
+    "objectID": "syllabus/course-design.html#ai-integration-design",
+    "href": "syllabus/course-design.html#ai-integration-design",
+    "title": "Workshop Design",
+    "section": "AI Integration Design",
+    "text": "AI Integration Design\nAI is not an add-on — it is woven into every lab as a skill students must develop.\n\nAI Integration by Lab\n\n\n\n\n\n\n\n\nLab\nAI Exercise\nCritique Focus\n\n\n\n\nLab 1\nUse AI to generate a power curve for BH by effect size\nDoes the code correctly simulate from the two-groups model?\n\n\nLab 2\nUse AI to perform full FDR analysis with Storey’s q-values\nDoes AI choose appropriate methods (e.g., limma vs. raw t-tests)?\n\n\nLab 3\nUse AI to add silhouette scores or stability analysis to UMAP\nDoes AI interpret UMAP distances correctly?\n\n\nLab 4\nUse AI to interpret selected genes biologically\nDoes AI fabricate gene function claims? Can you verify?\n\n\n\n\n\nAI Evaluation Framework\nEvery AI exercise includes a critique checklist:\n\nDoes the code run without errors?\nDoes it use appropriate methods for this data structure?\nAre the statistical assumptions met?\nAre the interpretations of results correct?\nAre any claims fabricated or unverifiable?\n\nThis framework maps directly to EU5 (reproducibility as statistical practice) and LO3 (critical evaluation of computational output)."
+  },
+  {
+    "objectID": "syllabus/course-design.html#assessment-pacing-summary",
+    "href": "syllabus/course-design.html#assessment-pacing-summary",
+    "title": "Workshop Design",
+    "section": "Assessment Pacing Summary",
+    "text": "Assessment Pacing Summary\n\n\n\n\n\n\n\n\nTime\nSession\nAssessment\n\n\n\n\nBefore Day 1\nPre-Homework\nActivate prerequisites; software check; first AI evaluation\n\n\nDay 1, 0:00–1:00\nLecture 1\n—\n\n\nDay 1, 1:00–2:00\nLab 1\nPractice: multiple testing, p-value histogram\n\n\nDay 1, 2:00–3:00\nLecture 2\n—\n\n\nDay 1, 3:00–4:00\nLunch\n—\n\n\nDay 1, 4:00–5:00\nLab 2\nPractice: BH, q-values, empirical Bayes\n\n\nDay 1 evening\nHomework assigned\nIntegration: new scenarios, AI-assisted analysis, error evaluation\n\n\nDay 2, 0:00–0:15\nHW discussion\nBrief review of Q1 and Q3\n\n\nDay 2, 0:15–1:00\nLecture 3\n—\n\n\nDay 2, 1:00–2:00\nLab 3\nPractice: PCA, UMAP, scree plots\n\n\nDay 2, 2:00–3:00\nLecture 4\n—\n\n\nDay 2, 3:00–4:00\nLunch\n—\n\n\nDay 2, 4:00–5:00\nLab 4\nPractice: ridge, LASSO, elastic net, interpretation"
+  },
+  {
+    "objectID": "syllabus/course-design.html#questions-still-open",
+    "href": "syllabus/course-design.html#questions-still-open",
+    "title": "Workshop Design",
+    "section": "Questions Still Open",
+    "text": "Questions Still Open\n\nShould Day 2 include a brief “synthesis” session at the end connecting all four methods on the Golub dataset?\nHow much time should the homework discussion take? 15 minutes may be too short if students have interesting Q3 responses.\nShould the decision guide be introduced explicitly at the start of Day 2, or left as a reference?\nIs the balance between lecture time (~45–60 min) and lab time (60 min) right, or should labs be longer?"
+  },
+  {
+    "objectID": "lectures/lecture1.html",
+    "href": "lectures/lecture1.html",
+    "title": "Lecture 1: The Gene That Wasn’t There",
+    "section": "",
+    "text": "In 2003, Avshalom Caspi and a team of researchers published a paper in Science that would become one of the most influential findings in psychiatric genetics. They reported that a variant in the serotonin transporter gene — a gene called 5-HTTLPR — predicted whether people who experienced stressful life events would develop depression. The idea was elegant: some people carry a version of this gene that produces less serotonin transporter protein, and those people, when exposed to stress, are more vulnerable to depression. Nature plus nurture, mediated by a single gene.\nThe paper was cited over 8,000 times.1 It launched an entire subfield. Hundreds of labs tried to replicate and extend the finding. Graduate students built dissertations around it. Textbooks cited it as a model of gene-environment interaction. If you took a psychology or genetics course between 2005 and 2015, you probably heard about it.\nIn 2019, a team led by Richard Border tested the 5-HTTLPR hypothesis — along with 17 other “candidate gene” hypotheses for depression — in samples ranging from 62,000 to 443,000 people. They had preregistered their analysis plan. They used the same measures and the same statistical approaches that the original studies had used, just with vastly more data.\nThey found nothing. Not “a smaller effect than expected.” Nothing. The serotonin transporter variant had no detectable relationship to depression, with or without stress. Neither did any of the other 17 candidate genes.\nHow does a false positive survive for fifteen years?\nThe short answer is: it wasn’t one false positive. It was thousands of them, across hundreds of studies, in a field that was running many statistical tests without accounting for how many tests it was running. And the tools to prevent this — to control the rate of false discovery when you’re testing many hypotheses — existed the entire time. The field just wasn’t using them.\nThat’s what this lecture is about. Not the serotonin gene specifically, but the general problem: what happens when you test many hypotheses, and what it looks like when you don’t account for it. We’re going to see this problem firsthand, using a real dataset that we’ll work with for the rest of the workshop. And we’ll start building the diagnostic tools to catch it."
+  },
+  {
+    "objectID": "lectures/lecture1.html#the-serotonin-gene-that-wasnt",
+    "href": "lectures/lecture1.html#the-serotonin-gene-that-wasnt",
+    "title": "Lecture 1: The Gene That Wasn’t There",
+    "section": "",
+    "text": "In 2003, Avshalom Caspi and a team of researchers published a paper in Science that would become one of the most influential findings in psychiatric genetics. They reported that a variant in the serotonin transporter gene — a gene called 5-HTTLPR — predicted whether people who experienced stressful life events would develop depression. The idea was elegant: some people carry a version of this gene that produces less serotonin transporter protein, and those people, when exposed to stress, are more vulnerable to depression. Nature plus nurture, mediated by a single gene.\nThe paper was cited over 8,000 times.1 It launched an entire subfield. Hundreds of labs tried to replicate and extend the finding. Graduate students built dissertations around it. Textbooks cited it as a model of gene-environment interaction. If you took a psychology or genetics course between 2005 and 2015, you probably heard about it.\nIn 2019, a team led by Richard Border tested the 5-HTTLPR hypothesis — along with 17 other “candidate gene” hypotheses for depression — in samples ranging from 62,000 to 443,000 people. They had preregistered their analysis plan. They used the same measures and the same statistical approaches that the original studies had used, just with vastly more data.\nThey found nothing. Not “a smaller effect than expected.” Nothing. The serotonin transporter variant had no detectable relationship to depression, with or without stress. Neither did any of the other 17 candidate genes.\nHow does a false positive survive for fifteen years?\nThe short answer is: it wasn’t one false positive. It was thousands of them, across hundreds of studies, in a field that was running many statistical tests without accounting for how many tests it was running. And the tools to prevent this — to control the rate of false discovery when you’re testing many hypotheses — existed the entire time. The field just wasn’t using them.\nThat’s what this lecture is about. Not the serotonin gene specifically, but the general problem: what happens when you test many hypotheses, and what it looks like when you don’t account for it. We’re going to see this problem firsthand, using a real dataset that we’ll work with for the rest of the workshop. And we’ll start building the diagnostic tools to catch it."
+  },
+  {
+    "objectID": "lectures/lecture1.html#three-thousand-and-fifty-one-tests",
+    "href": "lectures/lecture1.html#three-thousand-and-fifty-one-tests",
+    "title": "Lecture 1: The Gene That Wasn’t There",
+    "section": "Three thousand and fifty-one tests",
+    "text": "Three thousand and fifty-one tests\nLet’s start with a dataset. In 1999, Todd Golub and colleagues published a landmark paper in Science that asked a deceptively simple question: can you distinguish two types of leukemia — acute lymphoblastic leukemia (ALL) and acute myeloid leukemia (AML) — using only gene expression? They profiled 72 patients on Affymetrix microarrays, measuring thousands of genes simultaneously. After preprocessing, the dataset contains 3,051 genes per patient. We’ll call it the Golub dataset, and we’ll work with it for the rest of the workshop.\nThe 72 patients fall into two groups: 47 with ALL and 25 with AML. These are different diseases — they have different prognoses, different treatment responses, different biology. The question is: which genes are expressed differently between the two types?\nThis is a perfectly reasonable question. A clinician might want to know which genes distinguish the types so they can develop better diagnostics. A biologist might want to understand the molecular basis of the distinction. An informaticist might want to build a classifier.\nSo you do what anyone would do. You take each gene, one at a time, and ask: is this gene expressed at a different level in ALL patients than in AML patients? The standard tool is a t-test. You compute a test statistic, you get a p-value, and you decide whether the difference is “statistically significant.”\nDo this for all 3,051 genes and you get 3,051 p-values.\nNow, here’s the thing about p-values that everyone learns in their first statistics course and then immediately forgets the implications of: a p-value of 0.05 means that if the gene is not differentially expressed — if there is truly no difference between ALL and AML — there’s still a 5% chance of getting a test statistic this extreme or more extreme, just by chance. That’s fine for one test. You accept a 5% false positive rate as the cost of doing business.\nBut you’re not running one test. You’re running 3,051.\nIf none of the genes were actually different between ALL and AML — if the two diseases were molecularly identical, which they’re not, but bear with me — you’d still expect about 5% of your tests to come back significant at the 0.05 level. Five percent of 3,051 is about 153. You’d get 153 “significant” results from pure noise.\nThe false positive rate is still 5%. The false positive count is 153. And if you’re a biologist looking at your results, you don’t see a rate — you see a list of genes. A long list. A list that looks like you’ve discovered something.\nThis is the multiple testing problem. It’s not subtle. The math is first-semester probability. And yet it fooled an entire field of psychiatric genetics for fifteen years, and it still catches people in every discipline that runs many tests on the same dataset. (And 3,051 genes is modest by modern standards — today’s RNA-seq experiments measure 20,000 or more.)\nLet’s look at what it actually looks like."
+  },
+  {
+    "objectID": "lectures/lecture1.html#your-first-diagnostic-the-p-value-histogram",
+    "href": "lectures/lecture1.html#your-first-diagnostic-the-p-value-histogram",
+    "title": "Lecture 1: The Gene That Wasn’t There",
+    "section": "Your first diagnostic: the p-value histogram",
+    "text": "Your first diagnostic: the p-value histogram\nI want to show you the single most useful plot in high-dimensional statistics. It’s not a volcano plot. It’s not a heatmap. It’s a histogram of p-values.\nTake those 3,051 p-values from the Golub dataset and plot them in a histogram. The x-axis goes from 0 to 1. The y-axis counts how many p-values fall in each bin.\nHere’s what you’d see if none of the genes were differentially expressed: a flat histogram. Uniform. Equal numbers of p-values in every bin. This is because, under the null hypothesis, p-values are uniformly distributed between 0 and 1. That’s not an approximation or an asymptotic result — it’s exact.2 If nothing is going on, every bin gets the same number of p-values.\nNow consider the Golub data. The histogram is not flat. There is a pronounced spike near zero — hundreds of genes with very small p-values — and then a roughly flat region for the rest. The spike is signal: genes that are genuinely differentially expressed between ALL and AML. The flat part is the null genes — the genes where no real difference is present, producing the uniform distribution we would expect.\nThis one plot tells you three things:\nFirst, whether there’s signal. If the histogram is flat, there is nothing to detect. If there’s a spike near zero, something real is happening.\nSecond, roughly how much signal. The height of the flat part tells you the density of null p-values. If the flat part is at, say, 80% of the total, then roughly 80% of your genes are null and 20% are non-null. That’s a lot of signal. In the Golub data, the spike is substantial — ALL and AML are genuinely different diseases, and the transcriptomic differences are large.\nThird, whether your analysis is trustworthy. A well-behaved analysis produces a histogram with a flat right side and a spike on the left. But sometimes the histogram looks wrong. If the bars increase toward the right — more large p-values than expected — your test is conservative (too cautious). If there’s a bump in the middle, something is off with your test statistics. If the entire histogram is shifted left with no flat region, your null model is wrong. These pathological histograms are surprisingly common, and they tell you to stop and fix your analysis before interpreting any results.\nI want you to internalize this: before you look at gene lists, before you compute adjusted p-values, before you run any correction procedure — plot the histogram. It takes ten seconds and it tells you whether the rest of your analysis is worth doing.\nWe’ll come back to this histogram in Lecture 2, where it turns from a diagnostic into an estimator. The flat part isn’t just telling you “these genes are null” — it’s telling you the proportion of null genes, and that proportion is the key ingredient in false discovery rate estimation. But I’m getting ahead of myself."
+  },
+  {
+    "objectID": "lectures/lecture1.html#bonferroni-and-family-wise-error-rate-control",
+    "href": "lectures/lecture1.html#bonferroni-and-family-wise-error-rate-control",
+    "title": "Lecture 1: The Gene That Wasn’t There",
+    "section": "Bonferroni and family-wise error rate control",
+    "text": "Bonferroni and family-wise error rate control\nSo you have 3,051 p-values and a histogram that shows real signal. You want to call some genes significant. But you know that if you use the standard 0.05 threshold, you’ll get over a hundred false positives mixed in with the real results. What do you do?\nThe oldest and simplest answer is Bonferroni correction. The idea is almost embarrassingly straightforward: divide your significance level by the number of tests. Instead of calling a gene significant at p &lt; 0.05, you call it significant at p &lt; 0.05 / 3,051 ≈ 1.6 × 10⁻⁵.\nThe logic goes like this. You want the probability of making any false positive — even one — to be at most 5%. This is called the family-wise error rate, or FWER. If each individual test has a false positive probability of α/m, then by the union bound, the probability that at least one of the m tests produces a false positive is at most m × (α/m) = α. Done.\nBonferroni is clean, easy to explain, and requires no assumptions about the dependence structure of your tests. It works whether your genes are independent or correlated. It works whether you’re testing 10 hypotheses or 10 million. In genome-wide association studies, where you’re testing around a million genetic variants, the convention is a significance threshold of 5 × 10⁻⁸ — which is just Bonferroni at the million-variant scale.3\nAnd Bonferroni works, in the sense that it does what it promises. If you apply Bonferroni to 3,051 tests, the probability that any of your declared significant genes is a false positive is at most 5%.\nBut here’s the problem: Bonferroni controls the wrong thing.\nThink about what the family-wise error rate actually means. It’s the probability of any false positive. Any. Even one. In a list of 500 significant genes, Bonferroni demands a guarantee that not a single one is a false discovery. That’s an extraordinarily high standard. And to achieve it, the threshold becomes so stringent that you miss most of the real signal.\nIf you’re an astronomer and you’re about to announce the discovery of gravitational waves, yes, you want to be very sure you haven’t made even one false positive. The standard there is “five sigma,” roughly one in 3.5 million. The cost of a false claim is enormous.\nBut if you’re a biologist screening thousands of genes to find candidates for follow-up experiments, you’re in a completely different situation. You don’t need a guarantee that every gene on your list is real. You need a useful list — one where most of the genes are real and the false positives are a manageable fraction. If your list of 500 genes contains 25 false positives, that’s a 5% false discovery rate, and for most biological applications, that’s fine. You’ll validate the interesting ones in follow-up experiments anyway.\nBonferroni can’t give you that list. It’s trying to prevent a different kind of error — any error at all — and in doing so, it throws away most of your real discoveries.\nYou need a different question. Not “did I make any false positives?” but “what fraction of my discoveries are false?” That question has an answer, and it’s the subject of Lecture 2. But before we get there, I want to show you what happens when people skip the correction entirely."
+  },
+  {
+    "objectID": "lectures/lecture1.html#the-dead-salmon",
+    "href": "lectures/lecture1.html#the-dead-salmon",
+    "title": "Lecture 1: The Gene That Wasn’t There",
+    "section": "The dead salmon",
+    "text": "The dead salmon\nIn 2009, a neuroscientist named Craig Bennett and his colleagues put a dead Atlantic salmon in an fMRI scanner.4\nThey showed the salmon a series of photographs of people in social situations and asked it — well, they ran the standard fMRI analysis pipeline — to determine the emotional valence of each photograph. The scanner measured blood oxygenation levels across thousands of tiny volume elements (voxels) in the salmon’s body. For each voxel, a statistical test asked: does the signal in this voxel change in response to the photographs?\nWithout any correction for multiple comparisons, a cluster of voxels in the salmon’s brain cavity showed statistically significant “neural activity.” The dead fish appeared to be processing human emotions.\nWith a standard correction for multiple comparisons, the signal disappeared. Because of course it did — the salmon was dead.\nBennett presented this as a poster at a conference, and it became widely circulated, partly for its memorable framing and partly because it made a serious point: every fMRI analysis involves thousands of voxels, each tested independently, and the multiple testing problem is the same as in genomics. Bennett surveyed published fMRI studies and found that between 25% and 40% did not report correcting for multiple comparisons. The poster was memorable. The survey was concerning.\nThe salmon is the same problem we saw with genes, just in a different domain. Instead of 3,051 genes, you have tens of thousands of voxels. Instead of expression levels, you have blood oxygenation signals. But the statistics are the same: many tests, a 5% false positive rate per test, and enough tests that false positives are guaranteed.\nI’m telling you the salmon story because it’s memorable and because it makes the multiple testing problem feel visceral in a way that abstract calculations don’t. But the salmon was caught quickly — it was a deliberate demonstration. The next story is about what happens when false positives aren’t caught at all."
+  },
+  {
+    "objectID": "lectures/lecture1.html#what-a-field-wide-false-positive-looks-like",
+    "href": "lectures/lecture1.html#what-a-field-wide-false-positive-looks-like",
+    "title": "Lecture 1: The Gene That Wasn’t There",
+    "section": "What a field-wide false positive looks like",
+    "text": "What a field-wide false positive looks like\nLet’s go back to the serotonin gene.\nCaspi et al. published their finding in 2003. Over the next fifteen years, hundreds of studies tried to replicate or extend the result. Some found the same thing. Some found the opposite. Some found nothing. Meta-analyses — studies that combine the results of many studies — disagreed with each other, depending on which studies they included and how they weighted them.\nThis should have been a red flag. When a real effect exists, replications generally agree on its direction and approximate size. When studies disagree about whether an effect is positive, negative, or zero, that’s what noise looks like.\nBut the field had reasons to keep believing. The biology was plausible — serotonin is genuinely involved in mood regulation. The original study was well-designed by the standards of its time. And there were enough positive replications to maintain hope, especially if you squinted at the inclusion criteria of the meta-analyses.\nIn 2019, Border et al. settled it. They tested 18 candidate gene hypotheses for depression — including 5-HTTLPR — in enormous samples, with preregistered analysis plans and consistent methodology across all 18 tests. None of the 18 replicated. Not one.\nMeanwhile, a parallel approach had been yielding real results. Genome-wide association studies, which test hundreds of thousands or millions of genetic variants and apply stringent multiple testing correction (that 5 × 10⁻⁸ threshold), had been steadily finding genetic loci associated with depression. By 2019, GWAS had identified over 100 loci. These weren’t the same genes that the candidate gene studies had focused on. The two approaches — one without proper correction, one with — were studying the same biology and getting completely different answers.\nHow did the false positives survive? Three mechanisms, each reinforcing the others:\nPublication bias. Studies that found a significant result for 5-HTTLPR were more likely to be published. Studies that found nothing were more likely to sit in a file drawer. The published literature was a biased sample of the evidence.\nWinner’s curse. The studies that did get published — the ones that found significant results — necessarily overestimated the effect size. To cross the significance threshold with a small, noisy sample, the observed effect has to be larger than the true effect. So the early estimates of the 5-HTTLPR effect were inflated, and later studies with more realistic estimates looked like “failures to replicate.”\nThe garden of forking paths. There are many defensible choices in any analysis: which covariates to include, which subgroups to analyze, which outcome measure to use, how to define “stressful life events.” Each choice is a branch point, and the analysts — without any intent to deceive — could explore different branches until they found one that produced a significant result. This isn’t the same as running thousands of explicit tests, but it has the same effect: the number of implicit tests is much larger than the number of reported tests.\nNone of this required bad intentions. The researchers who studied 5-HTTLPR were, for the most part, careful scientists who believed in their hypothesis and interpreted ambiguous evidence in its favor. That’s not fraud — that’s human cognition. The problem wasn’t the scientists. The problem was the statistical framework, which didn’t account for the scale of testing that was actually happening.\nThe fix was known the entire time. GWAS adopted it from the beginning: test everything, correct for everything, accept the stringent thresholds. The candidate gene field tested one or a few genes per study, which seemed like it shouldn’t require correction — but across the entire literature, across hundreds of studies each making dozens of analytical choices, the effective number of tests was enormous. The correction should have happened at the field level, not just the study level.\n\nThe 5-HTTLPR story isn’t a story about bad scientists. It’s a story about what happens when a field’s statistical framework doesn’t match the scale of its questions. The framework to handle that scale exists — it’s what we’ll build in Lecture 2. But first, in the lab, you’re going to see it for yourself. You’ll take the Golub dataset, run those 3,051 tests, plot the histogram, apply Bonferroni, and feel the gap between “controls any error” and “gives you a useful answer.” That gap is where the false discovery rate lives."
+  },
+  {
+    "objectID": "lectures/lecture1.html#footnotes",
+    "href": "lectures/lecture1.html#footnotes",
+    "title": "Lecture 1: The Gene That Wasn’t There",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nTo put that in perspective, a typical well-cited paper in genetics gets maybe 200 citations. A famous one gets 1,000. 8,000 is a field-defining result.↩︎\nTechnically, this is true for continuous test statistics. Discrete test statistics produce p-values that are stochastically larger than uniform, which makes the test conservative. For gene expression data with continuous measurements, the uniform assumption is essentially exact.↩︎\nThe actual number 5 × 10⁻⁸ comes from a more sophisticated calculation involving linkage disequilibrium and the effective number of independent tests in the genome, but it’s in the Bonferroni ballpark.↩︎\nIt was purchased at a local fish market. It was, by all accounts, very dead.↩︎"
+  },
+  {
+    "objectID": "lectures/lecture3.html#from-faces-to-genes",
+    "href": "lectures/lecture3.html#from-faces-to-genes",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "From Faces to Genes",
+    "text": "From Faces to Genes\nIn 1991, Turk and Pentland ran PCA on a database of face photographs. The principal components — ghostly, blurred images they called “eigenfaces” — could reconstruct any face in the database using just 100 numbers instead of thousands of pixels.\n\nThis was the moment dimension reduction went from mathematical abstraction to transformative tool: a high-dimensional object (a face) could be faithfully represented in a far lower-dimensional space.\n\n\nThe same idea now drives single-cell genomics, where 30,000 gene measurements per cell are routinely compressed to 30–50 principal components before any analysis."
+  },
+  {
+    "objectID": "lectures/lecture3.html#the-problem",
+    "href": "lectures/lecture3.html#the-problem",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "The Problem",
+    "text": "The Problem\nWe have data \\(X \\in \\mathbb{R}^{n \\times p}\\) with \\(p\\) large (thousands to tens of thousands).\nGoals:\n\nVisualization: Project to 2D or 3D for exploration\nDenoising: Separate signal from noise\nPreprocessing: Reduce \\(p\\) before applying downstream methods (clustering, regression)\n\n\nCore question: Can we represent the data in a lower-dimensional space \\(\\mathbb{R}^k\\) with \\(k \\ll p\\), preserving the important structure?"
+  },
+  {
+    "objectID": "lectures/lecture3.html#principal-component-analysis-pca",
+    "href": "lectures/lecture3.html#principal-component-analysis-pca",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "Principal Component Analysis (PCA)",
+    "text": "Principal Component Analysis (PCA)\nThe idea\nFind orthogonal directions of maximum variance in the data.\nFormally\nGiven centered data \\(X\\) (\\(n \\times p\\)), PCA solves:\n\\[\\mathbf{v}_1 = \\arg\\max_{\\|\\mathbf{v}\\| = 1} \\text{Var}(X\\mathbf{v}) = \\arg\\max_{\\|\\mathbf{v}\\| = 1} \\mathbf{v}^T \\hat{\\Sigma} \\mathbf{v}\\]\nThe solution \\(\\mathbf{v}_1\\) is the eigenvector of \\(\\hat{\\Sigma} = \\frac{1}{n-1}X^TX\\) with the largest eigenvalue."
+  },
+  {
+    "objectID": "lectures/lecture3.html#pca-via-the-svd",
+    "href": "lectures/lecture3.html#pca-via-the-svd",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "PCA via the SVD",
+    "text": "PCA via the SVD\nThe singular value decomposition of \\(X\\):\n\\[X = U D V^T\\]\n\n\\(U\\) (\\(n \\times r\\)): left singular vectors (sample directions)\n\\(D\\) (\\(r \\times r\\)): diagonal matrix of singular values \\(d_1 \\geq d_2 \\geq \\cdots \\geq 0\\)\n\\(V\\) (\\(p \\times r\\)): right singular vectors (loadings = principal component directions)\n\nwhere \\(r = \\min(n, p)\\). Software returns this “thin” SVD by default.\n\nConnection: Eigenvalues of \\(\\hat{\\Sigma}\\) are \\(\\lambda_j = d_j^2 / (n-1)\\).\nPC scores: \\(Z = XV = UD\\) (the \\(j\\)-th column of \\(Z\\) is the \\(j\\)-th principal component)."
+  },
+  {
+    "objectID": "lectures/lecture3.html#how-many-components",
+    "href": "lectures/lecture3.html#how-many-components",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "How Many Components?",
+    "text": "How Many Components?\nScree plot\nPlot \\(\\lambda_j\\) (or proportion of variance explained) vs. \\(j\\). Look for an “elbow.”\nProportion of variance explained\n\\[\\text{PVE}(k) = \\frac{\\sum_{j=1}^k \\lambda_j}{\\sum_{j=1}^p \\lambda_j}\\]\nFormal methods\n\nMarchenko–Pastur threshold: Under null (\\(\\Sigma = I\\)) with \\(\\gamma = p/n\\), eigenvalues lie in \\([\\max(0,\\,(1-\\sqrt{\\gamma})^2),\\; (1+\\sqrt{\\gamma})^2]\\). When \\(p &gt; n\\) (our regime), the lower edge is 0 and only the upper edge matters. Eigenvalues above \\((1+\\sqrt{\\gamma})^2\\) are signal.\nParallel analysis: Compare observed eigenvalues to those from permuted data."
+  },
+  {
+    "objectID": "lectures/lecture3.html#pca-strengths-and-limitations",
+    "href": "lectures/lecture3.html#pca-strengths-and-limitations",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "PCA: Strengths and Limitations",
+    "text": "PCA: Strengths and Limitations\nStrengths\n\nComputationally fast; solved by standard linear algebra\nOptimal for linear reconstruction (Eckart–Young theorem)\nInterpretable loadings: which variables contribute to each PC?\n\nLimitations\n\nLinear only: Cannot capture nonlinear manifold structure\nSensitive to scaling: Must standardize or choose units carefully\nRotation ambiguity: PCs are identified only up to sign\nHigh-D noise bias: In the \\(p \\gg n\\) regime, the Marchenko–Pastur law inflates eigenvalues. Leading PCs can be distorted."
+  },
+  {
+    "objectID": "lectures/lecture3.html#biplots",
+    "href": "lectures/lecture3.html#biplots",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "Biplots",
+    "text": "Biplots\nA biplot overlays sample scores and variable loadings on the same 2D plot.\n\n\nCode\nimport numpy as np\nimport matplotlib.pyplot as plt\nfrom sklearn.decomposition import PCA\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.datasets import load_iris\n\niris = load_iris()\nX_iris = StandardScaler().fit_transform(iris.data)\npca_iris = PCA(n_components=2).fit(X_iris)\nscores = pca_iris.transform(X_iris)\nloadings = pca_iris.components_.T  # (4, 2)\n\nfig, ax = plt.subplots(figsize=(7, 5))\nax.scatter(scores[:, 0], scores[:, 1], s=15, color=\"gray\", alpha=0.6)\nscale = np.abs(scores).max() / np.abs(loadings).max() * 0.8\nfor i, name in enumerate(iris.feature_names):\n    ax.arrow(0, 0, loadings[i, 0] * scale, loadings[i, 1] * scale,\n             color=\"red\", head_width=0.1, linewidth=1.5)\n    ax.text(loadings[i, 0] * scale * 1.15, loadings[i, 1] * scale * 1.15,\n            name, color=\"red\", fontsize=9, ha=\"center\")\nax.set_xlabel(f\"PC1 ({pca_iris.explained_variance_ratio_[0]:.1%})\")\nax.set_ylabel(f\"PC2 ({pca_iris.explained_variance_ratio_[1]:.1%})\")\nax.set_title(\"Biplot of Iris Data\")\nax.axhline(0, color=\"gray\", linewidth=0.5)\nax.axvline(0, color=\"gray\", linewidth=0.5)\nplt.tight_layout()\nplt.show()\n\n\n\n\n\n\n\n\n\n\nRead it as: arrows pointing in the same direction as a cluster of points tell you which variables are high in that cluster."
+  },
+  {
+    "objectID": "lectures/lecture3.html#when-t-sne-lies",
+    "href": "lectures/lecture3.html#when-t-sne-lies",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "When t-SNE Lies",
+    "text": "When t-SNE Lies\nIn 2016, Wattenberg, Viégas, and Johnson published “How to Use t-SNE Effectively” — a landmark interactive article showing that:\n\nt-SNE can create clusters from completely uniform data\nIt can split a single group into two apparent clusters\nIt can make distant groups appear adjacent\nCluster sizes and distances between clusters are meaningless\n\n\nYet thousands of papers treat t-SNE and UMAP plots as ground truth. A t-SNE plot is a sketch, not a photograph."
+  },
+  {
+    "objectID": "lectures/lecture3.html#beyond-pca-nonlinear-methods",
+    "href": "lectures/lecture3.html#beyond-pca-nonlinear-methods",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "Beyond PCA: Nonlinear Methods",
+    "text": "Beyond PCA: Nonlinear Methods\nWhen the data lies on a nonlinear manifold (common in single-cell biology), PCA may miss important structure.\nThree popular nonlinear methods:\n\nt-SNE (van der Maaten & Hinton, 2008)\nUMAP (McInnes et al., 2018)\nDiffusion maps (Coifman & Lafon, 2006)"
+  },
+  {
+    "objectID": "lectures/lecture3.html#t-sne-intuition",
+    "href": "lectures/lecture3.html#t-sne-intuition",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "t-SNE: Intuition",
+    "text": "t-SNE: Intuition\nt-Distributed Stochastic Neighbor Embedding\n\nIn high-D: compute pairwise “affinities” \\(p_{ij}\\) using Gaussian kernels\nIn low-D (2D): compute affinities \\(q_{ij}\\) using a Student-\\(t\\) distribution (heavier tails)\nMinimize the KL divergence: \\(\\text{KL}(P \\| Q) = \\sum_{i \\neq j} p_{ij} \\log \\frac{p_{ij}}{q_{ij}}\\)\n\n\nThe heavy-tailed \\(t\\)-distribution in low-D allows distant points to spread apart while keeping nearby points close → good cluster separation."
+  },
+  {
+    "objectID": "lectures/lecture3.html#t-sne-key-parameters",
+    "href": "lectures/lecture3.html#t-sne-key-parameters",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "t-SNE: Key Parameters",
+    "text": "t-SNE: Key Parameters\nPerplexity\n\nControls the effective number of neighbors\nTypical range: 5–50\nLow perplexity: fine local structure; high perplexity: more global structure\n\nIterations\n\nt-SNE uses gradient descent; needs enough iterations to converge (typically 500–1000)\n\n. . .\nCautions\n\nDistances between clusters are not meaningful\nCluster sizes are not meaningful\nResults depend on random initialization—run multiple times\nDoes not preserve global structure well"
+  },
+  {
+    "objectID": "lectures/lecture3.html#umap-intuition",
+    "href": "lectures/lecture3.html#umap-intuition",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "UMAP: Intuition",
+    "text": "UMAP: Intuition\nUniform Manifold Approximation and Projection\nBased on topological data analysis concepts. Constructs a fuzzy simplicial complex (weighted graph) in high-D and optimizes a low-D layout to match.\n\nAdvantages over t-SNE\n\nBetter preservation of global structure (relative cluster positions)\nFaster (scales better to large \\(n\\))\nTheoretical grounding in Riemannian geometry and algebraic topology\n\nKey parameters\n\nn_neighbors: similar to perplexity. Controls local vs. global balance.\nmin_dist: controls how tightly points cluster in the embedding."
+  },
+  {
+    "objectID": "lectures/lecture3.html#comparing-pca-t-sne-umap",
+    "href": "lectures/lecture3.html#comparing-pca-t-sne-umap",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "Comparing PCA, t-SNE, UMAP",
+    "text": "Comparing PCA, t-SNE, UMAP\n\n\n\nFeature\nPCA\nt-SNE\nUMAP\n\n\n\n\nLinear?\nYes\nNo\nNo\n\n\nPreserves global structure?\nYes\nPoorly\nModerately\n\n\nPreserves local structure?\nSomewhat\nVery well\nVery well\n\n\nScalability\nExcellent\nSlow for large \\(n\\)\nFast\n\n\nDeterministic?\nYes\nNo\nNo\n\n\nInterpretable axes?\nYes (loadings)\nNo\nNo"
+  },
+  {
+    "objectID": "lectures/lecture3.html#the-phase-transition-you-cant-cross",
+    "href": "lectures/lecture3.html#the-phase-transition-you-cant-cross",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "The Phase Transition You Can’t Cross",
+    "text": "The Phase Transition You Can’t Cross\nBaik, Ben Arous, and Péché (2005) proved a remarkable result: there is a sharp threshold below which PCA cannot detect a signal, no matter how much data you have.\n\nFor a signal-plus-noise model with \\(p/n \\to \\gamma\\), a signal eigenvalue \\(\\ell\\) is detectable only if:\n\\[\\ell &gt; 1 + \\sqrt{\\gamma}\\]\n\n\nWith \\(p = 10{,}000\\) and \\(n = 100\\) (\\(\\gamma = 100\\)), you need signal strength \\(&gt; 11\\) to detect a component. Weak signals literally merge with noise and become invisible."
+  },
+  {
+    "objectID": "lectures/lecture3.html#a-practical-workflow",
+    "href": "lectures/lecture3.html#a-practical-workflow",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "A Practical Workflow",
+    "text": "A Practical Workflow\nFor high-dimensional biological data:\n\nStart with PCA to get an overview, check for batch effects, choose number of informative dimensions\nApply t-SNE or UMAP on the top \\(k\\) PCs (not the raw \\(p\\)-dimensional data)\nNever skip PCA—it denoises and speeds up nonlinear methods\n\n\nWhy PCA first?\n\nRemoves noise dimensions that confuse t-SNE/UMAP\nStandard practice in single-cell analysis (Seurat, Scanpy both do this)\nThe “Johnson–Lindenstrauss” intuition: random projections preserve distances approximately, and PCA is even better than random"
+  },
+  {
+    "objectID": "lectures/lecture3.html#cautions-with-nonlinear-embeddings",
+    "href": "lectures/lecture3.html#cautions-with-nonlinear-embeddings",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "Cautions with Nonlinear Embeddings",
+    "text": "Cautions with Nonlinear Embeddings\nThings that are NOT safe to conclude from a t-SNE or UMAP plot:\n\n“These two clusters are far apart” (distances are distorted)\n“This cluster is larger/denser” (sizes are distorted)\n“There are exactly \\(k\\) clusters” (artifacts can create false clusters)\n“The trajectory goes from A to B” (without additional evidence)\n\n\n\nUse nonlinear embeddings for hypothesis generation, not hypothesis testing. Always validate findings with quantitative methods."
+  },
+  {
+    "objectID": "lectures/lecture3.html#connection-to-factor-models",
+    "href": "lectures/lecture3.html#connection-to-factor-models",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "Connection to Factor Models",
+    "text": "Connection to Factor Models\nPCA is closely related to the factor model:\n\\[X = F L^T + E\\]\n\n\\(F\\) (\\(n \\times k\\)): factor scores (one row per sample)\n\\(L\\) (\\(p \\times k\\)): factor loadings (one row per variable)\n\\(E\\): noise\n\n\nWhen \\(E_{ij} \\sim N(0, \\sigma^2)\\) (homoscedastic), PCA recovers the factors. When \\(E\\) has heterogeneous variance, probabilistic PCA or factor analysis may be more appropriate.\nIn genomics, surrogate variable analysis (SVA) uses this framework to estimate hidden confounders."
+  },
+  {
+    "objectID": "lectures/lecture3.html#discussion",
+    "href": "lectures/lecture3.html#discussion",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "Discussion",
+    "text": "Discussion\nTake a few minutes on each of these before we move to the lab.\nIs 15% a lot?\nYou run PCA on \\(p = 20{,}000\\) genes measured on \\(n = 100\\) samples. PC1 explains 15% of the variance.\n\nIf all \\(p\\) variables were independent noise, each PC would explain about \\(1/\\min(n,p) = 1/100 = 1\\%\\).\nPC1 explains 15× that. This is strong signal.\n\n. . .\nBut: in the \\(p \\gg n\\) regime, the Marchenko–Pastur law inflates eigenvalues—the leading eigenvalue of pure noise with \\(\\gamma = p/n = 200\\) can be as large as \\((1 + \\sqrt{200})^2 \\approx 229\\) on the covariance matrix scale. Not all of that 15% is necessarily signal—some is inflated by high-dimensional noise. The scree plot and parallel analysis help you decide."
+  },
+  {
+    "objectID": "lectures/lecture3.html#summary",
+    "href": "lectures/lecture3.html#summary",
+    "title": "Lecture 3: Dimension Reduction",
+    "section": "Summary",
+    "text": "Summary\n\nPCA is the workhorse: fast, interpretable, optimal for linear structure. Always start here.\nScree plots and Marchenko–Pastur help decide how many components to keep.\nt-SNE and UMAP reveal nonlinear structure but distort distances and sizes.\nBest practice: PCA first, then nonlinear embedding on top PCs.\nNonlinear plots are for exploration, not confirmation.\nIn the \\(p \\gg n\\) regime, random matrix theory tells us about the limits of what PCA can detect.\n\nUp Next\nLab 3: Apply PCA and UMAP to the Golub dataset. Interpret biplots, scree plots, and embeddings."
+  },
+  {
+    "objectID": "lectures/lecture4.html#perfect-training-catastrophic-prediction",
+    "href": "lectures/lecture4.html#perfect-training-catastrophic-prediction",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Perfect Training, Catastrophic Prediction",
+    "text": "Perfect Training, Catastrophic Prediction\nA research team fitted ordinary least squares to predict patient outcomes from 500 gene expression features on 80 patients.\n\n\nTraining \\(R^2\\): 0.99 — the model fit the data almost perfectly\nTest \\(R^2\\): \\(-0.3\\) — worse than simply predicting the mean for everyone\n\n\n\nThe model had memorized noise. With more features than samples, OLS finds a perfect interpolation — not because the biology is that clean, but because there are infinitely many solutions that pass through every data point.\n\n\nThis is the overfitting catastrophe that regularization prevents."
+  },
+  {
+    "objectID": "lectures/lecture4.html#the-regression-problem-in-high-d",
+    "href": "lectures/lecture4.html#the-regression-problem-in-high-d",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "The Regression Problem in High-D",
+    "text": "The Regression Problem in High-D\nWe want to model a response \\(y \\in \\mathbb{R}^n\\) as a function of predictors \\(X \\in \\mathbb{R}^{n \\times p}\\):\n\\[y = X\\beta + \\varepsilon, \\quad \\varepsilon \\sim N(0, \\sigma^2 I)\\]\n\nWhen \\(p &gt; n\\):\n\nOLS \\(\\hat{\\beta} = (X^TX)^{-1}X^Ty\\) does not exist (\\(X^TX\\) is singular)\nEven when \\(p &lt; n\\) but \\(p\\) is close to \\(n\\), OLS overfits: high variance, poor prediction\nNeed to regularize: trade some bias for reduced variance"
+  },
+  {
+    "objectID": "lectures/lecture4.html#ridge-regression",
+    "href": "lectures/lecture4.html#ridge-regression",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Ridge Regression",
+    "text": "Ridge Regression\nAdd an \\(\\ell_2\\) penalty:\n\\[\\hat{\\beta}_{\\text{ridge}} = \\arg\\min_\\beta \\left\\{ \\frac{1}{2n}\\|y - X\\beta\\|_2^2 + \\frac{\\lambda}{2} \\|\\beta\\|_2^2 \\right\\}\\]\n\nClosed-form solution: \\(\\hat{\\beta}_{\\text{ridge}} = (X^TX + n\\lambda I)^{-1}X^Ty\\)\n(All three methods—ridge, LASSO, elastic net—use the glmnet convention with \\(1/(2n)\\) scaling on the loss, so \\(\\lambda\\) is comparable across methods.)\nProperties\n\nShrinks all coefficients toward zero (but none exactly to zero)\nThe penalty term makes the system invertible even when \\(p &gt; n\\)\nEquivalent to a Bayesian posterior with \\(\\beta_j \\sim N(0, \\tau^2)\\) prior, where \\(\\lambda = \\sigma^2/\\tau^2\\)"
+  },
+  {
+    "objectID": "lectures/lecture4.html#ridge-bias-variance-tradeoff",
+    "href": "lectures/lecture4.html#ridge-bias-variance-tradeoff",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Ridge: Bias-Variance Tradeoff",
+    "text": "Ridge: Bias-Variance Tradeoff\nAs \\(\\lambda\\) increases:\n\nBias increases: coefficients shrink toward zero\nVariance decreases: estimates become more stable\n\n\nThere exists an optimal \\(\\lambda\\) that minimizes prediction error. The mean squared error:\n\\[\\text{MSE}(\\hat{\\beta}_{\\text{ridge}}) = \\text{Bias}^2 + \\text{Variance}\\]\nRidge is optimal when many predictors have small effects (no true sparsity)."
+  },
+  {
+    "objectID": "lectures/lecture4.html#the-most-elegant-geometry-in-modern-statistics",
+    "href": "lectures/lecture4.html#the-most-elegant-geometry-in-modern-statistics",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "The Most Elegant Geometry in Modern Statistics",
+    "text": "The Most Elegant Geometry in Modern Statistics\nWhy does changing \\(\\|\\beta\\|_2^2\\) to \\(\\|\\beta\\|_1\\) — changing a sphere to a diamond — cause coefficients to become exactly zero?\n\nThe answer is corners.\n\n\nThe \\(\\ell_1\\) constraint set (a diamond / cross-polytope) has corners on every coordinate axis. The \\(\\ell_2\\) constraint set (a sphere) is perfectly smooth.\nWhen the OLS contour ellipse expands until it touches the constraint set, it almost always hits a corner of the diamond — where one or more coordinates are exactly zero.\n\n\nIn \\(p\\) dimensions: the \\(\\ell_1\\) ball has \\(2p\\) vertices, all on coordinate axes. High-dimensional geometry makes corner intersections even more likely."
+  },
+  {
+    "objectID": "lectures/lecture4.html#the-lasso",
+    "href": "lectures/lecture4.html#the-lasso",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "The LASSO",
+    "text": "The LASSO\nLeast Absolute Shrinkage and Selection Operator (Tibshirani, 1996):\n\\[\\hat{\\beta}_{\\text{lasso}} = \\arg\\min_\\beta \\left\\{ \\frac{1}{2n}\\|y - X\\beta\\|_2^2 + \\lambda \\|\\beta\\|_1 \\right\\}\\]\n\nKey difference from ridge\nThe \\(\\ell_1\\) penalty \\(\\|\\beta\\|_1 = \\sum_j |\\beta_j|\\) produces sparse solutions: many \\(\\hat{\\beta}_j = 0\\) exactly.\nLASSO simultaneously performs estimation and variable selection."
+  },
+  {
+    "objectID": "lectures/lecture4.html#geometry-why-ell_1-gives-sparsity",
+    "href": "lectures/lecture4.html#geometry-why-ell_1-gives-sparsity",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Geometry: Why \\(\\ell_1\\) Gives Sparsity",
+    "text": "Geometry: Why \\(\\ell_1\\) Gives Sparsity\nThe constraint region for \\(\\ell_1\\) is a diamond (cross-polytope). The constraint for \\(\\ell_2\\) is a sphere.\nThe OLS solution, projected onto the constraint set, is more likely to hit a corner of the diamond (where coordinates are zero) than the smooth surface of the sphere.\n\nIn \\(p\\) dimensions: the \\(\\ell_1\\) ball has \\(2p\\) vertices (one per axis), making sparse intersections very likely."
+  },
+  {
+    "objectID": "lectures/lecture4.html#lasso-solution-path",
+    "href": "lectures/lecture4.html#lasso-solution-path",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "LASSO: Solution Path",
+    "text": "LASSO: Solution Path\nAs \\(\\lambda\\) decreases from \\(\\lambda_{\\max}\\) (where \\(\\hat{\\beta} = 0\\)) to 0:\n\nCoefficients enter the model one at a time\nThe regularization path \\(\\hat{\\beta}(\\lambda)\\) is piecewise linear (Efron et al., 2004, LARS)\nCan compute the entire path efficiently"
+  },
+  {
+    "objectID": "lectures/lecture4.html#choosing-lambda-cross-validation",
+    "href": "lectures/lecture4.html#choosing-lambda-cross-validation",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Choosing \\(\\lambda\\): Cross-Validation",
+    "text": "Choosing \\(\\lambda\\): Cross-Validation\n\\(K\\)-fold cross-validation:\n\nSplit data into \\(K\\) folds (typically \\(K = 10\\))\nFor each \\(\\lambda\\): fit on \\(K-1\\) folds, predict on held-out fold\nAverage the prediction error across folds\nChoose \\(\\lambda\\) that minimizes CV error\n\n\nTwo common choices\n\n\\(\\lambda_{\\min}\\): minimizes CV error (best prediction)\n\\(\\lambda_{1\\text{se}}\\): largest \\(\\lambda\\) within 1 SE of the minimum (more parsimonious model)"
+  },
+  {
+    "objectID": "lectures/lecture4.html#elastic-net",
+    "href": "lectures/lecture4.html#elastic-net",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Elastic Net",
+    "text": "Elastic Net\nCompromise between ridge and LASSO (Zou & Hastie, 2005):\n\\[\\hat{\\beta}_{\\text{enet}} = \\arg\\min_\\beta \\left\\{ \\frac{1}{2n}\\|y - X\\beta\\|_2^2 + \\lambda\\left[\\alpha\\|\\beta\\|_1 + \\frac{1-\\alpha}{2}\\|\\beta\\|_2^2\\right] \\right\\}\\]\n\n\\(\\alpha = 1\\): LASSO\n\\(\\alpha = 0\\): Ridge\n\\(0 &lt; \\alpha &lt; 1\\): Elastic net\n\n\nWhen to use elastic net: Correlated predictors (common in genomics). LASSO tends to arbitrarily select one from a group of correlated variables; elastic net selects the group."
+  },
+  {
+    "objectID": "lectures/lecture4.html#penalized-regression-summary",
+    "href": "lectures/lecture4.html#penalized-regression-summary",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Penalized Regression: Summary",
+    "text": "Penalized Regression: Summary\n\n\n\n\n\n\n\n\n\nMethod\nPenalty\nSparsity?\nBest when…\n\n\n\n\nRidge\n\\(\\frac{1}{2}\\|\\beta\\|_2^2\\)\nNo\nMany small effects\n\n\nLASSO\n\\(\\|\\beta\\|_1\\)\nYes\nFew large effects\n\n\nElastic Net\n\\(\\alpha\\|\\beta\\|_1 + \\frac{1-\\alpha}{2}\\|\\beta\\|_2^2\\)\nYes\nCorrelated predictors\n\n\n\n\nAll are available in glmnet (R) and scikit-learn (Python)."
+  },
+  {
+    "objectID": "lectures/lecture4.html#theoretical-guarantees",
+    "href": "lectures/lecture4.html#theoretical-guarantees",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Theoretical Guarantees",
+    "text": "Theoretical Guarantees\nLASSO consistency (Zhao & Yu, 2006)\nUnder the irrepresentable condition and sufficient signal strength, LASSO recovers the true support (nonzero coefficients) with probability \\(\\to 1\\) as \\(n \\to \\infty\\).\nPrediction error bounds\nUnder restricted eigenvalue conditions, LASSO achieves prediction error:\n\\[\\frac{1}{n}\\|X\\hat{\\beta}_{\\text{lasso}} - X\\beta^*\\|_2^2 = O\\left(\\frac{s \\log p}{n}\\right)\\]\nwhere \\(s\\) = number of true nonzero coefficients. This is near-optimal—you pay only \\(\\log p\\), not \\(p\\)."
+  },
+  {
+    "objectID": "lectures/lecture4.html#mammaprint-when-regularization-saves-lives",
+    "href": "lectures/lecture4.html#mammaprint-when-regularization-saves-lives",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "MammaPrint: When Regularization Saves Lives",
+    "text": "MammaPrint: When Regularization Saves Lives\nIn 2002, Laura van ’t Veer measured 25,000 genes on 78 breast cancer patients and used a supervised method to find a 70-gene signature predicting metastasis (van ’t Veer et al., 2002, Nature).\n\nThe signature was commercialized as MammaPrint, cleared by the FDA, and validated in the MINDACT trial (Cardoso et al., 2016, NEJM): 6,693 patients. Women classified as high clinical risk but low genomic risk were randomized to chemotherapy vs. no chemotherapy.\n\n\nResult: 94.7% five-year distant metastasis-free survival without chemo. 46% of women who would have received chemotherapy were spared — because a model built on 25,000 variables and 78 patients turned out to be right."
+  },
+  {
+    "objectID": "lectures/lecture4.html#the-duke-fraud-when-the-same-method-destroys-trust",
+    "href": "lectures/lecture4.html#the-duke-fraud-when-the-same-method-destroys-trust",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "The Duke Fraud: When the Same Method Destroys Trust",
+    "text": "The Duke Fraud: When the Same Method Destroys Trust\nAt Duke University, Anil Potti used gene expression signatures to predict which chemotherapy drug a tumor would respond to. Clinical trials enrolled patients based on these signatures.\n\nTwo statisticians at MD Anderson — Keith Baggerly and Kevin Coombes — spent years trying to reproduce the analysis (Baggerly & Coombes, 2009, Ann. Appl. Stat.). They found mislabeled samples, off-by-one errors in gene indices, and results that were literally the opposite of what was claimed.\n\n\n18 papers retracted. Potti’s medical license revoked. Patients had been assigned to treatments based on fraudulent models."
+  },
+  {
+    "objectID": "lectures/lecture4.html#the-same-method-different-outcomes",
+    "href": "lectures/lecture4.html#the-same-method-different-outcomes",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "The Same Method, Different Outcomes",
+    "text": "The Same Method, Different Outcomes\nMammaPrint and the Duke fraud used the same method on the same kind of data for the same kind of question. The difference:\n\n\nValidation: MammaPrint was tested in a 6,693-patient prospective randomized trial. Duke’s signatures were never properly validated.\nReproducibility: Baggerly and Coombes couldn’t reproduce the Duke analysis because the code and data were not shared. Van ’t Veer’s 70 genes replicated.\nCross-validation done correctly: The Duke group leaked information between training and test sets. MammaPrint did not.\n\n\n\nThe lesson: Regularization is a tool, not a guarantee. The model is only as good as the analysis pipeline."
+  },
+  {
+    "objectID": "lectures/lecture4.html#lasso-instability-a-warning",
+    "href": "lectures/lecture4.html#lasso-instability-a-warning",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "LASSO Instability: A Warning",
+    "text": "LASSO Instability: A Warning\nEven when the method is applied honestly, LASSO has a reproducibility challenge:\n\nWhen predictors are correlated (as genes always are), LASSO arbitrarily picks one from each correlated group. Different samples → different arbitrary picks → different gene lists, same prediction accuracy.\n\n\nThis is why bootstrap stability analysis matters: it tells you which genes are consistently selected, not just selected once. Elastic net mitigates this via the grouping property."
+  },
+  {
+    "objectID": "lectures/lecture4.html#using-generative-ai-in-high-dimensional-analysis",
+    "href": "lectures/lecture4.html#using-generative-ai-in-high-dimensional-analysis",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Using Generative AI in High-Dimensional Analysis",
+    "text": "Using Generative AI in High-Dimensional Analysis\nLarge language models (Claude, ChatGPT, and others) can now write and debug analysis code, explain statistical output, suggest analysis strategies, and provide first-pass biological interpretations.\n\nThey are useful for code generation, syntax lookup, and boilerplate. They are unreliable for statistical judgment, numerical computation, and novel biological claims. Code may contain subtle bugs; gene function descriptions may be fabricated."
+  },
+  {
+    "objectID": "lectures/lecture4.html#common-errors-to-watch-for",
+    "href": "lectures/lecture4.html#common-errors-to-watch-for",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Common Errors to Watch For",
+    "text": "Common Errors to Watch For\n\n\n\n\n\n\n\n\nError\nWhy it matters\nHow you catch it\n\n\n\n\nNo multiple testing correction\nHundreds of false positives\nCheck for p.adjust() or equivalent\n\n\nUses theoretical null when empirical null is needed\nInflated false discovery rate\nLook at the \\(z\\)-score histogram\n\n\nRuns t-SNE on raw 20K dimensions\nSlow, noisy, misleading\nCheck if PCA was applied first\n\n\nDoesn’t set scale. = TRUE in PCA\nVariables on different scales dominate\nRead the code carefully\n\n\nUses lambda.min without justification\nOverly complex model\nIs the sparser lambda.1se model adequate?\n\n\nHallucinated gene functions\nWrong biological conclusions\nVerify against GeneCards, NCBI Gene, PubMed"
+  },
+  {
+    "objectID": "lectures/lecture4.html#verifying-biological-interpretations",
+    "href": "lectures/lecture4.html#verifying-biological-interpretations",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Verifying Biological Interpretations",
+    "text": "Verifying Biological Interpretations\nAfter identifying a gene set, you might ask an AI to describe their functions. Always cross-reference the response:\n\nPick at least 3 genes\nLook them up on GeneCards or NCBI Gene\nCheck: Did the AI get the function right? Did it invent a citation?"
+  },
+  {
+    "objectID": "lectures/lecture4.html#other-modern-approaches-brief-survey",
+    "href": "lectures/lecture4.html#other-modern-approaches-brief-survey",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Other Modern Approaches (Brief Survey)",
+    "text": "Other Modern Approaches (Brief Survey)\nDeep learning for high-D biology\n\nAutoencoders: Nonlinear dimension reduction; used in single-cell analysis (e.g., scVI)\nVariational autoencoders (VAEs): Probabilistic; learn latent representations\nTransformers: Protein structure prediction (AlphaFold), gene expression modeling (Geneformer)\n\n. . .\nWhen do these beat classical methods?\n\nVery large \\(n\\) (thousands of samples/cells)\nComplex nonlinear relationships\nTransfer learning from pre-trained models\n\nFor \\(n \\leq\\) a few hundred (typical in many BTP settings), penalized regression and empirical Bayes methods often perform comparably or better, and are much more interpretable."
+  },
+  {
+    "objectID": "lectures/lecture4.html#bringing-it-all-together",
+    "href": "lectures/lecture4.html#bringing-it-all-together",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Bringing It All Together",
+    "text": "Bringing It All Together\nThe complete high-dimensional analysis toolkit:\n\n\n\n\n\n\n\n\nDay\nTopic\nKey Idea\n\n\n\n\n1\nMultiple testing & FDR\nControl false discoveries when testing thousands of hypotheses\n\n\n1\nEmpirical Bayes\nUse the aggregate data to estimate prior, then individualize\n\n\n2\nPCA & UMAP\nFind low-dimensional structure; visualize\n\n\n2\nPenalized regression\nPredict and select variables when \\(p \\gg n\\)\n\n\n2\nLLMs as tools\nAccelerate coding and interpretation; verify everything"
+  },
+  {
+    "objectID": "lectures/lecture4.html#discussion",
+    "href": "lectures/lecture4.html#discussion",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Discussion",
+    "text": "Discussion\nTake a few minutes on each of these before we move to the lab.\nWhy not OLS?\nYou have \\(n = 80\\) samples and \\(p = 5{,}000\\) gene expression measurements. Why can’t you just run ordinary least squares?\n. . .\n\nMathematical: \\(X^TX\\) is at most rank 80, so it’s singular—\\((X^TX)^{-1}\\) doesn’t exist.\nPractical: Even if \\(p\\) were just slightly less than \\(n\\), OLS would overfit catastrophically—memorizing noise rather than learning signal."
+  },
+  {
+    "objectID": "lectures/lecture4.html#summary",
+    "href": "lectures/lecture4.html#summary",
+    "title": "Lecture 4: Penalized Regression & Modern AI Tools",
+    "section": "Summary",
+    "text": "Summary\n\nRidge, LASSO, elastic net handle the \\(p &gt; n\\) problem through regularization.\nLASSO gives sparse solutions; ridge when you expect many small effects; elastic net for correlated predictors.\nCross-validation chooses the regularization strength.\nLLMs are powerful tools for code generation and interpretation, but require critical evaluation.\nClassical methods remain strong for moderate \\(n\\); deep learning shines with massive datasets.\n\nUp Next\nLab 4: Penalized regression on the Golub dataset with biological interpretation."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section",
+    "href": "lectures/lecture1-slides.html#section",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "In 2003, Avshalom Caspi and a team of researchers published a paper in Science that would become one of the most influential findings in psychiatric genetics. They reported that a variant in the serotonin transporter gene — a gene called 5-HTTLPR — predicted whether people who experienced stressful life events would develop depression. The idea was elegant: some people carry a version of this gene that produces less serotonin transporter protein, and those people, when exposed to stress, are more vulnerable to depression. Nature plus nurture, mediated by a single gene."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section-1",
+    "href": "lectures/lecture1-slides.html#section-1",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "This is the key figure. The interaction looks clean — the short allele carriers show more depression under stress, the long allele carriers are protected. The paper was cited over 8,000 times. To put that in perspective, a typical well-cited paper in genetics gets maybe 200 citations. A famous one gets 1,000. 8,000 is a field-defining result. It launched an entire subfield. Hundreds of labs tried to replicate and extend the finding. Graduate students built dissertations around it. Textbooks cited it as a model of gene-environment interaction. If you took a psychology or genetics course between 2005 and 2015, you probably heard about it."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#citations",
+    "href": "lectures/lecture1-slides.html#citations",
+    "title": "The Gene That Wasn’t There",
+    "section": "8,000 citations",
+    "text": "8,000 citations\n\n2003–2018: Hundreds of replication attempts\nSome positive. Some negative. Some null.\nMeta-analyses disagreed with each other.\n\n\nOver the next fifteen years, hundreds of studies tried to replicate or extend the result. Some found the same thing. Some found the opposite. Some found nothing. Meta-analyses — studies that combine the results of many studies — disagreed with each other, depending on which studies they included and how they weighted them. This should have been a red flag. When a real effect exists, replications generally agree on its direction and approximate size. When studies disagree about whether an effect is positive, negative, or zero, that’s what noise looks like. But the field had reasons to keep believing. The biology was plausible — serotonin is genuinely involved in mood regulation. The original study was well-designed by the standards of its time."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section-2",
+    "href": "lectures/lecture1-slides.html#section-2",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "In 2019, a team led by Richard Border tested the 5-HTTLPR hypothesis — along with 17 other “candidate gene” hypotheses for depression — in samples ranging from 62,000 to 443,000 people. They had preregistered their analysis plan. They used the same measures and the same statistical approaches that the original studies had used, just with vastly more data.\nThey found nothing. Not “a smaller effect than expected.” Nothing. The serotonin transporter variant had no detectable relationship to depression, with or without stress. Neither did any of the other 17 candidate genes."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section-3",
+    "href": "lectures/lecture1-slides.html#section-3",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "This is the figure. Eighteen candidate genes. Zero replication. The entire candidate gene literature for depression was, in effect, noise.\nHow does a false positive survive for fifteen years? The short answer is: it wasn’t one false positive. It was thousands of them, across hundreds of studies, in a field that was running many statistical tests without accounting for how many tests it was running. And the tools to prevent this — to control the rate of false discovery when you’re testing many hypotheses — existed the entire time. The field just wasn’t using them.\nThat’s what this lecture is about. Not the serotonin gene specifically, but the general problem: what happens when you test many hypotheses, and what it looks like when you don’t account for it."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section-4",
+    "href": "lectures/lecture1-slides.html#section-4",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "How does a false positive survive for fifteen years?\n\n\nPause here. Let the question hang. Then: “We’re going to see this problem firsthand, using a real dataset that we’ll work with for the rest of the workshop. And we’ll start building the diagnostic tools to catch it.”"
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section-5",
+    "href": "lectures/lecture1-slides.html#section-5",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "In 1999, Todd Golub and colleagues published a landmark paper in Science showing that gene expression patterns alone could distinguish between two types of leukemia: acute lymphoblastic leukemia (ALL) and acute myeloid leukemia (AML). Each patient’s tumor was profiled using a microarray — a technology that measures the expression level of thousands of genes simultaneously. In this case, 3,051 genes per patient after preprocessing. This is the dataset we’ll work with for the rest of the workshop."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section-6",
+    "href": "lectures/lecture1-slides.html#section-6",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "Patients\n72\n\n\nGenes\n3,051\n\n\nALL\n47\n\n\nAML\n25\n\n\nRatio p/n\n~42\n\n\n\n\n\n\nMore variables than observations. 42× more.\n\n\nThe 72 patients fall into two groups: 47 with ALL and 25 with AML. These are different types of leukemia — they have different prognoses, different treatment responses, different biology. The question is: which genes are expressed differently between the two types?\nThis is a perfectly reasonable question. A clinician might want to know which genes distinguish the types so they can develop better diagnostics. A biologist might want to understand the molecular basis of the distinction.\nSo you do what anyone would do. You take each gene, one at a time, and ask: is this gene expressed at a different level in ALL patients than in AML patients? The standard tool is a t-test. You compute a test statistic, you get a p-value, and you decide whether the difference is “statistically significant.” Do this for all 3,051 genes and you get 3,051 p-values."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section-7",
+    "href": "lectures/lecture1-slides.html#section-7",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "\\[3{,}051 \\times 0.05 = 153\\]\n\n\n\n153 “significant” genes from pure noise.\n\n\nHere’s the thing about p-values that everyone learns in their first statistics course and then immediately forgets the implications of: a p-value of 0.05 means that if the gene is not differentially expressed — if there is truly no difference between ALL and AML — there’s still a 5% chance of getting a test statistic this extreme or more extreme, just by chance. That’s fine for one test. You accept a 5% false positive rate as the cost of doing business.\nBut you’re not running one test. You’re running 3,051.\nIf none of the genes were actually different between ALL and AML — if the two types were molecularly identical, which they’re not, but bear with me — you’d still expect about 5% of your tests to come back significant at the 0.05 level. Five percent of 3,051 is 153. You’d get 153 “significant” results from pure noise.\nThe false positive rate is still 5%. The false positive count is 153. And if you’re a biologist looking at your results, you don’t see a rate — you see a list of genes. A long list. A list that looks like you’ve discovered something.\nThis is the multiple testing problem. It’s not subtle. The math is first-semester probability. And yet it fooled an entire field of psychiatric genetics for fifteen years."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#what-nothing-looks-like",
+    "href": "lectures/lecture1-slides.html#what-nothing-looks-like",
+    "title": "The Gene That Wasn’t There",
+    "section": "What “nothing” looks like",
+    "text": "What “nothing” looks like\n\n\n\n\n\n\n\n\n\n\nHere’s what you’d see if none of the genes were differentially expressed: a flat histogram. Uniform. Equal numbers of p-values in every bin. This is because, under the null hypothesis, p-values are uniformly distributed between 0 and 1. That’s not an approximation or an asymptotic result — it’s exact. Technically, this is true for continuous test statistics. Discrete test statistics produce p-values that are stochastically larger than uniform, which makes the test conservative. For gene expression data with continuous measurements, the uniform assumption is essentially exact. If nothing is going on, every bin gets the same number of p-values. Memorize this shape — it’s your baseline."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#the-golub-data",
+    "href": "lectures/lecture1-slides.html#the-golub-data",
+    "title": "The Gene That Wasn’t There",
+    "section": "The Golub data",
+    "text": "The Golub data\n\n\n\n\n\n\n\n\n\n\nNow consider the Golub data. The histogram is not flat. There is a pronounced spike near zero — hundreds of genes with very small p-values — and then a roughly flat region for the rest. The spike is signal: genes that are genuinely differentially expressed between ALL and AML. The flat part is the null genes — the genes where no real difference is present, producing the uniform distribution we would expect.\nDon’t explain yet. Ask the audience: “What do you see?” Let them describe it — spike near zero, flat region, excess above the red line. Then confirm what they said."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#three-things-this-histogram-tells-you",
+    "href": "lectures/lecture1-slides.html#three-things-this-histogram-tells-you",
+    "title": "The Gene That Wasn’t There",
+    "section": "Three things this histogram tells you",
+    "text": "Three things this histogram tells you\n\n\nIs there signal? Spike near zero → yes.\nHow much? The flat part estimates π₀ (fraction of null genes).\nIs your analysis trustworthy? Flat part should be flat. If not, something is wrong.\n\n\n\n\n\nPlot the histogram before you do anything else.\n\n\n\nThis one plot tells you three things. First, whether there’s signal. If the histogram is flat, there is nothing to detect. If there’s a spike near zero, something real is happening.\nSecond, roughly how much signal. The height of the flat part tells you the density of null p-values. If the flat part is at, say, 80% of the total, then roughly 80% of your genes are null and 20% are non-null. In the Golub data, the spike is substantial — ALL and AML are genuinely different diseases, and the transcriptomic differences are large.\nThird, whether your analysis is trustworthy. A well-behaved analysis produces a histogram with a flat right side and a spike on the left. But sometimes the histogram looks wrong. If the bars increase toward the right — more large p-values than expected — your test is conservative. If there’s a bump in the middle, something is off with your test statistics. If the entire histogram is shifted left with no flat region, your null model is wrong. These pathological histograms are surprisingly common, and they tell you to stop and fix your analysis before interpreting any results.\nI want you to internalize this: before you look at gene lists, before you compute adjusted p-values, before you run any correction procedure — plot the histogram. It takes ten seconds and it tells you whether the rest of your analysis is worth doing.\nWe’ll come back to this histogram in Lecture 2, where it turns from a diagnostic into an estimator. The flat part isn’t just telling you “these genes are null” — it’s telling you the proportion of null genes, and that proportion is the key ingredient in false discovery rate estimation. But I’m getting ahead of myself."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section-8",
+    "href": "lectures/lecture1-slides.html#section-8",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "[PLACEHOLDER — create a 2×2 panel showing: (1) well-behaved with signal, (2) all null/uniform, (3) anti-conservative (too many small p-values, inflated null), (4) conservative (dip near zero). Label each panel clearly.]\nThese are the shapes you’ll learn to recognize. Top left is what we just saw — signal plus a well-behaved null. Top right is all null — flat, no detectable signal. Bottom left is anti-conservative — the null is inflated, indicating a problem with the analysis, often batch effects or unaddressed confounders. Bottom right is conservative — the test is overly cautious, possibly because the test statistic is discrete. In every case, the histogram tells you what to do before you run any correction."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#bonferroni-correction",
+    "href": "lectures/lecture1-slides.html#bonferroni-correction",
+    "title": "The Gene That Wasn’t There",
+    "section": "Bonferroni correction",
+    "text": "Bonferroni correction\n\n\\[\\frac{0.05}{3{,}051} \\approx 1.6 \\times 10^{-5}\\]\n\n\n\nControls the family-wise error rate: P(any false positive) ≤ 0.05\n\n\nThe oldest and simplest answer is Bonferroni correction. The idea is almost embarrassingly straightforward: divide your significance level by the number of tests. Instead of calling a gene significant at p &lt; 0.05, you call it significant at p &lt; 0.05 / 3,051 ≈ 1.6 × 10⁻⁵.\nThe logic goes like this. You want the probability of making any false positive — even one — to be at most 5%. This is called the family-wise error rate, or FWER. If each individual test has a false positive probability of α/m, then by the union bound, the probability that at least one of the m tests produces a false positive is at most m × (α/m) = α. Done.\nBonferroni is clean, easy to explain, and requires no assumptions about the dependence structure of your tests. It works whether your genes are independent or correlated. It works whether you’re testing 10 hypotheses or 10 million. In genome-wide association studies, where you’re testing around a million genetic variants, the convention is a significance threshold of 5 × 10⁻⁸ — which is just Bonferroni at the million-variant scale. The actual number comes from a more sophisticated calculation involving linkage disequilibrium and the effective number of independent tests in the genome, but it’s in the Bonferroni ballpark.\nAnd Bonferroni works, in the sense that it does what it promises. If you apply Bonferroni to 3,051 tests, the probability that any of your declared significant genes is a false positive is at most 5%.\nBut here’s the problem: Bonferroni controls the wrong thing."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#where-is-the-threshold",
+    "href": "lectures/lecture1-slides.html#where-is-the-threshold",
+    "title": "The Gene That Wasn’t There",
+    "section": "Where is the threshold?",
+    "text": "Where is the threshold?\n\n\n\n\n\n\n\n\n\n\nThink about what the family-wise error rate actually means. It’s the probability of any false positive. Any. Even one. In a list of 500 significant genes, Bonferroni demands a guarantee that not a single one is a false discovery. That’s an extraordinarily high standard. And to achieve it, the threshold becomes so stringent that you miss most of the real signal.\nYou can barely see the red line. It’s jammed against zero. Only the very tip of the spike survives. Everything else — including real signal — gets thrown away.\nIf you’re an astronomer and you’re about to announce the discovery of gravitational waves, yes, you want to be very sure you haven’t made even one false positive. The standard there is “five sigma,” roughly one in 3.5 million. The cost of a false claim is enormous.\nBut if you’re a biologist screening 12,625 genes to find candidates for follow-up experiments, you’re in a completely different situation. You don’t need a guarantee that every gene on your list is real. You need a useful list — one where most of the genes are real and the false positives are a manageable fraction. If your list of 500 genes contains 25 false positives, that’s a 5% false discovery rate, and for most biological applications, that’s fine. You’ll validate the interesting ones in follow-up experiments anyway.\nBonferroni can’t give you that list. It’s trying to prevent a different kind of error — any error at all — and in doing so, it throws away most of your real discoveries."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section-9",
+    "href": "lectures/lecture1-slides.html#section-9",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "In 2009, a neuroscientist named Craig Bennett and his colleagues put a dead Atlantic salmon in an fMRI scanner. It was purchased at a local fish market. It was, by all accounts, very dead.\nThey showed the salmon a series of photographs of people in social situations and asked it — well, they ran the standard fMRI analysis pipeline — to determine the emotional valence of each photograph. The scanner measured blood oxygenation levels across thousands of tiny volume elements, called voxels, in the salmon’s body. For each voxel, a statistical test asked: does the signal in this voxel change in response to the photographs?\nWithout any correction for multiple comparisons, a cluster of voxels in the salmon’s brain cavity showed statistically significant “neural activity.” The dead fish appeared to be processing human emotions.\nWith a standard correction for multiple comparisons, the signal disappeared. Because of course it did — the salmon was dead."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section-10",
+    "href": "lectures/lecture1-slides.html#section-10",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "This is the figure. The colored blobs are “statistically significant” voxels in the dead salmon’s brain cavity. Without correction, the salmon is thinking about human emotions. With correction, it’s a dead fish.\nBennett presented this as a poster at a conference, and it became widely circulated, partly for its memorable framing and partly because it made a serious point: every fMRI analysis involves thousands of voxels, each tested independently, and the multiple testing problem is the same as in genomics. Bennett surveyed published fMRI studies and found that between 25% and 40% did not report correcting for multiple comparisons. The poster was memorable. The survey was concerning.\nI’m telling you the salmon story because it’s memorable and because it makes the multiple testing problem feel visceral in a way that abstract calculations don’t. But the salmon was caught quickly — it was a deliberate demonstration. The next story is about what happens when false positives aren’t caught at all."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#the-gap",
+    "href": "lectures/lecture1-slides.html#the-gap",
+    "title": "The Gene That Wasn’t There",
+    "section": "The gap",
+    "text": "The gap\n\n\n\n\nApproach\nGenes significant\nProblem\n\n\n\n\nNo correction\nThousands\nHundreds of false positives\n\n\nBonferroni\nA handful\nMost real signal missed\n\n\n\n\n\n\nYou need a different question.\n\n\nYou need a different question. Not “did I make any false positives?” but “what fraction of my discoveries are false?” That question has an answer, and it’s the subject of Lecture 2. But before we get there, I want to show you what happens when people skip the correction entirely."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#two-questions",
+    "href": "lectures/lecture1-slides.html#two-questions",
+    "title": "The Gene That Wasn’t There",
+    "section": "Two questions",
+    "text": "Two questions\n\nFWER (Bonferroni): Did I make any false positive?\n\\[P(\\text{at least one false positive}) \\leq \\alpha\\]\n. . .\nFDR (Benjamini-Hochberg): What fraction of my discoveries are false?\n\\[E\\!\\left[\\frac{\\text{false positives}}{\\text{total discoveries}}\\right] \\leq \\alpha\\]\n\n\nThis is the conceptual reframe. Bonferroni asks: what’s the probability of any false positive? FDR asks: of the genes I called significant, what fraction are wrong? If I call 200 genes significant and the FDR is 10%, I expect about 20 of them to be wrong. The other 180 are real. That’s a useful list."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#three-approaches-one-dataset",
+    "href": "lectures/lecture1-slides.html#three-approaches-one-dataset",
+    "title": "The Gene That Wasn’t There",
+    "section": "Three approaches, one dataset",
+    "text": "Three approaches, one dataset\n\n\n\n\n\n\n\n\n\n\nThe Benjamini-Hochberg procedure finds the middle ground. We’ll learn how it works in Lecture 2. For now, just see the result: uncorrected gives you thousands with hundreds of false positives. Bonferroni gives you a handful. BH gives you a useful discovery set. Which list would you want for follow-up experiments?"
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#how-false-positives-survive",
+    "href": "lectures/lecture1-slides.html#how-false-positives-survive",
+    "title": "The Gene That Wasn’t There",
+    "section": "How false positives survive",
+    "text": "How false positives survive\n\nPublication bias Studies finding nothing sit in file drawers.\n. . .\nWinner’s curse To cross the significance threshold in a small sample, the observed effect has to overshoot the true value.\n. . .\nGarden of forking paths Many defensible analytical choices, each a branch point. The effective number of tests is much larger than reported.\n\n\nHow did the false positives survive? Three mechanisms, each reinforcing the others.\nPublication bias. Studies that found a significant result for 5-HTTLPR were more likely to be published. Studies that found nothing were more likely to sit in a file drawer. The published literature was a biased sample of the evidence.\nWinner’s curse. The studies that did get published — the ones that found significant results — necessarily overestimated the effect size. To cross the significance threshold with a small, noisy sample, the observed effect has to be larger than the true effect. So the early estimates of the 5-HTTLPR effect were inflated, and later studies with more realistic estimates looked like “failures to replicate.”\nThe garden of forking paths. There are many defensible choices in any analysis: which covariates to include, which subgroups to analyze, which outcome measure to use, how to define “stressful life events.” Each choice is a branch point, and the analysts — without any intent to deceive — could explore different branches until they found one that produced a significant result. This isn’t the same as running 12,625 explicit tests, but it has the same effect: the number of implicit tests is much larger than the number of reported tests.\nNone of this required bad intentions. The researchers who studied 5-HTTLPR were, for the most part, careful scientists who believed in their hypothesis and interpreted ambiguous evidence in its favor. That’s not fraud — that’s human cognition. The problem wasn’t the scientists. The problem was the statistical framework, which didn’t account for the scale of testing that was actually happening."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#meanwhile-gwas-got-it-right",
+    "href": "lectures/lecture1-slides.html#meanwhile-gwas-got-it-right",
+    "title": "The Gene That Wasn’t There",
+    "section": "Meanwhile, GWAS got it right",
+    "text": "Meanwhile, GWAS got it right\n\n\n\n\n\nCandidate genes\nGWAS\n\n\n\n\nTests per study\n1–few\n~1,000,000\n\n\nCorrection\nUsually none\n5 × 10⁻⁸\n\n\nDepression loci found\n0 (replicated)\n100+\n\n\n\n\n\n\nSame biology. Different statistical framework. Different results.\n\n\nMeanwhile, a parallel approach had been yielding real results. Genome-wide association studies, which test hundreds of thousands or millions of genetic variants and apply stringent multiple testing correction — that 5 × 10⁻⁸ threshold — had been steadily finding genetic loci associated with depression. By 2019, GWAS had identified over 100 loci. These weren’t the same genes that the candidate gene studies had focused on. The two approaches — one without proper correction, one with — were studying the same biology and getting completely different answers.\nThe fix was known the entire time. GWAS adopted it from the beginning: test everything, correct for everything, accept the stringent thresholds. The candidate gene field tested one or a few genes per study, which seemed like it shouldn’t require correction — but across the entire literature, across hundreds of studies each making dozens of analytical choices, the effective number of tests was enormous. The correction should have happened at the field level, not just the study level."
+  },
+  {
+    "objectID": "lectures/lecture1-slides.html#section-11",
+    "href": "lectures/lecture1-slides.html#section-11",
+    "title": "The Gene That Wasn’t There",
+    "section": "",
+    "text": "The 5-HTTLPR story isn’t a story about bad scientists.\n. . .\nIt’s a story about what happens when a field’s statistical framework doesn’t match the scale of its questions.\n. . .\nThe framework exists.\nThat’s what we’ll build in Lecture 2.\n\n\nThe 5-HTTLPR story isn’t a story about bad scientists. It’s a story about what happens when a field’s statistical framework doesn’t match the scale of its questions. The framework to handle that scale exists — it’s what we’ll build in Lecture 2. But first, in the lab, you’re going to see it for yourself. You’ll take the Golub dataset, run those 3,051 tests, plot the histogram, apply Bonferroni, and feel the gap between “controls any error” and “gives you a useful answer.” That gap is where the false discovery rate lives."
+  }
+]
