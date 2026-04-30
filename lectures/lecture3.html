@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Lecture 3: Dimension Reduction – High-Dimensional Data Analysis — BTP Graduate Workshop</title>
+<title>Lecture 3: The Map That Drew Itself – High-Dimensional Data Analysis — BTP Graduate Workshop</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -22,41 +22,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -181,6 +146,10 @@ window.Quarto = {
  <span class="dropdown-text">Lecture 2: The Histogram That Was Too Wide</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../lectures/lecture2-slides.html">
+ <span class="dropdown-text">Lecture 2 Slides</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab2.ipynb">
  <span class="dropdown-text">Lab 2: FDR in Practice (Colab)</span></a>
   </li>  
@@ -196,12 +165,20 @@ window.Quarto = {
  <span class="dropdown-text">Lecture 3: The Map That Drew Itself</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../lectures/lecture3-slides.html">
+ <span class="dropdown-text">Lecture 3 Slides</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab3.ipynb">
  <span class="dropdown-text">Lab 3: Dimension Reduction (Colab)</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture4.html">
  <span class="dropdown-text">Lecture 4: Seventy Genes and a Fraud</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture4-slides.html">
+ <span class="dropdown-text">Lecture 4 Slides</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab4.ipynb">
@@ -262,78 +239,28 @@ window.Quarto = {
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
-  <ul>
-  <li><a href="#the-eigenface-that-launched-a-thousand-papers" id="toc-the-eigenface-that-launched-a-thousand-papers" class="nav-link active" data-scroll-target="#the-eigenface-that-launched-a-thousand-papers">The Eigenface That Launched a Thousand Papers</a>
   <ul class="collapse">
-  <li><a href="#from-faces-to-genes" id="toc-from-faces-to-genes" class="nav-link" data-scroll-target="#from-faces-to-genes">From Faces to Genes</a></li>
-  <li><a href="#the-problem" id="toc-the-problem" class="nav-link" data-scroll-target="#the-problem">The Problem</a></li>
-  <li><a href="#principal-component-analysis-pca" id="toc-principal-component-analysis-pca" class="nav-link" data-scroll-target="#principal-component-analysis-pca">Principal Component Analysis (PCA)</a>
-  <ul class="collapse">
-  <li><a href="#the-idea" id="toc-the-idea" class="nav-link" data-scroll-target="#the-idea">The idea</a></li>
-  <li><a href="#formally" id="toc-formally" class="nav-link" data-scroll-target="#formally">Formally</a></li>
-  </ul></li>
-  <li><a href="#pca-via-the-svd" id="toc-pca-via-the-svd" class="nav-link" data-scroll-target="#pca-via-the-svd">PCA via the SVD</a></li>
-  <li><a href="#how-many-components" id="toc-how-many-components" class="nav-link" data-scroll-target="#how-many-components">How Many Components?</a>
-  <ul class="collapse">
-  <li><a href="#scree-plot" id="toc-scree-plot" class="nav-link" data-scroll-target="#scree-plot">Scree plot</a></li>
-  <li><a href="#proportion-of-variance-explained" id="toc-proportion-of-variance-explained" class="nav-link" data-scroll-target="#proportion-of-variance-explained">Proportion of variance explained</a></li>
-  <li><a href="#formal-methods" id="toc-formal-methods" class="nav-link" data-scroll-target="#formal-methods">Formal methods</a></li>
-  </ul></li>
-  <li><a href="#pca-strengths-and-limitations" id="toc-pca-strengths-and-limitations" class="nav-link" data-scroll-target="#pca-strengths-and-limitations">PCA: Strengths and Limitations</a>
-  <ul class="collapse">
-  <li><a href="#strengths" id="toc-strengths" class="nav-link" data-scroll-target="#strengths">Strengths</a></li>
-  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
-  </ul></li>
-  <li><a href="#biplots" id="toc-biplots" class="nav-link" data-scroll-target="#biplots">Biplots</a></li>
-  </ul></li>
-  <li><a href="#the-map-is-not-the-territory" id="toc-the-map-is-not-the-territory" class="nav-link" data-scroll-target="#the-map-is-not-the-territory">The Map Is Not the Territory</a>
-  <ul class="collapse">
-  <li><a href="#when-t-sne-misleads" id="toc-when-t-sne-misleads" class="nav-link" data-scroll-target="#when-t-sne-misleads">When t-SNE Misleads</a></li>
-  <li><a href="#beyond-pca-nonlinear-methods" id="toc-beyond-pca-nonlinear-methods" class="nav-link" data-scroll-target="#beyond-pca-nonlinear-methods">Beyond PCA: Nonlinear Methods</a></li>
-  <li><a href="#t-sne-intuition" id="toc-t-sne-intuition" class="nav-link" data-scroll-target="#t-sne-intuition">t-SNE: Intuition</a></li>
-  <li><a href="#t-sne-key-parameters" id="toc-t-sne-key-parameters" class="nav-link" data-scroll-target="#t-sne-key-parameters">t-SNE: Key Parameters</a>
-  <ul class="collapse">
-  <li><a href="#perplexity" id="toc-perplexity" class="nav-link" data-scroll-target="#perplexity">Perplexity</a></li>
-  <li><a href="#iterations" id="toc-iterations" class="nav-link" data-scroll-target="#iterations">Iterations</a></li>
+  <li><a href="#from-eigenfaces-to-genes" id="toc-from-eigenfaces-to-genes" class="nav-link active" data-scroll-target="#from-eigenfaces-to-genes">From eigenfaces to genes</a></li>
+  <li><a href="#principal-component-analysis" id="toc-principal-component-analysis" class="nav-link" data-scroll-target="#principal-component-analysis">Principal component analysis</a></li>
+  <li><a href="#choosing-the-number-of-components" id="toc-choosing-the-number-of-components" class="nav-link" data-scroll-target="#choosing-the-number-of-components">Choosing the number of components</a></li>
+  <li><a href="#the-detection-phase-transition" id="toc-the-detection-phase-transition" class="nav-link" data-scroll-target="#the-detection-phase-transition">The detection phase transition</a></li>
+  <li><a href="#biplots-reading-pca-visually" id="toc-biplots-reading-pca-visually" class="nav-link" data-scroll-target="#biplots-reading-pca-visually">Biplots: reading PCA visually</a></li>
+  <li><a href="#when-t-sne-misleads" id="toc-when-t-sne-misleads" class="nav-link" data-scroll-target="#when-t-sne-misleads">When t-SNE misleads</a></li>
+  <li><a href="#t-sne-umap-and-diffusion-maps" id="toc-t-sne-umap-and-diffusion-maps" class="nav-link" data-scroll-target="#t-sne-umap-and-diffusion-maps">t-SNE, UMAP, and diffusion maps</a></li>
+  <li><a href="#a-practical-workflow" id="toc-a-practical-workflow" class="nav-link" data-scroll-target="#a-practical-workflow">A practical workflow</a></li>
   <li><a href="#cautions" id="toc-cautions" class="nav-link" data-scroll-target="#cautions">Cautions</a></li>
-  </ul></li>
-  <li><a href="#umap-intuition" id="toc-umap-intuition" class="nav-link" data-scroll-target="#umap-intuition">UMAP: Intuition</a>
-  <ul class="collapse">
-  <li><a href="#advantages-over-t-sne" id="toc-advantages-over-t-sne" class="nav-link" data-scroll-target="#advantages-over-t-sne">Advantages over t-SNE</a></li>
-  <li><a href="#key-parameters" id="toc-key-parameters" class="nav-link" data-scroll-target="#key-parameters">Key parameters</a></li>
-  </ul></li>
-  <li><a href="#comparing-pca-t-sne-umap" id="toc-comparing-pca-t-sne-umap" class="nav-link" data-scroll-target="#comparing-pca-t-sne-umap">Comparing PCA, t-SNE, UMAP</a></li>
-  </ul></li>
-  <li><a href="#the-invisible-signal" id="toc-the-invisible-signal" class="nav-link" data-scroll-target="#the-invisible-signal">The Invisible Signal</a>
-  <ul class="collapse">
-  <li><a href="#a-detection-phase-transition" id="toc-a-detection-phase-transition" class="nav-link" data-scroll-target="#a-detection-phase-transition">A Detection Phase Transition</a></li>
-  <li><a href="#a-practical-workflow" id="toc-a-practical-workflow" class="nav-link" data-scroll-target="#a-practical-workflow">A Practical Workflow</a>
-  <ul class="collapse">
-  <li><a href="#why-pca-first" id="toc-why-pca-first" class="nav-link" data-scroll-target="#why-pca-first">Why PCA first?</a></li>
-  </ul></li>
-  <li><a href="#cautions-with-nonlinear-embeddings" id="toc-cautions-with-nonlinear-embeddings" class="nav-link" data-scroll-target="#cautions-with-nonlinear-embeddings">Cautions with Nonlinear Embeddings</a></li>
-  <li><a href="#connection-to-factor-models" id="toc-connection-to-factor-models" class="nav-link" data-scroll-target="#connection-to-factor-models">Connection to Factor Models</a></li>
-  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a>
-  <ul class="collapse">
-  <li><a href="#is-15-a-lot" id="toc-is-15-a-lot" class="nav-link" data-scroll-target="#is-15-a-lot">Is 15% a lot?</a></li>
-  <li><a href="#can-you-trust-the-clusters" id="toc-can-you-trust-the-clusters" class="nav-link" data-scroll-target="#can-you-trust-the-clusters">Can you trust the clusters?</a></li>
-  <li><a href="#how-many-pcs-before-umap" id="toc-how-many-pcs-before-umap" class="nav-link" data-scroll-target="#how-many-pcs-before-umap">How many PCs before UMAP?</a></li>
-  </ul></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a>
-  <ul class="collapse">
-  <li><a href="#up-next" id="toc-up-next" class="nav-link" data-scroll-target="#up-next">Up Next</a></li>
-  </ul></li>
-  </ul></li>
+  <li><a href="#connections-to-factor-models" id="toc-connections-to-factor-models" class="nav-link" data-scroll-target="#connections-to-factor-models">Connections to factor models</a></li>
+  <li><a href="#summary-and-outlook" id="toc-summary-and-outlook" class="nav-link" data-scroll-target="#summary-and-outlook">Summary and outlook</a></li>
   </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="lecture3.html"><i class="bi bi-file-slides"></i>RevealJS</a></li><li><a href="lecture3.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="lecture3.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Lecture 3: Dimension Reduction</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
-<p class="subtitle lead">Finding Structure in High-Dimensional Data</p>
+<h1 class="title">Lecture 3: The Map That Drew Itself</h1>
+<p class="subtitle lead">Dimension Reduction and the Geometry of High-Dimensional Data</p>
 </div>
 
 
@@ -356,404 +283,112 @@ window.Quarto = {
 </header>
 
 
-<section id="the-eigenface-that-launched-a-thousand-papers" class="level1 centered">
-<h1 class="centered">The Eigenface That Launched a Thousand Papers</h1>
-<hr>
-<section id="from-faces-to-genes" class="level2">
-<h2 class="anchored" data-anchor-id="from-faces-to-genes">From Faces to Genes</h2>
-<p>In 1991, <a href="https://doi.org/10.1162/jocn.1991.3.1.71">Turk and Pentland</a> applied PCA to a database of face photographs. The leading principal components — diffuse, low-resolution images they termed <strong>“eigenfaces”</strong> — sufficed to reconstruct any face in the database from approximately 100 coefficients in place of thousands of pixels.</p>
-<p>. . .</p>
-<p>The result marked the transition of dimension reduction from a mathematical construct to a practical tool: a high-dimensional object (a face) could be faithfully represented in a far lower-dimensional space.</p>
-<p>. . .</p>
-<p>The same principle now drives single-cell genomics, where 30,000 gene measurements per cell are routinely compressed to 30–50 principal components before any further analysis.</p>
+<section id="from-eigenfaces-to-genes" class="level2">
+<h2 class="anchored" data-anchor-id="from-eigenfaces-to-genes">From eigenfaces to genes</h2>
+<p>In 1991, <a href="https://doi.org/10.1162/jocn.1991.3.1.71">Turk and Pentland</a> applied principal component analysis to a database of face photographs. The leading principal components — diffuse, low-resolution images they termed <em>eigenfaces</em> — sufficed to reconstruct any face in the database from approximately 100 numerical coefficients in place of the thousands of pixels in the original image. The reduction was dramatic and the result was new: dimension reduction had moved from a mathematical construct to a practical tool for representing high-dimensional objects.</p>
+<p>The idea is now ubiquitous. In single-cell genomics, where 30,000 transcript abundances per cell are typical, the standard pipeline begins by compressing the expression matrix to 30 to 50 principal components before any clustering, embedding, or downstream analysis. What worked for faces works, with appropriate modifications, for cells, tissues, brain images, and protein structures. The unifying assumption is that high-dimensional data often live near a low-dimensional manifold; the methods of this lecture identify that manifold and project the data onto it.</p>
+<p>The lecture covers three topics. The first is principal component analysis, including its formal definition, the relationship to the singular value decomposition, and the random-matrix complications that arise in the <span class="math inline">\(p \gg n\)</span> regime. The second is the two principal nonlinear methods for dimension reduction — t-SNE and UMAP — and the systematic ways in which they mislead. The third is a practical workflow that combines the linear and nonlinear methods to obtain useful representations without obvious artifacts.</p>
 <hr>
 </section>
-<section id="the-problem" class="level2">
-<h2 class="anchored" data-anchor-id="the-problem">The Problem</h2>
-<p>We have data <span class="math inline">\(X \in \mathbb{R}^{n \times p}\)</span> with <span class="math inline">\(p\)</span> large (thousands to tens of thousands).</p>
-<p><strong>Goals</strong>:</p>
-<ul>
-<li><strong>Visualization</strong>: Project to 2D or 3D for exploration</li>
-<li><strong>Denoising</strong>: Separate signal from noise</li>
-<li><strong>Preprocessing</strong>: Reduce <span class="math inline">\(p\)</span> before applying downstream methods (clustering, regression)</li>
-</ul>
-<p>. . .</p>
-<p><strong>Core question</strong>: Can we represent the data in a lower-dimensional space <span class="math inline">\(\mathbb{R}^k\)</span> with <span class="math inline">\(k \ll p\)</span>, preserving the important structure?</p>
+<section id="principal-component-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="principal-component-analysis">Principal component analysis</h2>
+<p>The goal is to represent data <span class="math inline">\(X \in \mathbb{R}^{n \times p}\)</span> in a lower-dimensional space <span class="math inline">\(\mathbb{R}^k\)</span> with <span class="math inline">\(k \ll p\)</span> while preserving as much of the data’s structure as possible. PCA realizes this goal under a precise notion of “structure”: the variance of linear combinations of the variables.</p>
+<p>For centered data <span class="math inline">\(X\)</span>, the first principal component <span class="math inline">\(\mathbf{v}_1\)</span> is the unit-norm direction that maximizes the variance of the projection <span class="math inline">\(X\mathbf{v}\)</span>:</p>
+<p><span class="math display">\[\mathbf{v}_1 = \arg\max_{\|\mathbf{v}\|=1} \mathbf{v}^\top \hat\Sigma \mathbf{v}, \qquad \hat\Sigma = \frac{1}{n-1} X^\top X.\]</span></p>
+<p>The solution is the eigenvector of <span class="math inline">\(\hat\Sigma\)</span> corresponding to the largest eigenvalue. Subsequent principal components are defined recursively as the directions orthogonal to those already chosen that maximize the residual variance.</p>
+<p>Computationally, PCA is most cleanly expressed through the singular value decomposition of the data matrix:</p>
+<p><span class="math display">\[X = U D V^\top,\]</span></p>
+<p>where <span class="math inline">\(U\)</span> has orthonormal columns of length <span class="math inline">\(n\)</span> (the left singular vectors), <span class="math inline">\(D\)</span> is the diagonal matrix of singular values <span class="math inline">\(d_1 \geq d_2 \geq \cdots \geq 0\)</span>, and <span class="math inline">\(V\)</span> has orthonormal columns of length <span class="math inline">\(p\)</span> (the right singular vectors). The eigenvalues of the sample covariance matrix are <span class="math inline">\(\lambda_j = d_j^2/(n-1)\)</span>; the principal-component scores are <span class="math inline">\(Z = XV = UD\)</span>, and the loadings <span class="math inline">\(V\)</span> identify which variables contribute to each component.</p>
+<p>The optimality of PCA is precisely characterized by the <a href="https://doi.org/10.1007/BF02288367">Eckart–Young theorem (1936)</a>: the rank-<span class="math inline">\(k\)</span> matrix that minimizes the Frobenius reconstruction error of <span class="math inline">\(X\)</span> is obtained by truncating the SVD to its top <span class="math inline">\(k\)</span> singular values. PCA is therefore the optimal <em>linear</em> dimension reduction — a guarantee that does not extend to nonlinear methods.</p>
 <hr>
 </section>
-<section id="principal-component-analysis-pca" class="level2">
-<h2 class="anchored" data-anchor-id="principal-component-analysis-pca">Principal Component Analysis (PCA)</h2>
-<section id="the-idea" class="level3">
-<h3 class="anchored" data-anchor-id="the-idea">The idea</h3>
-<p>Find orthogonal directions of maximum variance in the data.</p>
-</section>
-<section id="formally" class="level3">
-<h3 class="anchored" data-anchor-id="formally">Formally</h3>
-<p>Given centered data <span class="math inline">\(X\)</span> (<span class="math inline">\(n \times p\)</span>), PCA solves:</p>
-<p><span class="math display">\[\mathbf{v}_1 = \arg\max_{\|\mathbf{v}\| = 1} \text{Var}(X\mathbf{v}) = \arg\max_{\|\mathbf{v}\| = 1} \mathbf{v}^T \hat{\Sigma} \mathbf{v}\]</span></p>
-<p>The solution <span class="math inline">\(\mathbf{v}_1\)</span> is the eigenvector of <span class="math inline">\(\hat{\Sigma} = \frac{1}{n-1}X^TX\)</span> with the largest eigenvalue.</p>
+<section id="choosing-the-number-of-components" class="level2">
+<h2 class="anchored" data-anchor-id="choosing-the-number-of-components">Choosing the number of components</h2>
+<p>The number of components <span class="math inline">\(k\)</span> to retain is a perennial question. Three approaches are common.</p>
+<p>The <strong>scree plot</strong> displays the eigenvalues <span class="math inline">\(\lambda_j\)</span> (or the proportion of variance they explain) against the index <span class="math inline">\(j\)</span>. An “elbow” — a point at which subsequent eigenvalues fall off sharply — suggests a natural cutoff. The diagnostic is informal but often useful.</p>
+<p>The <strong>proportion of variance explained</strong>,</p>
+<p><span class="math display">\[\mathrm{PVE}(k) = \frac{\sum_{j=1}^k \lambda_j}{\sum_{j=1}^p \lambda_j},\]</span></p>
+<p>provides a quantitative summary; thresholds in the range of 70 to 90 percent are common.</p>
+<p>The <strong>Marchenko–Pastur threshold</strong> offers a more principled criterion in the <span class="math inline">\(p \gg n\)</span> regime. Under the null hypothesis that all variables are independent noise, the bulk of the eigenvalues of the sample covariance matrix is distributed within <span class="math inline">\([\max(0,(1-\sqrt\gamma)^2), (1+\sqrt\gamma)^2]\)</span> as <span class="math inline">\(p, n \to \infty\)</span> with <span class="math inline">\(p/n \to \gamma\)</span>. Eigenvalues exceeding the upper edge <span class="math inline">\((1+\sqrt\gamma)^2\)</span> correspond to components that lie above the noise floor and are therefore candidates for true signal.</p>
+<p>Parallel analysis, which compares the observed eigenvalues to those obtained by permuting each column of <span class="math inline">\(X\)</span> independently, provides a nonparametric counterpart. Both methods address the same question: which eigenvalues exceed what would be expected from noise alone.</p>
 <hr>
 </section>
-</section>
-<section id="pca-via-the-svd" class="level2">
-<h2 class="anchored" data-anchor-id="pca-via-the-svd">PCA via the SVD</h2>
-<p>The <strong>singular value decomposition</strong> of <span class="math inline">\(X\)</span>:</p>
-<p><span class="math display">\[X = U D V^T\]</span></p>
-<ul>
-<li><span class="math inline">\(U\)</span> (<span class="math inline">\(n \times r\)</span>): left singular vectors (sample directions)</li>
-<li><span class="math inline">\(D\)</span> (<span class="math inline">\(r \times r\)</span>): diagonal matrix of singular values <span class="math inline">\(d_1 \geq d_2 \geq \cdots \geq 0\)</span></li>
-<li><span class="math inline">\(V\)</span> (<span class="math inline">\(p \times r\)</span>): right singular vectors (loadings = principal component directions)</li>
-</ul>
-<p>where <span class="math inline">\(r = \min(n, p)\)</span>. Software returns this “thin” SVD by default.</p>
-<p>. . .</p>
-<p><strong>Connection</strong>: Eigenvalues of <span class="math inline">\(\hat{\Sigma}\)</span> are <span class="math inline">\(\lambda_j = d_j^2 / (n-1)\)</span>.</p>
-<p><strong>PC scores</strong>: <span class="math inline">\(Z = XV = UD\)</span> (the <span class="math inline">\(j\)</span>-th column of <span class="math inline">\(Z\)</span> is the <span class="math inline">\(j\)</span>-th principal component).</p>
+<section id="the-detection-phase-transition" class="level2">
+<h2 class="anchored" data-anchor-id="the-detection-phase-transition">The detection phase transition</h2>
+<p>A more profound limitation of PCA in the <span class="math inline">\(p \gg n\)</span> regime was established by <a href="https://doi.org/10.1214/009117905000000233">Baik, Ben Arous, and Péché (2005)</a>. For a signal-plus-noise model in which the population covariance matrix has a single spike of magnitude <span class="math inline">\(\ell\)</span> above the identity baseline, the leading eigenvalue of the sample covariance matrix is detectable, in the asymptotic limit <span class="math inline">\(p/n \to \gamma\)</span>, only if</p>
+<p><span class="math display">\[\ell &gt; 1 + \sqrt\gamma.\]</span></p>
+<p>Below this threshold, the signal eigenvalue is absorbed into the bulk noise spectrum and becomes indistinguishable from a noise eigenvalue. The leading sample principal component, in such cases, has zero asymptotic correlation with the true signal direction.</p>
+<p>The numerical implications are sobering. With <span class="math inline">\(p = 10{,}000\)</span> and <span class="math inline">\(n = 100\)</span>, <span class="math inline">\(\gamma = 100\)</span> and the threshold is <span class="math inline">\(1 + \sqrt{100} = 11\)</span>. A signal of magnitude smaller than 11 (relative to the noise variance of 1) is, in the asymptotic limit, undetectable by PCA — no matter how cleverly the analysis is performed. The threshold is a property of the geometry of the problem, not of any particular procedure.</p>
+<p>The result has practical consequences. In single-cell genomics, where tens of thousands of genes are measured on hundreds or thousands of cells, the leading principal components reflect the strongest biological structure (cell type, developmental stage), but weaker structure may lie below the detection limit and require additional information — for example, prior knowledge of marker genes — to recover.</p>
 <hr>
 </section>
-<section id="how-many-components" class="level2">
-<h2 class="anchored" data-anchor-id="how-many-components">How Many Components?</h2>
-<section id="scree-plot" class="level3">
-<h3 class="anchored" data-anchor-id="scree-plot">Scree plot</h3>
-<p>Plot <span class="math inline">\(\lambda_j\)</span> (or proportion of variance explained) vs.&nbsp;<span class="math inline">\(j\)</span>. Look for an “elbow.”</p>
-</section>
-<section id="proportion-of-variance-explained" class="level3">
-<h3 class="anchored" data-anchor-id="proportion-of-variance-explained">Proportion of variance explained</h3>
-<p><span class="math display">\[\text{PVE}(k) = \frac{\sum_{j=1}^k \lambda_j}{\sum_{j=1}^p \lambda_j}\]</span></p>
-</section>
-<section id="formal-methods" class="level3">
-<h3 class="anchored" data-anchor-id="formal-methods">Formal methods</h3>
-<ul>
-<li><strong>Marchenko–Pastur threshold</strong>: Under null (<span class="math inline">\(\Sigma = I\)</span>) with <span class="math inline">\(\gamma = p/n\)</span>, eigenvalues lie in <span class="math inline">\([\max(0,\,(1-\sqrt{\gamma})^2),\; (1+\sqrt{\gamma})^2]\)</span>. When <span class="math inline">\(p &gt; n\)</span> (our regime), the lower edge is 0 and only the upper edge matters. Eigenvalues above <span class="math inline">\((1+\sqrt{\gamma})^2\)</span> are signal.</li>
-<li><strong>Parallel analysis</strong>: Compare observed eigenvalues to those from permuted data.</li>
-</ul>
+<section id="biplots-reading-pca-visually" class="level2">
+<h2 class="anchored" data-anchor-id="biplots-reading-pca-visually">Biplots: reading PCA visually</h2>
+<p>The biplot is a simultaneous visualization of sample scores and variable loadings on a single set of axes. The scores show the projected positions of the samples in the first two principal components; arrows superimposed on the same axes indicate the loading of each variable on those components. Arrows pointing in the same direction as a cluster of points identify the variables that drive the cluster’s separation along the relevant axes.</p>
+<p>The interpretation is geometric and therefore concrete. If a cluster of samples lies in the upper right of the biplot, and the arrows for genes A and B point in that direction, then A and B are highly expressed in that cluster relative to the rest. The biplot offers something neither PCA scores nor loadings alone provide: a single picture in which the data and the variables that organize them appear together.</p>
 <hr>
 </section>
-</section>
-<section id="pca-strengths-and-limitations" class="level2">
-<h2 class="anchored" data-anchor-id="pca-strengths-and-limitations">PCA: Strengths and Limitations</h2>
-<section id="strengths" class="level3">
-<h3 class="anchored" data-anchor-id="strengths">Strengths</h3>
-<ul>
-<li>Computationally fast; solved by standard linear algebra</li>
-<li>Optimal for linear reconstruction (Eckart–Young theorem)</li>
-<li>Interpretable loadings: which variables contribute to each PC?</li>
-</ul>
-</section>
-<section id="limitations" class="level3">
-<h3 class="anchored" data-anchor-id="limitations">Limitations</h3>
-<ul>
-<li><strong>Linear only</strong>: Cannot capture nonlinear manifold structure</li>
-<li><strong>Sensitive to scaling</strong>: Must standardize or choose units carefully</li>
-<li><strong>Rotation ambiguity</strong>: PCs are identified only up to sign</li>
-<li><strong>High-D noise bias</strong>: In the <span class="math inline">\(p \gg n\)</span> regime, the Marchenko–Pastur law inflates eigenvalues. Leading PCs can be distorted.</li>
-</ul>
-<hr>
-</section>
-</section>
-<section id="biplots" class="level2">
-<h2 class="anchored" data-anchor-id="biplots">Biplots</h2>
-<p>A biplot overlays sample scores and variable loadings on the same 2D plot.</p>
-<div id="203a27a8" class="cell" data-fig-height="5" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_iris</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> load_iris()</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>X_iris <span class="op">=</span> StandardScaler().fit_transform(iris.data)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>pca_iris <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>).fit(X_iris)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> pca_iris.transform(X_iris)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>loadings <span class="op">=</span> pca_iris.components_.T  <span class="co"># (4, 2)</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">5</span>))</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>ax.scatter(scores[:, <span class="dv">0</span>], scores[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">15</span>, color<span class="op">=</span><span class="st">"gray"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>scale <span class="op">=</span> np.<span class="bu">abs</span>(scores).<span class="bu">max</span>() <span class="op">/</span> np.<span class="bu">abs</span>(loadings).<span class="bu">max</span>() <span class="op">*</span> <span class="fl">0.8</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, name <span class="kw">in</span> <span class="bu">enumerate</span>(iris.feature_names):</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    ax.arrow(<span class="dv">0</span>, <span class="dv">0</span>, loadings[i, <span class="dv">0</span>] <span class="op">*</span> scale, loadings[i, <span class="dv">1</span>] <span class="op">*</span> scale,</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>             color<span class="op">=</span><span class="st">"red"</span>, head_width<span class="op">=</span><span class="fl">0.1</span>, linewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    ax.text(loadings[i, <span class="dv">0</span>] <span class="op">*</span> scale <span class="op">*</span> <span class="fl">1.15</span>, loadings[i, <span class="dv">1</span>] <span class="op">*</span> scale <span class="op">*</span> <span class="fl">1.15</span>,</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            name, color<span class="op">=</span><span class="st">"red"</span>, fontsize<span class="op">=</span><span class="dv">9</span>, ha<span class="op">=</span><span class="st">"center"</span>)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="ss">f"PC1 (</span><span class="sc">{</span>pca_iris<span class="sc">.</span>explained_variance_ratio_[<span class="dv">0</span>]<span class="sc">:.1%}</span><span class="ss">)"</span>)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="ss">f"PC2 (</span><span class="sc">{</span>pca_iris<span class="sc">.</span>explained_variance_ratio_[<span class="dv">1</span>]<span class="sc">:.1%}</span><span class="ss">)"</span>)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Biplot of Iris Data"</span>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"gray"</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"gray"</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="lecture3_files/figure-html/cell-2-output-1.png" width="662" height="470" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>. . .</p>
-<p>Read it as: arrows pointing in the same direction as a cluster of points tell you which variables are high in that cluster.</p>
-<hr>
-</section>
-</section>
-<section id="the-map-is-not-the-territory" class="level1 centered">
-<h1 class="centered">The Map Is Not the Territory</h1>
-<hr>
 <section id="when-t-sne-misleads" class="level2">
-<h2 class="anchored" data-anchor-id="when-t-sne-misleads">When t-SNE Misleads</h2>
-<p>In 2016, <a href="https://distill.pub/2016/misread-tsne/">Wattenberg, Viégas, and Johnson</a> published <em>How to Use t-SNE Effectively</em>, an interactive article that documented several systematic failure modes:</p>
+<h2 class="anchored" data-anchor-id="when-t-sne-misleads">When t-SNE misleads</h2>
+<p>PCA is constrained to linear dimension reduction. When the data lie on a curved manifold — common in single-cell biology, where developmental trajectories and continuous lineage transitions are nonlinear — PCA may fail to expose the structure. Nonlinear methods address this limitation. The two most widely used are t-distributed Stochastic Neighbor Embedding (t-SNE) and Uniform Manifold Approximation and Projection (UMAP).</p>
+<p>The methods are powerful but have systematic failure modes that are widely underappreciated. <a href="https://distill.pub/2016/misread-tsne/">Wattenberg, Viégas, and Johnson (2016)</a> documented these failure modes in an interactive article that has become required reading. Among the points they established:</p>
 <ul>
-<li>t-SNE can produce <strong>apparent clusters from uniformly distributed data</strong></li>
-<li>It can <strong>partition a single population</strong> into two apparent clusters</li>
-<li>It can render <strong>distant groups visually adjacent</strong></li>
-<li>Cluster <strong>sizes</strong> and <strong>between-cluster distances</strong> are not meaningful</li>
+<li>t-SNE can produce apparent clusters from data that are uniformly distributed in the original space.</li>
+<li>It can partition a single connected population into two visually distinct clusters.</li>
+<li>It can place distant groups in adjacent positions.</li>
+<li>Cluster sizes and between-cluster distances in the embedding are not interpretable as quantities in the original data.</li>
 </ul>
-<p>. . .</p>
-<p>Despite this, t-SNE and UMAP plots are routinely treated in the literature as veridical representations of the data. A t-SNE plot is a sketch, not a photograph.</p>
+<p>These behaviors are not bugs. They are consequences of t-SNE’s optimization criterion, which preserves local neighbor relationships at the expense of global geometry. The implication is that a t-SNE plot is a sketch of the data, not a photograph; it is a tool for hypothesis generation, not for hypothesis confirmation.</p>
 <hr>
 </section>
-<section id="beyond-pca-nonlinear-methods" class="level2">
-<h2 class="anchored" data-anchor-id="beyond-pca-nonlinear-methods">Beyond PCA: Nonlinear Methods</h2>
-<p>When the data lies on a <strong>nonlinear manifold</strong> (common in single-cell biology), PCA may miss important structure.</p>
-<p>Three nonlinear methods in widespread use:</p>
-<ol type="1">
-<li><strong>t-SNE</strong> (<a href="https://jmlr.org/papers/v9/vandermaaten08a.html">van der Maaten &amp; Hinton, 2008</a>)</li>
-<li><strong>UMAP</strong> (<a href="https://arxiv.org/abs/1802.03426">McInnes, Healy &amp; Melville, 2018</a>)</li>
-<li><strong>Diffusion maps</strong> (<a href="https://doi.org/10.1016/j.acha.2006.04.006">Coifman &amp; Lafon, 2006</a>)</li>
-</ol>
-<hr>
-</section>
-<section id="t-sne-intuition" class="level2">
-<h2 class="anchored" data-anchor-id="t-sne-intuition">t-SNE: Intuition</h2>
-<p><strong>t-Distributed Stochastic Neighbor Embedding</strong></p>
-<ol type="1">
-<li>In high-D: compute pairwise “affinities” <span class="math inline">\(p_{ij}\)</span> using Gaussian kernels</li>
-<li>In low-D (2D): compute affinities <span class="math inline">\(q_{ij}\)</span> using a <strong>Student-<span class="math inline">\(t\)</span> distribution</strong> (heavier tails)</li>
-<li>Minimize the KL divergence: <span class="math inline">\(\text{KL}(P \| Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}\)</span></li>
-</ol>
-<p>. . .</p>
-<p>The heavy-tailed <span class="math inline">\(t\)</span>-distribution in low-D allows distant points to spread apart while keeping nearby points close → good cluster separation.</p>
-<hr>
-</section>
-<section id="t-sne-key-parameters" class="level2">
-<h2 class="anchored" data-anchor-id="t-sne-key-parameters">t-SNE: Key Parameters</h2>
-<section id="perplexity" class="level3">
-<h3 class="anchored" data-anchor-id="perplexity">Perplexity</h3>
-<ul>
-<li>Controls the effective number of neighbors</li>
-<li>Typical range: 5–50</li>
-<li>Low perplexity: fine local structure; high perplexity: more global structure</li>
-</ul>
-</section>
-<section id="iterations" class="level3">
-<h3 class="anchored" data-anchor-id="iterations">Iterations</h3>
-<ul>
-<li>t-SNE uses gradient descent; needs enough iterations to converge (typically 500–1000)</li>
-</ul>
-<p>. . .</p>
-</section>
-<section id="cautions" class="level3">
-<h3 class="anchored" data-anchor-id="cautions">Cautions</h3>
-<ul>
-<li><strong>Distances between clusters are not meaningful</strong></li>
-<li><strong>Cluster sizes are not meaningful</strong></li>
-<li>Results depend on random initialization—run multiple times</li>
-<li>Does not preserve global structure well</li>
-</ul>
-<hr>
-</section>
-</section>
-<section id="umap-intuition" class="level2">
-<h2 class="anchored" data-anchor-id="umap-intuition">UMAP: Intuition</h2>
-<p><strong>Uniform Manifold Approximation and Projection</strong></p>
-<p>Based on topological data analysis concepts. Constructs a fuzzy simplicial complex (weighted graph) in high-D and optimizes a low-D layout to match.</p>
-<p>. . .</p>
-<section id="advantages-over-t-sne" class="level3">
-<h3 class="anchored" data-anchor-id="advantages-over-t-sne">Advantages over t-SNE</h3>
-<ul>
-<li>Better preservation of global structure (relative cluster positions)</li>
-<li>Faster (scales better to large <span class="math inline">\(n\)</span>)</li>
-<li>Theoretical grounding in Riemannian geometry and algebraic topology</li>
-</ul>
-</section>
-<section id="key-parameters" class="level3">
-<h3 class="anchored" data-anchor-id="key-parameters">Key parameters</h3>
-<ul>
-<li><code>n_neighbors</code>: similar to perplexity. Controls local vs.&nbsp;global balance.</li>
-<li><code>min_dist</code>: controls how tightly points cluster in the embedding.</li>
-</ul>
-<hr>
-</section>
-</section>
-<section id="comparing-pca-t-sne-umap" class="level2">
-<h2 class="anchored" data-anchor-id="comparing-pca-t-sne-umap">Comparing PCA, t-SNE, UMAP</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Feature</th>
-<th>PCA</th>
-<th>t-SNE</th>
-<th>UMAP</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Linear?</td>
-<td>Yes</td>
-<td>No</td>
-<td>No</td>
-</tr>
-<tr class="even">
-<td>Preserves global structure?</td>
-<td>Yes</td>
-<td>Poorly</td>
-<td>Moderately</td>
-</tr>
-<tr class="odd">
-<td>Preserves local structure?</td>
-<td>Somewhat</td>
-<td>Very well</td>
-<td>Very well</td>
-</tr>
-<tr class="even">
-<td>Scalability</td>
-<td>Excellent</td>
-<td>Slow for large <span class="math inline">\(n\)</span></td>
-<td>Fast</td>
-</tr>
-<tr class="odd">
-<td>Deterministic?</td>
-<td>Yes</td>
-<td>No</td>
-<td>No</td>
-</tr>
-<tr class="even">
-<td>Interpretable axes?</td>
-<td>Yes (loadings)</td>
-<td>No</td>
-<td>No</td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-</section>
-<section id="the-invisible-signal" class="level1 centered">
-<h1 class="centered">The Invisible Signal</h1>
-<hr>
-<section id="a-detection-phase-transition" class="level2">
-<h2 class="anchored" data-anchor-id="a-detection-phase-transition">A Detection Phase Transition</h2>
-<p><a href="https://doi.org/10.1214/009117905000000233">Baik, Ben Arous, and Péché (2005)</a> established a sharp threshold below which PCA cannot detect a signal regardless of sample size.</p>
-<p>. . .</p>
-<p>For a signal-plus-noise model with <span class="math inline">\(p/n \to \gamma\)</span>, a signal eigenvalue <span class="math inline">\(\ell\)</span> is detectable only if</p>
-<p><span class="math display">\[\ell &gt; 1 + \sqrt{\gamma}.\]</span></p>
-<p>. . .</p>
-<p>With <span class="math inline">\(p = 10{,}000\)</span> and <span class="math inline">\(n = 100\)</span> (<span class="math inline">\(\gamma = 100\)</span>), the required signal strength exceeds <span class="math inline">\(11\)</span>. Below the threshold, signal eigenvalues are absorbed into the bulk noise spectrum and become irrecoverable from the leading components alone.</p>
+<section id="t-sne-umap-and-diffusion-maps" class="level2">
+<h2 class="anchored" data-anchor-id="t-sne-umap-and-diffusion-maps">t-SNE, UMAP, and diffusion maps</h2>
+<p>t-SNE (<a href="https://jmlr.org/papers/v9/vandermaaten08a.html">van der Maaten and Hinton, 2008</a>) constructs pairwise affinities <span class="math inline">\(p_{ij}\)</span> in the high-dimensional space using Gaussian kernels and matches them to affinities <span class="math inline">\(q_{ij}\)</span> in the low-dimensional space using a Student-<span class="math inline">\(t\)</span> distribution. The objective is the Kullback–Leibler divergence</p>
+<p><span class="math display">\[\mathrm{KL}(P \| Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}},\]</span></p>
+<p>minimized by gradient descent. The heavy tails of the Student-<span class="math inline">\(t\)</span> distribution in low dimensions allow points that are far apart in the original space to be pushed even further apart in the embedding, which improves cluster separation. Two parameters dominate behavior: the perplexity, which controls the effective number of neighbors used to construct <span class="math inline">\(p_{ij}\)</span>, and the number of optimization iterations.</p>
+<p>UMAP (<a href="https://arxiv.org/abs/1802.03426">McInnes, Healy, and Melville, 2018</a>) constructs a fuzzy simplicial complex in the high-dimensional space — a weighted graph encoding local neighbor relationships — and optimizes a low-dimensional layout to match. Compared to t-SNE, UMAP tends to preserve global structure somewhat better, scales more favorably to large <span class="math inline">\(n\)</span>, and admits a theoretical interpretation in terms of Riemannian geometry and algebraic topology. Two principal parameters: <code>n_neighbors</code>, analogous to perplexity, and <code>min_dist</code>, which controls how tightly points cluster in the embedding.</p>
+<p>Diffusion maps (<a href="https://doi.org/10.1016/j.acha.2006.04.006">Coifman and Lafon, 2006</a>) constitute a third nonlinear method, based on the spectral decomposition of a Markov transition matrix on the data graph. The leading eigenvectors of this matrix provide low-dimensional coordinates that respect the diffusion geometry of the manifold; the method is particularly natural for data with continuous trajectory structure.</p>
+<p>The three methods differ in their commitments. PCA preserves variance and is linear and deterministic. t-SNE preserves local neighbor identities at the expense of global geometry. UMAP balances local and global structure with greater fidelity than t-SNE in most settings. Diffusion maps preserve a particular notion of intrinsic geometry. None is uniformly best; the choice depends on the structure to be exposed.</p>
 <hr>
 </section>
 <section id="a-practical-workflow" class="level2">
-<h2 class="anchored" data-anchor-id="a-practical-workflow">A Practical Workflow</h2>
-<p>For high-dimensional biological data:</p>
+<h2 class="anchored" data-anchor-id="a-practical-workflow">A practical workflow</h2>
+<p>The combination of linear and nonlinear methods has become standard in high-dimensional biological analysis. The recommended workflow is:</p>
 <ol type="1">
-<li><strong>Start with PCA</strong> to get an overview, check for batch effects, choose number of informative dimensions</li>
-<li><strong>Apply t-SNE or UMAP</strong> on the top <span class="math inline">\(k\)</span> PCs (not the raw <span class="math inline">\(p\)</span>-dimensional data)</li>
-<li><strong>Never skip PCA</strong>—it denoises and speeds up nonlinear methods</li>
+<li>Apply PCA first. Use the leading components to inspect for batch effects, identify the variance structure, and choose a number <span class="math inline">\(k\)</span> of components to retain — typically 20 to 50 in single-cell applications.</li>
+<li>Apply a nonlinear method (t-SNE or UMAP) to the top <span class="math inline">\(k\)</span> principal components rather than to the raw <span class="math inline">\(p\)</span>-dimensional data.</li>
+<li>Interpret the resulting embedding as a tool for visualization and hypothesis generation, not as a quantitatively faithful representation of the original geometry.</li>
 </ol>
-<p>. . .</p>
-<section id="why-pca-first" class="level3">
-<h3 class="anchored" data-anchor-id="why-pca-first">Why PCA first?</h3>
+<p>The motivation for the PCA-first step is twofold. PCA removes the high-dimensional noise that distorts t-SNE and UMAP, sharpening the structure that survives. It also dramatically reduces the computational cost: fitting t-SNE or UMAP on 50 dimensions is much faster than on 20,000. The Johnson–Lindenstrauss lemma (<a href="https://doi.org/10.1090/conm/026/737400">Johnson and Lindenstrauss, 1984</a>) provides a related theoretical assurance — random projections approximately preserve pairwise distances — and PCA is, in the relevant noise regime, strictly better than random projection.</p>
+<hr>
+</section>
+<section id="cautions" class="level2">
+<h2 class="anchored" data-anchor-id="cautions">Cautions</h2>
+<p>A small set of conclusions are systematically invalid from t-SNE or UMAP plots alone:</p>
 <ul>
-<li>Removes noise dimensions that distort t-SNE and UMAP embeddings</li>
-<li>Standard practice in single-cell pipelines (Seurat, Scanpy)</li>
-<li>The <a href="https://doi.org/10.1090/conm/026/737400">Johnson–Lindenstrauss</a> intuition: random projections approximately preserve distances, and PCA is strictly better than random in the relevant noise regime</li>
+<li>“These two clusters are far apart” — distances between clusters are not reliably preserved.</li>
+<li>“This cluster is larger or denser than that one” — cluster sizes in the embedding are not preserved.</li>
+<li>“There are exactly <span class="math inline">\(k\)</span> clusters” — apparent clusters can be artifacts of perplexity, initialization, or convergence.</li>
+<li>“The trajectory runs from A to B” — without quantitative validation, trajectory inferences from embeddings are speculative.</li>
 </ul>
+<p>The general rule: nonlinear embeddings are tools for <em>exploration</em>. Quantitative claims about the geometry of the data — distances, sizes, counts of clusters, trajectories — require validation by other methods.</p>
+<p>A related caution applies to PCA itself. In the <span class="math inline">\(p \gg n\)</span> regime, the Marchenko–Pastur law inflates eigenvalues even under pure noise: with <span class="math inline">\(\gamma = 200\)</span>, the leading noise eigenvalue can exceed <span class="math inline">\((1+\sqrt{200})^2 \approx 229\)</span> on the covariance scale. A leading PC that explains 15 percent of the total variance is impressive against the naive baseline of <span class="math inline">\(1/\min(n,p) \approx 1\)</span> percent expected under independence, but the proper baseline in the <span class="math inline">\(p \gg n\)</span> regime is the Marchenko–Pastur upper edge, not the naive one. Scree plots and parallel analysis remain the most reliable diagnostics.</p>
 <hr>
 </section>
-</section>
-<section id="cautions-with-nonlinear-embeddings" class="level2">
-<h2 class="anchored" data-anchor-id="cautions-with-nonlinear-embeddings">Cautions with Nonlinear Embeddings</h2>
-<p>Things that are <strong>NOT safe to conclude</strong> from a t-SNE or UMAP plot:</p>
-<ul>
-<li>“These two clusters are far apart” (distances are distorted)</li>
-<li>“This cluster is larger/denser” (sizes are distorted)</li>
-<li>“There are exactly <span class="math inline">\(k\)</span> clusters” (artifacts can create false clusters)</li>
-<li>“The trajectory goes from A to B” (without additional evidence)</li>
-</ul>
-<p>. . .</p>
-<blockquote class="blockquote">
-<p>Use nonlinear embeddings for <strong>hypothesis generation</strong>, not hypothesis testing. Always validate findings with quantitative methods.</p>
-</blockquote>
+<section id="connections-to-factor-models" class="level2">
+<h2 class="anchored" data-anchor-id="connections-to-factor-models">Connections to factor models</h2>
+<p>PCA is closely related to the linear factor model</p>
+<p><span class="math display">\[X = FL^\top + E,\]</span></p>
+<p>in which <span class="math inline">\(F\)</span> (<span class="math inline">\(n \times k\)</span>) contains factor scores, <span class="math inline">\(L\)</span> (<span class="math inline">\(p \times k\)</span>) contains factor loadings, and <span class="math inline">\(E\)</span> contains noise. When the noise is homoscedastic (<span class="math inline">\(E_{ij} \sim N(0,\sigma^2)\)</span>), PCA recovers the factors. When the noise is heteroscedastic, <em>probabilistic PCA</em> and <em>factor analysis</em> are more appropriate. In genomics, surrogate variable analysis (SVA) extends this framework to estimate latent confounders that distort gene-level inferences if left uncontrolled.</p>
+<p>The factor-model perspective is useful because it makes explicit a question that PCA tends to obscure: are the leading components capturing biology, or are they capturing nuisance variation (batch, technical artifact, latent population structure)? The same eigenvector decomposition can produce either, and only domain knowledge — which the math itself does not supply — distinguishes them.</p>
 <hr>
 </section>
-<section id="connection-to-factor-models" class="level2">
-<h2 class="anchored" data-anchor-id="connection-to-factor-models">Connection to Factor Models</h2>
-<p>PCA is closely related to the factor model:</p>
-<p><span class="math display">\[X = F L^T + E\]</span></p>
-<ul>
-<li><span class="math inline">\(F\)</span> (<span class="math inline">\(n \times k\)</span>): factor scores (one row per sample)</li>
-<li><span class="math inline">\(L\)</span> (<span class="math inline">\(p \times k\)</span>): factor loadings (one row per variable)</li>
-<li><span class="math inline">\(E\)</span>: noise</li>
-</ul>
-<p>. . .</p>
-<p>When <span class="math inline">\(E_{ij} \sim N(0, \sigma^2)\)</span> (homoscedastic), PCA recovers the factors. When <span class="math inline">\(E\)</span> has heterogeneous variance, <strong>probabilistic PCA</strong> or <strong>factor analysis</strong> may be more appropriate.</p>
-<p>In genomics, surrogate variable analysis (SVA) uses this framework to estimate hidden confounders.</p>
-<hr>
-</section>
-<section id="discussion" class="level2">
-<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
-<p><em>Take a few minutes on each of these before we move to the lab.</em></p>
-<section id="is-15-a-lot" class="level3">
-<h3 class="anchored" data-anchor-id="is-15-a-lot">Is 15% a lot?</h3>
-<p>You run PCA on <span class="math inline">\(p = 20{,}000\)</span> genes measured on <span class="math inline">\(n = 100\)</span> samples. PC1 explains 15% of the variance.</p>
-<ul>
-<li>If all <span class="math inline">\(p\)</span> variables were independent noise, each PC would explain about <span class="math inline">\(1/\min(n,p) = 1/100 = 1\%\)</span>.</li>
-<li>PC1 explains 15× that. This is strong signal.</li>
-</ul>
-<p>. . .</p>
-<p><strong>But</strong>: in the <span class="math inline">\(p \gg n\)</span> regime, the Marchenko–Pastur law inflates eigenvalues—the leading eigenvalue of pure noise with <span class="math inline">\(\gamma = p/n = 200\)</span> can be as large as <span class="math inline">\((1 + \sqrt{200})^2 \approx 229\)</span> on the covariance matrix scale. Not all of that 15% is necessarily signal—some is inflated by high-dimensional noise. The scree plot and parallel analysis help you decide.</p>
-<hr>
-</section>
-<section id="can-you-trust-the-clusters" class="level3">
-<h3 class="anchored" data-anchor-id="can-you-trust-the-clusters">Can you trust the clusters?</h3>
-<p>A colleague shows you a t-SNE plot with 5 clearly separated clusters and says “There are 5 cell types.”</p>
-<p><strong>Discuss</strong>: What are two reasons this conclusion might be wrong?</p>
-<p>. . .</p>
-<ol type="1">
-<li>t-SNE can split a single continuous population into apparent clusters (artifacts of perplexity and optimization)</li>
-<li>Cluster sizes and inter-cluster distances in t-SNE are not meaningful—you can’t judge relative abundance or similarity</li>
-</ol>
-<hr>
-</section>
-<section id="how-many-pcs-before-umap" class="level3">
-<h3 class="anchored" data-anchor-id="how-many-pcs-before-umap">How many PCs before UMAP?</h3>
-<p>You want to run UMAP on the top <span class="math inline">\(k\)</span> PCs. How do you choose <span class="math inline">\(k\)</span>?</p>
-<p><strong>Discuss</strong>: Name two approaches.</p>
-<p>. . .</p>
-<ol type="1">
-<li><strong>Scree plot / elbow</strong>: keep PCs above the “elbow” where variance explained levels off</li>
-<li><strong>Marchenko–Pastur threshold</strong>: keep eigenvalues above <span class="math inline">\((1 + \sqrt{p/n})^2\)</span>—everything below is noise</li>
-</ol>
-<p>In practice, 20–50 PCs is a common default in single-cell workflows (Seurat uses 30).</p>
-<hr>
-</section>
-</section>
-<section id="summary" class="level2">
-<h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<ol type="1">
-<li><strong>PCA</strong>: fast, interpretable, optimal for linear structure (<a href="https://doi.org/10.1007/BF02288367">Eckart &amp; Young, 1936</a>). The default first step.</li>
-<li><strong>Scree plots and the Marchenko–Pastur threshold</strong> support principled selection of the number of components.</li>
-<li><strong>t-SNE and UMAP</strong> can reveal nonlinear structure but distort distances and cluster sizes.</li>
-<li><strong>Recommended workflow</strong>: PCA first, then nonlinear embedding on the top PCs.</li>
-<li>Nonlinear embeddings are tools for exploration, not for confirmation.</li>
-<li>In the <span class="math inline">\(p \gg n\)</span> regime, random matrix theory characterizes the fundamental detection limits of PCA.</li>
-</ol>
-<section id="up-next" class="level3">
-<h3 class="anchored" data-anchor-id="up-next">Up Next</h3>
-<p><strong>Lab 3</strong>: Apply PCA and UMAP to the Golub dataset. Interpret biplots, scree plots, and embeddings.</p>
+<section id="summary-and-outlook" class="level2">
+<h2 class="anchored" data-anchor-id="summary-and-outlook">Summary and outlook</h2>
+<p>Six points constitute the lecture’s content. First, PCA is the default first step in dimension reduction: fast, interpretable, and optimal for linear structure under the <a href="https://doi.org/10.1007/BF02288367">Eckart–Young theorem</a>. Second, scree plots and the Marchenko–Pastur threshold support principled selection of the number of components. Third, t-SNE and UMAP reveal nonlinear structure but distort distances, cluster sizes, and counts of apparent clusters; their plots are sketches, not photographs. Fourth, the recommended workflow is PCA first, then a nonlinear method on the top principal components. Fifth, nonlinear embeddings should be treated as instruments for exploration rather than confirmation. Sixth, in the <span class="math inline">\(p \gg n\)</span> regime, random matrix theory imposes fundamental limits on what PCA can detect; weak signals are not merely hard to find — they are absorbed into the noise spectrum.</p>
+<p>Lab 3 applies PCA and UMAP to the Golub dataset and asks the standard exploratory questions: what are the leading components, where do the samples cluster, and which genes drive the separation? Lecture 4 turns from unsupervised structure discovery to the supervised problem of building a predictive model when <span class="math inline">\(p \gg n\)</span> — the regime in which classical regression fails most spectacularly.</p>
 
 
-<!-- -->
-
-</section>
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -827,57 +462,6 @@ window.Quarto = {
         container: window.document.getElementById('quarto-embedded-source-code-modal')
       });
       clipboardModal.on('success', onCopySuccess);
-    }
-    const viewSource = window.document.getElementById('quarto-view-source') ||
-                       window.document.getElementById('quarto-code-tools-source');
-    if (viewSource) {
-      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
-      viewSource.addEventListener("click", function(e) {
-        if (sourceUrl) {
-          // rstudio viewer pane
-          if (/\bcapabilities=\b/.test(window.location)) {
-            window.open(sourceUrl);
-          } else {
-            window.location.href = sourceUrl;
-          }
-        } else {
-          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
-          modal.show();
-        }
-        return false;
-      });
-    }
-    function toggleCodeHandler(show) {
-      return function(e) {
-        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
-        for (let i=0; i<detailsSrc.length; i++) {
-          const details = detailsSrc[i].parentElement;
-          if (show) {
-            details.open = true;
-          } else {
-            details.removeAttribute("open");
-          }
-        }
-        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
-        const fromCls = show ? "hidden" : "unhidden";
-        const toCls = show ? "unhidden" : "hidden";
-        for (let i=0; i<cellCodeDivs.length; i++) {
-          const codeDiv = cellCodeDivs[i];
-          if (codeDiv.classList.contains(fromCls)) {
-            codeDiv.classList.remove(fromCls);
-            codeDiv.classList.add(toCls);
-          } 
-        }
-        return false;
-      }
-    }
-    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
-    if (hideAllCode) {
-      hideAllCode.addEventListener("click", toggleCodeHandler(false));
-    }
-    const showAllCode = window.document.getElementById("quarto-show-all-code");
-    if (showAllCode) {
-      showAllCode.addEventListener("click", toggleCodeHandler(true));
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
@@ -1207,405 +791,7 @@ window.Quarto = {
       }
     }
   });
-  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Lecture 3: Dimension Reduction"</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Finding Structure in High-Dimensional Data"</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "Day 2, 8:00–9:00"</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">  revealjs:</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">    theme: default</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">    slide-number: true</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">    chalkboard: true</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">    smaller: true</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">    scrollable: true</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">    footer: "High-Dimensional Data Analysis Workshop | BTP"</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">    math: mathjax</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">  pdf:</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co">    number-sections: false</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">    fig-pos: 'H'</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="fu"># The Eigenface That Launched a Thousand Papers {.centered}</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="fu">## From Faces to Genes</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>In 1991, <span class="co">[</span><span class="ot">Turk and Pentland</span><span class="co">](https://doi.org/10.1162/jocn.1991.3.1.71)</span> applied PCA to a database of face photographs. The leading principal components — diffuse, low-resolution images they termed **"eigenfaces"** — sufficed to reconstruct any face in the database from approximately 100 coefficients in place of thousands of pixels.</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>The result marked the transition of dimension reduction from a mathematical construct to a practical tool: a high-dimensional object (a face) could be faithfully represented in a far lower-dimensional space.</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>The same principle now drives single-cell genomics, where 30,000 gene measurements per cell are routinely compressed to 30–50 principal components before any further analysis.</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Problem</span></span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>We have data $X \in \mathbb{R}^{n \times p}$ with $p$ large (thousands to tens of thousands).</span>
-<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>**Goals**:</span>
-<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Visualization**: Project to 2D or 3D for exploration</span>
-<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Denoising**: Separate signal from noise</span>
-<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Preprocessing**: Reduce $p$ before applying downstream methods (clustering, regression)</span>
-<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>**Core question**: Can we represent the data in a lower-dimensional space $\mathbb{R}^k$ with $k \ll p$, preserving the important structure?</span>
-<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="fu">## Principal Component Analysis (PCA)</span></span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a><span class="fu">### The idea</span></span>
-<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>Find orthogonal directions of maximum variance in the data.</span>
-<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="fu">### Formally</span></span>
-<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>Given centered data $X$ ($n \times p$), PCA solves:</span>
-<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>$$\mathbf{v}_1 = \arg\max_{\|\mathbf{v}\| = 1} \text{Var}(X\mathbf{v}) = \arg\max_{<span class="sc">\|</span>\mathbf{v}<span class="sc">\|</span> = 1} \mathbf{v}^T \hat{\Sigma} \mathbf{v}$$</span>
-<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>The solution $\mathbf{v}_1$ is the eigenvector of $\hat{\Sigma} = \frac{1}{n-1}X^TX$ with the largest eigenvalue.</span>
-<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a><span class="fu">## PCA via the SVD</span></span>
-<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>The **singular value decomposition** of $X$:</span>
-<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>$$X = U D V^T$$</span>
-<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$U$ ($n \times r$): left singular vectors (sample directions)</span>
-<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$D$ ($r \times r$): diagonal matrix of singular values $d_1 \geq d_2 \geq \cdots \geq 0$</span>
-<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$V$ ($p \times r$): right singular vectors (loadings = principal component directions)</span>
-<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>where $r = \min(n, p)$. Software returns this "thin" SVD by default.</span>
-<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>**Connection**: Eigenvalues of $\hat{\Sigma}$ are $\lambda_j = d_j^2 / (n-1)$.</span>
-<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>**PC scores**: $Z = XV = UD$ (the $j$-th column of $Z$ is the $j$-th principal component).</span>
-<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="fu">## How Many Components?</span></span>
-<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="fu">### Scree plot</span></span>
-<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>Plot $\lambda_j$ (or proportion of variance explained) vs. $j$. Look for an "elbow."</span>
-<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a><span class="fu">### Proportion of variance explained</span></span>
-<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>$$\text{PVE}(k) = \frac{\sum_{j=1}^k \lambda_j}{\sum_{j=1}^p \lambda_j}$$</span>
-<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a><span class="fu">### Formal methods</span></span>
-<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Marchenko–Pastur threshold**: Under null ($\Sigma = I$) with $\gamma = p/n$, eigenvalues lie in $<span class="co">[</span><span class="ot">\max(0,\,(1-\sqrt{\gamma})^2),\; (1+\sqrt{\gamma})^2</span><span class="co">]</span>$. When $p &gt; n$ (our regime), the lower edge is 0 and only the upper edge matters. Eigenvalues above $(1+\sqrt{\gamma})^2$ are signal.</span>
-<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Parallel analysis**: Compare observed eigenvalues to those from permuted data.</span>
-<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a><span class="fu">## PCA: Strengths and Limitations</span></span>
-<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a><span class="fu">### Strengths</span></span>
-<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Computationally fast; solved by standard linear algebra</span>
-<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Optimal for linear reconstruction (Eckart–Young theorem)</span>
-<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Interpretable loadings: which variables contribute to each PC?</span>
-<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="fu">### Limitations</span></span>
-<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Linear only**: Cannot capture nonlinear manifold structure</span>
-<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Sensitive to scaling**: Must standardize or choose units carefully</span>
-<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Rotation ambiguity**: PCs are identified only up to sign</span>
-<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**High-D noise bias**: In the $p \gg n$ regime, the Marchenko–Pastur law inflates eigenvalues. Leading PCs can be distorted.</span>
-<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a><span class="fu">## Biplots</span></span>
-<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>A biplot overlays sample scores and variable loadings on the same 2D plot.</span>
-<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 5</span></span>
-<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
-<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
-<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_iris</span>
-<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>iris <span class="op">=</span> load_iris()</span>
-<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>X_iris <span class="op">=</span> StandardScaler().fit_transform(iris.data)</span>
-<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>pca_iris <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>).fit(X_iris)</span>
-<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> pca_iris.transform(X_iris)</span>
-<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>loadings <span class="op">=</span> pca_iris.components_.T  <span class="co"># (4, 2)</span></span>
-<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">5</span>))</span>
-<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>ax.scatter(scores[:, <span class="dv">0</span>], scores[:, <span class="dv">1</span>], s<span class="op">=</span><span class="dv">15</span>, color<span class="op">=</span><span class="st">"gray"</span>, alpha<span class="op">=</span><span class="fl">0.6</span>)</span>
-<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a>scale <span class="op">=</span> np.<span class="bu">abs</span>(scores).<span class="bu">max</span>() <span class="op">/</span> np.<span class="bu">abs</span>(loadings).<span class="bu">max</span>() <span class="op">*</span> <span class="fl">0.8</span></span>
-<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, name <span class="kw">in</span> <span class="bu">enumerate</span>(iris.feature_names):</span>
-<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>    ax.arrow(<span class="dv">0</span>, <span class="dv">0</span>, loadings[i, <span class="dv">0</span>] <span class="op">*</span> scale, loadings[i, <span class="dv">1</span>] <span class="op">*</span> scale,</span>
-<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>             color<span class="op">=</span><span class="st">"red"</span>, head_width<span class="op">=</span><span class="fl">0.1</span>, linewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
-<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>    ax.text(loadings[i, <span class="dv">0</span>] <span class="op">*</span> scale <span class="op">*</span> <span class="fl">1.15</span>, loadings[i, <span class="dv">1</span>] <span class="op">*</span> scale <span class="op">*</span> <span class="fl">1.15</span>,</span>
-<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>            name, color<span class="op">=</span><span class="st">"red"</span>, fontsize<span class="op">=</span><span class="dv">9</span>, ha<span class="op">=</span><span class="st">"center"</span>)</span>
-<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="ss">f"PC1 (</span><span class="sc">{</span>pca_iris<span class="sc">.</span>explained_variance_ratio_[<span class="dv">0</span>]<span class="sc">:.1%}</span><span class="ss">)"</span>)</span>
-<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="ss">f"PC2 (</span><span class="sc">{</span>pca_iris<span class="sc">.</span>explained_variance_ratio_[<span class="dv">1</span>]<span class="sc">:.1%}</span><span class="ss">)"</span>)</span>
-<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Biplot of Iris Data"</span>)</span>
-<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>ax.axhline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"gray"</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>ax.axvline(<span class="dv">0</span>, color<span class="op">=</span><span class="st">"gray"</span>, linewidth<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>Read it as: arrows pointing in the same direction as a cluster of points tell you which variables are high in that cluster.</span>
-<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a><span class="fu"># The Map Is Not the Territory {.centered}</span></span>
-<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a><span class="fu">## When t-SNE Misleads</span></span>
-<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>In 2016, <span class="co">[</span><span class="ot">Wattenberg, Viégas, and Johnson</span><span class="co">](https://distill.pub/2016/misread-tsne/)</span> published *How to Use t-SNE Effectively*, an interactive article that documented several systematic failure modes:</span>
-<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>t-SNE can produce **apparent clusters from uniformly distributed data**</span>
-<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>It can **partition a single population** into two apparent clusters</span>
-<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>It can render **distant groups visually adjacent**</span>
-<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Cluster **sizes** and **between-cluster distances** are not meaningful</span>
-<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>Despite this, t-SNE and UMAP plots are routinely treated in the literature as veridical representations of the data. A t-SNE plot is a sketch, not a photograph.</span>
-<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a><span class="fu">## Beyond PCA: Nonlinear Methods</span></span>
-<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>When the data lies on a **nonlinear manifold** (common in single-cell biology), PCA may miss important structure.</span>
-<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>Three nonlinear methods in widespread use:</span>
-<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**t-SNE** (<span class="co">[</span><span class="ot">van der Maaten &amp; Hinton, 2008</span><span class="co">](https://jmlr.org/papers/v9/vandermaaten08a.html)</span>)</span>
-<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**UMAP** (<span class="co">[</span><span class="ot">McInnes, Healy &amp; Melville, 2018</span><span class="co">](https://arxiv.org/abs/1802.03426)</span>)</span>
-<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Diffusion maps** (<span class="co">[</span><span class="ot">Coifman &amp; Lafon, 2006</span><span class="co">](https://doi.org/10.1016/j.acha.2006.04.006)</span>)</span>
-<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a><span class="fu">## t-SNE: Intuition</span></span>
-<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>**t-Distributed Stochastic Neighbor Embedding**</span>
-<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>In high-D: compute pairwise "affinities" $p_{ij}$ using Gaussian kernels</span>
-<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>In low-D (2D): compute affinities $q_{ij}$ using a **Student-$t$ distribution** (heavier tails)</span>
-<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Minimize the KL divergence: $\text{KL}(P <span class="sc">\|</span> Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}$</span>
-<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>The heavy-tailed $t$-distribution in low-D allows distant points to spread apart while keeping nearby points close → good cluster separation.</span>
-<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a><span class="fu">## t-SNE: Key Parameters</span></span>
-<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="fu">### Perplexity</span></span>
-<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Controls the effective number of neighbors</span>
-<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Typical range: 5–50</span>
-<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Low perplexity: fine local structure; high perplexity: more global structure</span>
-<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="fu">### Iterations</span></span>
-<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>t-SNE uses gradient descent; needs enough iterations to converge (typically 500–1000)</span>
-<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a><span class="fu">### Cautions</span></span>
-<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Distances between clusters are not meaningful**</span>
-<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Cluster sizes are not meaningful**</span>
-<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Results depend on random initialization—run multiple times</span>
-<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Does not preserve global structure well</span>
-<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a><span class="fu">## UMAP: Intuition</span></span>
-<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a>**Uniform Manifold Approximation and Projection**</span>
-<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>Based on topological data analysis concepts. Constructs a fuzzy simplicial complex (weighted graph) in high-D and optimizes a low-D layout to match.</span>
-<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a><span class="fu">### Advantages over t-SNE</span></span>
-<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Better preservation of global structure (relative cluster positions)</span>
-<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Faster (scales better to large $n$)</span>
-<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Theoretical grounding in Riemannian geometry and algebraic topology</span>
-<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a><span class="fu">### Key parameters</span></span>
-<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`n_neighbors`</span>: similar to perplexity. Controls local vs. global balance.</span>
-<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`min_dist`</span>: controls how tightly points cluster in the embedding.</span>
-<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a><span class="fu">## Comparing PCA, t-SNE, UMAP</span></span>
-<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Feature <span class="pp">|</span> PCA <span class="pp">|</span> t-SNE <span class="pp">|</span> UMAP <span class="pp">|</span></span>
-<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a><span class="pp">|---------|-----|-------|------|</span></span>
-<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Linear? <span class="pp">|</span> Yes <span class="pp">|</span> No <span class="pp">|</span> No <span class="pp">|</span></span>
-<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Preserves global structure? <span class="pp">|</span> Yes <span class="pp">|</span> Poorly <span class="pp">|</span> Moderately <span class="pp">|</span></span>
-<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Preserves local structure? <span class="pp">|</span> Somewhat <span class="pp">|</span> Very well <span class="pp">|</span> Very well <span class="pp">|</span></span>
-<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Scalability <span class="pp">|</span> Excellent <span class="pp">|</span> Slow for large $n$ <span class="pp">|</span> Fast <span class="pp">|</span></span>
-<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Deterministic? <span class="pp">|</span> Yes <span class="pp">|</span> No <span class="pp">|</span> No <span class="pp">|</span></span>
-<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Interpretable axes? <span class="pp">|</span> Yes (loadings) <span class="pp">|</span> No <span class="pp">|</span> No <span class="pp">|</span></span>
-<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a><span class="fu"># The Invisible Signal {.centered}</span></span>
-<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a><span class="fu">## A Detection Phase Transition</span></span>
-<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Baik, Ben Arous, and Péché (2005)</span><span class="co">](https://doi.org/10.1214/009117905000000233)</span> established a sharp threshold below which PCA cannot detect a signal regardless of sample size.</span>
-<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>For a signal-plus-noise model with $p/n \to \gamma$, a signal eigenvalue $\ell$ is detectable only if</span>
-<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>$$\ell &gt; 1 + \sqrt{\gamma}.$$</span>
-<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>With $p = 10{,}000$ and $n = 100$ ($\gamma = 100$), the required signal strength exceeds $11$. Below the threshold, signal eigenvalues are absorbed into the bulk noise spectrum and become irrecoverable from the leading components alone.</span>
-<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a><span class="fu">## A Practical Workflow</span></span>
-<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>For high-dimensional biological data:</span>
-<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Start with PCA** to get an overview, check for batch effects, choose number of informative dimensions</span>
-<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Apply t-SNE or UMAP** on the top $k$ PCs (not the raw $p$-dimensional data)</span>
-<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Never skip PCA**---it denoises and speeds up nonlinear methods</span>
-<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why PCA first?</span></span>
-<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Removes noise dimensions that distort t-SNE and UMAP embeddings</span>
-<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Standard practice in single-cell pipelines (Seurat, Scanpy)</span>
-<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The <span class="co">[</span><span class="ot">Johnson–Lindenstrauss</span><span class="co">](https://doi.org/10.1090/conm/026/737400)</span> intuition: random projections approximately preserve distances, and PCA is strictly better than random in the relevant noise regime</span>
-<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a><span class="fu">## Cautions with Nonlinear Embeddings</span></span>
-<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>Things that are **NOT safe to conclude** from a t-SNE or UMAP plot:</span>
-<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>"These two clusters are far apart" (distances are distorted)</span>
-<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>"This cluster is larger/denser" (sizes are distorted)</span>
-<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>"There are exactly $k$ clusters" (artifacts can create false clusters)</span>
-<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>"The trajectory goes from A to B" (without additional evidence)</span>
-<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; Use nonlinear embeddings for **hypothesis generation**, not hypothesis testing. Always validate findings with quantitative methods.</span></span>
-<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connection to Factor Models</span></span>
-<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>PCA is closely related to the factor model:</span>
-<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a>$$X = F L^T + E$$</span>
-<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$F$ ($n \times k$): factor scores (one row per sample)</span>
-<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$L$ ($p \times k$): factor loadings (one row per variable)</span>
-<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$E$: noise</span>
-<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a>When $E_{ij} \sim N(0, \sigma^2)$ (homoscedastic), PCA recovers the factors. When $E$ has heterogeneous variance, **probabilistic PCA** or **factor analysis** may be more appropriate.</span>
-<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a>In genomics, surrogate variable analysis (SVA) uses this framework to estimate hidden confounders.</span>
-<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a><span class="fu">## Discussion</span></span>
-<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a>*Take a few minutes on each of these before we move to the lab.*</span>
-<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a><span class="fu">### Is 15% a lot?</span></span>
-<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a>You run PCA on $p = 20{,}000$ genes measured on $n = 100$ samples. PC1 explains 15% of the variance.</span>
-<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>If all $p$ variables were independent noise, each PC would explain about $1/\min(n,p) = 1/100 = 1\%$.</span>
-<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>PC1 explains 15×  that. This is strong signal.</span>
-<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a>**But**: in the $p \gg n$ regime, the Marchenko–Pastur law inflates eigenvalues---the leading eigenvalue of pure noise with $\gamma = p/n = 200$ can be as large as $(1 + \sqrt{200})^2 \approx 229$ on the covariance matrix scale. Not all of that 15% is necessarily signal---some is inflated by high-dimensional noise. The scree plot and parallel analysis help you decide.</span>
-<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a><span class="fu">### Can you trust the clusters?</span></span>
-<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a>A colleague shows you a t-SNE plot with 5 clearly separated clusters and says "There are 5 cell types."</span>
-<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a>**Discuss**: What are two reasons this conclusion might be wrong?</span>
-<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>t-SNE can split a single continuous population into apparent clusters (artifacts of perplexity and optimization)</span>
-<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Cluster sizes and inter-cluster distances in t-SNE are not meaningful—you can't judge relative abundance or similarity</span>
-<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a><span class="fu">### How many PCs before UMAP?</span></span>
-<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a>You want to run UMAP on the top $k$ PCs. How do you choose $k$?</span>
-<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>**Discuss**: Name two approaches.</span>
-<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Scree plot / elbow**: keep PCs above the "elbow" where variance explained levels off</span>
-<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Marchenko–Pastur threshold**: keep eigenvalues above $(1 + \sqrt{p/n})^2$—everything below is noise</span>
-<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a>In practice, 20–50 PCs is a common default in single-cell workflows (Seurat uses 30).</span>
-<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summary</span></span>
-<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**PCA**: fast, interpretable, optimal for linear structure (<span class="co">[</span><span class="ot">Eckart &amp; Young, 1936</span><span class="co">](https://doi.org/10.1007/BF02288367)</span>). The default first step.</span>
-<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Scree plots and the Marchenko–Pastur threshold** support principled selection of the number of components.</span>
-<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**t-SNE and UMAP** can reveal nonlinear structure but distort distances and cluster sizes.</span>
-<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Recommended workflow**: PCA first, then nonlinear embedding on the top PCs.</span>
-<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>Nonlinear embeddings are tools for exploration, not for confirmation.</span>
-<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a><span class="ss">6. </span>In the $p \gg n$ regime, random matrix theory characterizes the fundamental detection limits of PCA.</span>
-<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a><span class="fu">### Up Next</span></span>
-<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a>**Lab 3**: Apply PCA and UMAP to the Golub dataset. Interpret biplots, scree plots, and embeddings.</span>
-</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
-</div></div></div></div></div>
+  </script>
 </div> <!-- /content -->
 
 

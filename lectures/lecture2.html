@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Lecture 2: False Discovery Rates &amp; Empirical Bayes – High-Dimensional Data Analysis — BTP Graduate Workshop</title>
+<title>Lecture 2: The Histogram That Was Too Wide – High-Dimensional Data Analysis — BTP Graduate Workshop</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -22,41 +22,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -105,9 +70,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-<script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
-<script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
-<link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -184,6 +146,10 @@ window.Quarto = {
  <span class="dropdown-text">Lecture 2: The Histogram That Was Too Wide</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../lectures/lecture2-slides.html">
+ <span class="dropdown-text">Lecture 2 Slides</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab2.ipynb">
  <span class="dropdown-text">Lab 2: FDR in Practice (Colab)</span></a>
   </li>  
@@ -199,12 +165,20 @@ window.Quarto = {
  <span class="dropdown-text">Lecture 3: The Map That Drew Itself</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="../lectures/lecture3-slides.html">
+ <span class="dropdown-text">Lecture 3 Slides</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab3.ipynb">
  <span class="dropdown-text">Lab 3: Dimension Reduction (Colab)</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../lectures/lecture4.html">
  <span class="dropdown-text">Lecture 4: Seventy Genes and a Fraud</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture4-slides.html">
+ <span class="dropdown-text">Lecture 4 Slides</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab4.ipynb">
@@ -265,67 +239,26 @@ window.Quarto = {
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
-  <ul>
-  <li><a href="#the-histogram-that-tells-you-everything" id="toc-the-histogram-that-tells-you-everything" class="nav-link active" data-scroll-target="#the-histogram-that-tells-you-everything">The Histogram That Tells You Everything</a>
   <ul class="collapse">
-  <li><a href="#a-picture-worth-10000-tests" id="toc-a-picture-worth-10000-tests" class="nav-link" data-scroll-target="#a-picture-worth-10000-tests">A Picture Worth 10,000 Tests</a></li>
-  <li><a href="#recap-from-lecture-1" id="toc-recap-from-lecture-1" class="nav-link" data-scroll-target="#recap-from-lecture-1">Recap from Lecture 1</a></li>
-  <li><a href="#the-benjaminihochberg-bh-procedure" id="toc-the-benjaminihochberg-bh-procedure" class="nav-link" data-scroll-target="#the-benjaminihochberg-bh-procedure">The Benjamini–Hochberg (BH) Procedure</a></li>
-  <li><a href="#bh-geometric-interpretation" id="toc-bh-geometric-interpretation" class="nav-link" data-scroll-target="#bh-geometric-interpretation">BH: Geometric Interpretation</a></li>
-  <li><a href="#bh-under-dependence" id="toc-bh-under-dependence" class="nav-link" data-scroll-target="#bh-under-dependence">BH Under Dependence</a></li>
-  </ul></li>
-  <li><a href="#the-prior-you-didnt-know-you-had" id="toc-the-prior-you-didnt-know-you-had" class="nav-link" data-scroll-target="#the-prior-you-didnt-know-you-had">The Prior You Didn’t Know You Had</a>
-  <ul class="collapse">
-  <li><a href="#steins-paradox-borrowing-strength" id="toc-steins-paradox-borrowing-strength" class="nav-link" data-scroll-target="#steins-paradox-borrowing-strength">Stein’s Paradox: Borrowing Strength</a></li>
-  <li><a href="#from-baseball-to-genes" id="toc-from-baseball-to-genes" class="nav-link" data-scroll-target="#from-baseball-to-genes">From Baseball to Genes</a></li>
-  <li><a href="#storeys-approach-estimating-pi_0" id="toc-storeys-approach-estimating-pi_0" class="nav-link" data-scroll-target="#storeys-approach-estimating-pi_0">Storey’s Approach: Estimating <span class="math inline">\(\pi_0\)</span></a></li>
-  <li><a href="#the-q-value" id="toc-the-q-value" class="nav-link" data-scroll-target="#the-q-value">The <span class="math inline">\(q\)</span>-value</a></li>
-  <li><a href="#efrons-two-groups-model" id="toc-efrons-two-groups-model" class="nav-link" data-scroll-target="#efrons-two-groups-model">Efron’s Two-Groups Model</a></li>
-  <li><a href="#estimating-the-mixture" id="toc-estimating-the-mixture" class="nav-link" data-scroll-target="#estimating-the-mixture">Estimating the Mixture</a>
-  <ul class="collapse">
-  <li><a href="#key-idea" id="toc-key-idea" class="nav-link" data-scroll-target="#key-idea">Key idea</a></li>
-  </ul></li>
-  <li><a href="#the-local-false-discovery-rate" id="toc-the-local-false-discovery-rate" class="nav-link" data-scroll-target="#the-local-false-discovery-rate">The Local False Discovery Rate</a>
-  <ul class="collapse">
-  <li><a href="#relationship" id="toc-relationship" class="nav-link" data-scroll-target="#relationship">Relationship</a></li>
-  </ul></li>
-  <li><a href="#connections-to-bayesian-thinking" id="toc-connections-to-bayesian-thinking" class="nav-link" data-scroll-target="#connections-to-bayesian-thinking">Connections to Bayesian Thinking</a></li>
-  </ul></li>
-  <li><a href="#when-n01-lies-to-you" id="toc-when-n01-lies-to-you" class="nav-link" data-scroll-target="#when-n01-lies-to-you">When <span class="math inline">\(N(0,1)\)</span> Lies to You</a>
-  <ul class="collapse">
-  <li><a href="#a-cautionary-case-efrons-prostate-cancer-reanalysis" id="toc-a-cautionary-case-efrons-prostate-cancer-reanalysis" class="nav-link" data-scroll-target="#a-cautionary-case-efrons-prostate-cancer-reanalysis">A Cautionary Case: Efron’s Prostate Cancer Reanalysis</a></li>
-  <li><a href="#the-empirical-null" id="toc-the-empirical-null" class="nav-link" data-scroll-target="#the-empirical-null">The Empirical Null</a>
-  <ul class="collapse">
-  <li><a href="#why-the-theoretical-null-might-be-wrong" id="toc-why-the-theoretical-null-might-be-wrong" class="nav-link" data-scroll-target="#why-the-theoretical-null-might-be-wrong">Why the theoretical null might be wrong</a></li>
-  <li><a href="#empirical-null" id="toc-empirical-null" class="nav-link" data-scroll-target="#empirical-null">Empirical null</a></li>
-  </ul></li>
-  <li><a href="#empirical-null-illustration" id="toc-empirical-null-illustration" class="nav-link" data-scroll-target="#empirical-null-illustration">Empirical Null: Illustration</a></li>
-  <li><a href="#efrons-estimation-procedure" id="toc-efrons-estimation-procedure" class="nav-link" data-scroll-target="#efrons-estimation-procedure">Efron’s Estimation Procedure</a>
-  <ul class="collapse">
-  <li><a href="#step-by-step-efron-large-scale-inference-ch.-45" id="toc-step-by-step-efron-large-scale-inference-ch.-45" class="nav-link" data-scroll-target="#step-by-step-efron-large-scale-inference-ch.-45">Step by step (Efron, <em>Large-Scale Inference</em>, Ch. 4–5)</a></li>
-  </ul></li>
-  <li><a href="#when-does-this-work" id="toc-when-does-this-work" class="nav-link" data-scroll-target="#when-does-this-work">When Does This Work?</a>
-  <ul class="collapse">
-  <li><a href="#requirements-for-empirical-bayes-fdr" id="toc-requirements-for-empirical-bayes-fdr" class="nav-link" data-scroll-target="#requirements-for-empirical-bayes-fdr">Requirements for empirical Bayes FDR</a></li>
-  <li><a href="#when-it-can-fail" id="toc-when-it-can-fail" class="nav-link" data-scroll-target="#when-it-can-fail">When it can fail</a></li>
-  </ul></li>
-  <li><a href="#multiple-testing-in-practice-a-decision-framework" id="toc-multiple-testing-in-practice-a-decision-framework" class="nav-link" data-scroll-target="#multiple-testing-in-practice-a-decision-framework">Multiple Testing in Practice: A Decision Framework</a></li>
-  <li><a href="#software-ecosystem" id="toc-software-ecosystem" class="nav-link" data-scroll-target="#software-ecosystem">Software Ecosystem</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a>
-  <ul class="collapse">
-  <li><a href="#up-next" id="toc-up-next" class="nav-link" data-scroll-target="#up-next">Up Next</a></li>
-  </ul></li>
-  </ul></li>
+  <li><a href="#a-picture-worth-10000-tests" id="toc-a-picture-worth-10000-tests" class="nav-link active" data-scroll-target="#a-picture-worth-10000-tests">A picture worth 10,000 tests</a></li>
+  <li><a href="#the-benjaminihochberg-procedure" id="toc-the-benjaminihochberg-procedure" class="nav-link" data-scroll-target="#the-benjaminihochberg-procedure">The Benjamini–Hochberg procedure</a></li>
+  <li><a href="#borrowing-strength-from-stein-to-empirical-bayes" id="toc-borrowing-strength-from-stein-to-empirical-bayes" class="nav-link" data-scroll-target="#borrowing-strength-from-stein-to-empirical-bayes">Borrowing strength: from Stein to empirical Bayes</a></li>
+  <li><a href="#storeys-pi_0-and-the-q-value" id="toc-storeys-pi_0-and-the-q-value" class="nav-link" data-scroll-target="#storeys-pi_0-and-the-q-value">Storey’s <span class="math inline">\(\pi_0\)</span> and the <span class="math inline">\(q\)</span>-value</a></li>
+  <li><a href="#efrons-two-groups-model" id="toc-efrons-two-groups-model" class="nav-link" data-scroll-target="#efrons-two-groups-model">Efron’s two-groups model</a></li>
+  <li><a href="#the-local-false-discovery-rate" id="toc-the-local-false-discovery-rate" class="nav-link" data-scroll-target="#the-local-false-discovery-rate">The local false discovery rate</a></li>
+  <li><a href="#a-cautionary-case-the-empirical-null" id="toc-a-cautionary-case-the-empirical-null" class="nav-link" data-scroll-target="#a-cautionary-case-the-empirical-null">A cautionary case: the empirical null</a></li>
+  <li><a href="#when-does-this-framework-apply" id="toc-when-does-this-framework-apply" class="nav-link" data-scroll-target="#when-does-this-framework-apply">When does this framework apply?</a></li>
+  <li><a href="#summary-and-outlook" id="toc-summary-and-outlook" class="nav-link" data-scroll-target="#summary-and-outlook">Summary and outlook</a></li>
   </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="lecture2.html"><i class="bi bi-file-slides"></i>RevealJS</a></li><li><a href="lecture2.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="lecture2.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Lecture 2: False Discovery Rates &amp; Empirical Bayes</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
-<p class="subtitle lead">From Benjamini–Hochberg to Efron’s Local FDR</p>
+<h1 class="title">Lecture 2: The Histogram That Was Too Wide</h1>
+<p class="subtitle lead">False Discovery Rates and the Empirical Bayes Framework</p>
 </div>
 
 
@@ -348,383 +281,98 @@ window.Quarto = {
 </header>
 
 
-<section id="the-histogram-that-tells-you-everything" class="level1 centered">
-<h1 class="centered">The Histogram That Tells You Everything</h1>
-<hr>
 <section id="a-picture-worth-10000-tests" class="level2">
-<h2 class="anchored" data-anchor-id="a-picture-worth-10000-tests">A Picture Worth 10,000 Tests</h2>
-<p>A <span class="math inline">\(p\)</span>-value histogram from a gene-expression study comparing two cancer subtypes has two components:</p>
-<ul>
-<li>The <strong>flat part</strong> (uniform across <span class="math inline">\([0,1]\)</span>): null genes — no real signal</li>
-<li>The <strong>spike near 0</strong>: true discoveries — genes that actually differ</li>
-</ul>
-<p>. . .</p>
-<p>The proportion of true nulls <span class="math inline">\(\pi_0\)</span> is <em>visible</em> — it is the height of the flat region.</p>
-<p>. . .</p>
-<p>That the histogram itself encodes the answer is the foundation of this lecture. Translating the visual intuition into a rigorous procedure took several decades.</p>
+<h2 class="anchored" data-anchor-id="a-picture-worth-10000-tests">A picture worth 10,000 tests</h2>
+<p>Consider a <span class="math inline">\(p\)</span>-value histogram from a gene-expression study comparing two cancer subtypes. Two regions of the histogram carry distinct meanings. The flat portion, distributed roughly uniformly across the unit interval, corresponds to genes for which there is no real difference between groups: under the null hypothesis, p-values are uniformly distributed on <span class="math inline">\([0,1]\)</span>, and the flat region is precisely what that uniformity looks like. The spike near zero corresponds to true discoveries — genes whose expression genuinely differs between conditions and which therefore produce systematically small p-values.</p>
+<p>The proportion of true nulls <span class="math inline">\(\pi_0\)</span> is <em>visible</em> in this picture. It is the height of the flat region, normalized so that an entirely flat histogram would have height one. A spike that rises above this baseline near zero is the visible signature of real signal. If most of the mass lies in the flat region, most genes are null; if the spike is large, many genes carry signal.</p>
+<p>That the histogram itself encodes the answer is the central observation of this lecture. The development of a rigorous procedure from this visual intuition occupied statistics for several decades. The remainder of the lecture traces that development: from the Benjamini–Hochberg procedure, through Storey’s adaptive estimators, to Efron’s two-groups model and the local false discovery rate.</p>
 <hr>
 </section>
-<section id="recap-from-lecture-1" class="level2">
-<h2 class="anchored" data-anchor-id="recap-from-lecture-1">Recap from Lecture 1</h2>
-<ul>
-<li>High-dimensional data: <span class="math inline">\(p \gg n\)</span></li>
-<li>Multiple testing: <span class="math inline">\(m\)</span> simultaneous tests generate many false positives</li>
-<li>FWER (Bonferroni) is too conservative for discovery settings</li>
-<li>FDR = <span class="math inline">\(E[V / (R \vee 1)]\)</span> is the right error metric</li>
-</ul>
-<p>. . .</p>
-<p><strong>This lecture</strong>: How to control FDR, and the deeper theory behind it.</p>
-<hr>
-</section>
-<section id="the-benjaminihochberg-bh-procedure" class="level2">
-<h2 class="anchored" data-anchor-id="the-benjaminihochberg-bh-procedure">The Benjamini–Hochberg (BH) Procedure</h2>
-<p>Given <span class="math inline">\(m\)</span> hypothesis tests with <span class="math inline">\(p\)</span>-values <span class="math inline">\(p_1, \ldots, p_m\)</span>:</p>
+<section id="the-benjaminihochberg-procedure" class="level2">
+<h2 class="anchored" data-anchor-id="the-benjaminihochberg-procedure">The Benjamini–Hochberg procedure</h2>
+<p>Lecture 1 established that the family-wise error rate (FWER) is the wrong target in high-dimensional settings. The right target is the <em>false discovery rate</em> (FDR): the expected proportion of false positives among declared discoveries.</p>
+<p>Formally, suppose <span class="math inline">\(m\)</span> tests are conducted, of which <span class="math inline">\(V\)</span> produce false rejections and <span class="math inline">\(R\)</span> produce rejections of any kind. The false discovery rate is</p>
+<p><span class="math display">\[\mathrm{FDR} = \mathbb{E}\!\left[\frac{V}{R \vee 1}\right],\]</span></p>
+<p>where the convention <span class="math inline">\(R \vee 1\)</span> ensures the ratio is zero when no rejections are made. In contrast to the FWER, this quantity scales sensibly with the number of tests: a list of 500 discoveries with 25 false positives has an FDR of 5 percent, regardless of how many tests were originally performed.</p>
+<p><a href="https://doi.org/10.1111/j.2517-6161.1995.tb02031.x">Benjamini and Hochberg (1995)</a> provided a procedure that controls the FDR at any chosen level <span class="math inline">\(\alpha\)</span>. Given the ordered p-values <span class="math inline">\(p_{(1)} \leq p_{(2)} \leq \cdots \leq p_{(m)}\)</span>:</p>
 <ol type="1">
-<li>Order the <span class="math inline">\(p\)</span>-values: <span class="math inline">\(p_{(1)} \leq p_{(2)} \leq \cdots \leq p_{(m)}\)</span></li>
-<li>Find the largest <span class="math inline">\(k\)</span> such that <span class="math inline">\(p_{(k)} \leq \frac{k}{m} \alpha\)</span></li>
-<li>Reject all <span class="math inline">\(H_{0(i)}\)</span> for <span class="math inline">\(i = 1, \ldots, k\)</span></li>
+<li>Find the largest index <span class="math inline">\(k\)</span> for which <span class="math inline">\(p_{(k)} \leq \frac{k}{m}\alpha\)</span>.</li>
+<li>Reject <span class="math inline">\(H_{0(1)}, H_{0(2)}, \ldots, H_{0(k)}\)</span>.</li>
 </ol>
-<p>. . .</p>
-<p><strong>Theorem</strong> (<a href="https://doi.org/10.1111/j.2517-6161.1995.tb02031.x">Benjamini &amp; Hochberg, 1995</a>): Under independence, <span class="math inline">\(\text{FDR} \leq \frac{m_0}{m} \alpha \leq \alpha\)</span>.</p>
+<p>The procedure has a transparent geometric interpretation. Plotting the ordered p-values <span class="math inline">\(p_{(i)}\)</span> against <span class="math inline">\(i/m\)</span> yields a step function that begins near zero and rises toward unity. The Benjamini–Hochberg procedure draws a straight line through the origin with slope <span class="math inline">\(\alpha\)</span> and rejects every hypothesis whose ordered p-value lies below or on the line at the largest crossing. The original theorem guarantees that, under independence of the test statistics,</p>
+<p><span class="math display">\[\mathrm{FDR} \leq \frac{m_0}{m}\alpha \leq \alpha,\]</span></p>
+<p>where <span class="math inline">\(m_0\)</span> denotes the (unknown) number of true nulls.</p>
+<p>The independence assumption is restrictive. Gene expression measurements are correlated by biology — co-regulated transcripts vary together — and the original theorem does not directly apply. <a href="https://doi.org/10.1214/aos/1013699998">Benjamini and Yekutieli (2001)</a> established that under arbitrary dependence the procedure remains valid if <span class="math inline">\(\alpha\)</span> is replaced by <span class="math inline">\(\alpha / \sum_{i=1}^m i^{-1} \approx \alpha / \ln m\)</span>. This adjustment is severe and is rarely adopted in practice. A more usable result is that under positive regression dependency on a subset (PRDS) — a condition often satisfied in genomic applications — the original BH procedure controls FDR at <span class="math inline">\(\alpha\)</span> without modification.</p>
 <hr>
 </section>
-<section id="bh-geometric-interpretation" class="level2">
-<h2 class="anchored" data-anchor-id="bh-geometric-interpretation">BH: Geometric Interpretation</h2>
-<p>Plot <span class="math inline">\(p_{(i)}\)</span> vs.&nbsp;<span class="math inline">\(i/m\)</span>. The BH procedure finds the rightmost point where the <span class="math inline">\(p\)</span>-value curve dips below the line <span class="math inline">\(y = \alpha \cdot x\)</span>.</p>
-<div id="04137f25" class="cell" data-fig-height="4" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>m, m1 <span class="op">=</span> <span class="dv">1000</span>, <span class="dv">50</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>p_null <span class="op">=</span> rng.uniform(size<span class="op">=</span>m <span class="op">-</span> m1)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>p_alt <span class="op">=</span> rng.beta(<span class="fl">0.1</span>, <span class="dv">1</span>, size<span class="op">=</span>m1)  <span class="co"># small p-values for alternatives</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>pvals_sim <span class="op">=</span> np.sort(np.concatenate([p_null, p_alt]))</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">4</span>))</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>ax.scatter(np.arange(<span class="dv">1</span>, m <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> m, pvals_sim, s<span class="op">=</span><span class="dv">3</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="fl">0.10</span>], color<span class="op">=</span><span class="st">"red"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"BH line (slope = α)"</span>)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"i / m"</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Ordered p-value"</span>)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"BH procedure (α = 0.10)"</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="lecture2_files/figure-html/cell-2-output-1.png" width="662" height="374" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<hr>
-</section>
-<section id="bh-under-dependence" class="level2">
-<h2 class="anchored" data-anchor-id="bh-under-dependence">BH Under Dependence</h2>
-<p>The original BH result assumes independence of test statistics. In genomics, genes are often correlated.</p>
-<p>. . .</p>
-<p><a href="https://doi.org/10.1214/aos/1013699998"><strong>Benjamini &amp; Yekutieli (2001)</strong></a>: Under arbitrary dependence, replace <span class="math inline">\(\alpha\)</span> with <span class="math inline">\(\alpha / \sum_{i=1}^m 1/i \approx \alpha / \ln(m)\)</span>.</p>
-<p>. . .</p>
-<p><strong>But</strong>: Under positive regression dependency on a subset (PRDS)—a condition often satisfied in practice—the original BH procedure still controls FDR at level <span class="math inline">\(\alpha\)</span>.</p>
-<hr>
-</section>
-</section>
-<section id="the-prior-you-didnt-know-you-had" class="level1 centered">
-<h1 class="centered">The Prior You Didn’t Know You Had</h1>
-<hr>
-<section id="steins-paradox-borrowing-strength" class="level2">
-<h2 class="anchored" data-anchor-id="steins-paradox-borrowing-strength">Stein’s Paradox: Borrowing Strength</h2>
-<p>In 1956, <a href="https://projecteuclid.org/proceedings/berkeley-symposium-on-mathematical-statistics-and-probability/Proceedings-of-the-Third-Berkeley-Symposium-on-Mathematical-Statistics-and/Chapter/Inadmissibility-of-the-Usual-Estimator-for-the-Mean-of-a/bsmsp/1200501656">Charles Stein</a> established a result that reshaped the statistical landscape:</p>
-<p><strong>The sample mean is inadmissible for estimating 3 or more means simultaneously.</strong></p>
-<p>. . .</p>
-<p><a href="https://www.jstor.org/stable/24953895">Efron &amp; Morris (1977)</a> illustrated the principle with baseball. End-of-season batting averages are better predicted by <strong>shrinking each player’s early-season average toward the grand mean across players</strong> — despite the players being unrelated.</p>
-<p>. . .</p>
-<p>The James–Stein estimator (<a href="https://projecteuclid.org/proceedings/berkeley-symposium-on-mathematical-statistics-and-probability/Proceedings-of-the-Fourth-Berkeley-Symposium-on-Mathematical-Statistics-and/Chapter/Estimation-with-Quadratic-Loss/bsmsp/1200512173">James &amp; Stein, 1961</a>): <span class="math inline">\(\hat{\theta}_i^{JS} = \bar{y} + \left(1 - \frac{(d-3)\sigma^2}{\sum_j (y_j - \bar{y})^2}\right)(y_i - \bar{y})\)</span>,</p>
-<p>where <span class="math inline">\(d \geq 4\)</span> is the number of means estimated.</p>
-<p>. . .</p>
-<p>This is the founding insight of <strong>empirical Bayes</strong>: the other observations carry information about the observation under analysis. Efron generalized the idea — from baseball averages to 10,000 genes.</p>
-<hr>
-</section>
-<section id="from-baseball-to-genes" class="level2">
-<h2 class="anchored" data-anchor-id="from-baseball-to-genes">From Baseball to Genes</h2>
-<p>In classical statistics each gene is tested in isolation; the test for gene #4,237 uses no information from genes #1–4,236.</p>
-<p>. . .</p>
-<p>Efron observed that, when 10,000 genes are tested simultaneously, the <strong>other 9,999 results carry information about any particular gene</strong> — just as other batters’ averages refine the estimate for any single batter.</p>
-<p>. . .</p>
-<p>If most genes show no signal, the prior probability that any particular gene is non-null is low. The data themselves reveal the prior; the analyst need not specify one.</p>
-<p>. . .</p>
+<section id="borrowing-strength-from-stein-to-empirical-bayes" class="level2">
+<h2 class="anchored" data-anchor-id="borrowing-strength-from-stein-to-empirical-bayes">Borrowing strength: from Stein to empirical Bayes</h2>
+<p>The two-sample tests examined so far treat each gene in isolation: the test for gene 4,237 makes no use of the data from genes 1 through 4,236. A different perspective on high-dimensional inference begins with the recognition that the other tests, in aggregate, carry information about any individual one.</p>
+<p>The historical anchor for this idea is <a href="https://projecteuclid.org/proceedings/berkeley-symposium-on-mathematical-statistics-and-probability/Proceedings-of-the-Third-Berkeley-Symposium-on-Mathematical-Statistics-and/Chapter/Inadmissibility-of-the-Usual-Estimator-for-the-Mean-of-a/bsmsp/1200501656">Stein’s (1956)</a> result on the inadmissibility of the sample mean. Suppose one observes <span class="math inline">\(y_1, \ldots, y_d\)</span> with <span class="math inline">\(y_i \sim N(\theta_i, 1)\)</span> and wishes to estimate the vector <span class="math inline">\((\theta_1, \ldots, \theta_d)\)</span> under squared-error loss. The natural estimator is <span class="math inline">\(\hat\theta_i = y_i\)</span>. Stein proved that this estimator is <em>inadmissible</em> whenever <span class="math inline">\(d \geq 3\)</span>: there exists another estimator with strictly smaller risk for every <span class="math inline">\(\theta\)</span>. The James–Stein estimator (<a href="https://projecteuclid.org/proceedings/berkeley-symposium-on-mathematical-statistics-and-probability/Proceedings-of-the-Fourth-Berkeley-Symposium-on-Mathematical-Statistics-and/Chapter/Estimation-with-Quadratic-Loss/bsmsp/1200512173">James and Stein, 1961</a>) takes the form</p>
+<p><span class="math display">\[\hat\theta_i^{\mathrm{JS}} = \bar y + \left(1 - \frac{(d-3)\sigma^2}{\sum_j (y_j - \bar y)^2}\right)(y_i - \bar y),\]</span></p>
+<p>shrinking each individual estimate toward the grand mean of all observations.</p>
+<p><a href="https://www.jstor.org/stable/24953895">Efron and Morris (1977)</a> demonstrated the practical force of this result with a baseball illustration: end-of-season batting averages are predicted more accurately by shrinking each player’s early-season average toward the grand mean across players than by using each player’s own data alone. The players are independent in any biological or causal sense, yet their data jointly improve every individual estimate.</p>
+<p>This is the founding insight of empirical Bayes. When many parallel inferences are conducted under exchangeable conditions, the aggregate of observations carries information about any single one — information that classical, one-at-a-time procedures discard. In the high-dimensional setting, where ten thousand genes are tested simultaneously, the prior probability that any particular gene is non-null can be inferred from the population of tests. The data themselves reveal the prior; the analyst is not required to specify one.</p>
 <blockquote class="blockquote">
-<p>“Letting the data determine the prior turns Bayesian inference from a subjective into a largely objective technique.” — Efron, <a href="https://doi.org/10.1017/CBO9780511761362"><em>Large-Scale Inference</em></a>, Ch. 1</p>
+<p>“Letting the data determine the prior turns Bayesian inference from a subjective into a largely objective technique.” — Efron, <a href="https://doi.org/10.1017/CBO9780511761362"><em>Large-Scale Inference</em></a>, Ch. 1.</p>
 </blockquote>
 <hr>
 </section>
-<section id="storeys-approach-estimating-pi_0" class="level2">
-<h2 class="anchored" data-anchor-id="storeys-approach-estimating-pi_0">Storey’s Approach: Estimating <span class="math inline">\(\pi_0\)</span></h2>
-<p>BH controls FDR at level <span class="math inline">\(\frac{m_0}{m}\alpha\)</span>, which is conservative when <span class="math inline">\(m_0 &lt; m\)</span>.</p>
-<p><a href="https://doi.org/10.1111/1467-9868.00346"><strong>Storey (2002)</strong></a>: Estimate <span class="math inline">\(\pi_0 = m_0/m\)</span> and use an adaptive threshold.</p>
-<p>For a tuning parameter <span class="math inline">\(\lambda\)</span> (e.g., <span class="math inline">\(\lambda = 0.5\)</span>):</p>
-<p><span class="math display">\[\hat{\pi}_0(\lambda) = \frac{\#\{p_i &gt; \lambda\}}{m(1 - \lambda)}\]</span></p>
-<p>. . .</p>
-<p><strong>Intuition</strong>: <span class="math inline">\(p\)</span>-values above <span class="math inline">\(\lambda\)</span> are mostly from true nulls (which are uniform). Count them.</p>
-<p>The R package <code>qvalue</code> implements this with automatic <span class="math inline">\(\lambda\)</span> selection.</p>
-<hr>
-</section>
-<section id="the-q-value" class="level2">
-<h2 class="anchored" data-anchor-id="the-q-value">The <span class="math inline">\(q\)</span>-value</h2>
-<p><strong>Definition</strong> (<a href="https://doi.org/10.1214/aos/1074290335">Storey, 2003</a>): The <span class="math inline">\(q\)</span>-value of test <span class="math inline">\(i\)</span> is the minimum FDR at which test <span class="math inline">\(i\)</span> would be called significant.</p>
-<p><span class="math display">\[q_i = \min_{t \geq p_i} \widehat{\text{FDR}}(t)\]</span></p>
-<p>. . .</p>
-<p>Analogous to a <span class="math inline">\(p\)</span>-value, but for FDR instead of Type I error:</p>
-<ul>
-<li><span class="math inline">\(p\)</span>-value: “If I reject this one test, what’s the false positive probability?”</li>
-<li><span class="math inline">\(q\)</span>-value: “If I reject all tests at least this significant, what fraction are false positives?”</li>
-</ul>
+<section id="storeys-pi_0-and-the-q-value" class="level2">
+<h2 class="anchored" data-anchor-id="storeys-pi_0-and-the-q-value">Storey’s <span class="math inline">\(\pi_0\)</span> and the <span class="math inline">\(q\)</span>-value</h2>
+<p>The Benjamini–Hochberg procedure controls FDR at <span class="math inline">\(\alpha m_0/m\)</span>, which is conservative whenever <span class="math inline">\(m_0 &lt; m\)</span>. <a href="https://doi.org/10.1111/1467-9868.00346">Storey (2002)</a> proposed an adaptive procedure that estimates <span class="math inline">\(\pi_0 = m_0/m\)</span> from the data and uses the resulting estimate to recover the additional power that BH leaves on the table.</p>
+<p>The estimator exploits the same observation as the histogram diagnostic. Under the null, p-values are uniform; the distribution of large p-values is therefore approximately uniform regardless of how many alternatives are present. For a tuning parameter <span class="math inline">\(\lambda\)</span>, typically <span class="math inline">\(\lambda = 0.5\)</span>,</p>
+<p><span class="math display">\[\hat\pi_0(\lambda) = \frac{\#\{p_i &gt; \lambda\}}{m(1-\lambda)}.\]</span></p>
+<p>The numerator counts p-values above <span class="math inline">\(\lambda\)</span>; the denominator is the expected number of such p-values under the null. The R package <code>qvalue</code> automates the choice of <span class="math inline">\(\lambda\)</span>.</p>
+<p>Storey (<a href="https://doi.org/10.1214/aos/1074290335">2003</a>) defined the <span class="math inline">\(q\)</span>-value as the multiple-testing analogue of the p-value:</p>
+<p><span class="math display">\[q_i = \min_{t \geq p_i} \widehat{\mathrm{FDR}}(t).\]</span></p>
+<p>The <span class="math inline">\(q\)</span>-value of test <span class="math inline">\(i\)</span> is the smallest FDR at which test <span class="math inline">\(i\)</span> would be declared significant. Operationally, it occupies the same role as a p-value but answers a different question: a p-value reports the per-test false-positive probability under the null; a <span class="math inline">\(q\)</span>-value reports the expected proportion of false discoveries among rejections at least as significant as the one observed.</p>
 <hr>
 </section>
 <section id="efrons-two-groups-model" class="level2">
-<h2 class="anchored" data-anchor-id="efrons-two-groups-model">Efron’s Two-Groups Model</h2>
-<p>A more foundational perspective (<a href="https://doi.org/10.1198/016214504000000089">Efron, 2004, <em>JASA</em></a>; developed fully in <a href="https://doi.org/10.1214/07-STS236">Efron, 2008, <em>Statistical Science</em></a>; and <a href="https://doi.org/10.1017/CBO9780511761362">Efron, 2010, <em>Large-Scale Inference</em></a>, Ch. 2–4).</p>
-<p>Each of the <span class="math inline">\(m\)</span> cases belongs to one of two groups:</p>
-<ul>
-<li><strong>Null group</strong> (proportion <span class="math inline">\(\pi_0\)</span>): <span class="math inline">\(z_i \sim f_0(z)\)</span>, typically <span class="math inline">\(N(0,1)\)</span></li>
-<li><strong>Non-null group</strong> (proportion <span class="math inline">\(1 - \pi_0\)</span>): <span class="math inline">\(z_i \sim f_1(z)\)</span></li>
-</ul>
-<p>The <strong>mixture density</strong> of the observed <span class="math inline">\(z\)</span>-scores is:</p>
-<p><span class="math display">\[f(z) = \pi_0 f_0(z) + (1 - \pi_0) f_1(z)\]</span></p>
+<h2 class="anchored" data-anchor-id="efrons-two-groups-model">Efron’s two-groups model</h2>
+<p>A more foundational perspective on multiple testing was developed by <a href="https://doi.org/10.1198/016214504000000089">Efron (2004)</a>, elaborated in <a href="https://doi.org/10.1214/07-STS236">Efron (2008)</a>, and consolidated in <a href="https://doi.org/10.1017/CBO9780511761362"><em>Large-Scale Inference</em></a>. The two-groups model posits that each of the <span class="math inline">\(m\)</span> tests belongs to one of two latent groups: a null group, with prior probability <span class="math inline">\(\pi_0\)</span> and density <span class="math inline">\(f_0\)</span> (typically <span class="math inline">\(N(0,1)\)</span> for <span class="math inline">\(z\)</span>-scores), and a non-null group, with prior probability <span class="math inline">\(1-\pi_0\)</span> and density <span class="math inline">\(f_1\)</span>. The marginal density of the observed test statistics is the mixture</p>
+<p><span class="math display">\[f(z) = \pi_0 f_0(z) + (1-\pi_0)f_1(z).\]</span></p>
+<p>The framework unifies the procedures discussed above. With <span class="math inline">\(m\)</span> in the thousands, <span class="math inline">\(f(z)\)</span> can be estimated nonparametrically — for instance by a histogram or by Lindsey’s method, which fits a Poisson regression to binned counts. Once <span class="math inline">\(f\)</span> is in hand, <span class="math inline">\(\pi_0\)</span> can be estimated from the central peak (where <span class="math inline">\(f_0\)</span> dominates) and <span class="math inline">\(f_1\)</span> recovered by subtraction.</p>
+<p>The entire pipeline is empirical Bayes: the aggregate data are used to estimate the prior <span class="math inline">\(\pi_0\)</span> and the alternative density <span class="math inline">\(f_1\)</span>, and Bayes’s theorem is then applied case by case.</p>
 <hr>
-</section>
-<section id="estimating-the-mixture" class="level2">
-<h2 class="anchored" data-anchor-id="estimating-the-mixture">Estimating the Mixture</h2>
-<section id="key-idea" class="level3">
-<h3 class="anchored" data-anchor-id="key-idea">Key idea</h3>
-<p>We observe <span class="math inline">\(m\)</span> <span class="math inline">\(z\)</span>-scores. With <span class="math inline">\(m\)</span> large (thousands), we can <strong>estimate</strong> <span class="math inline">\(f(z)\)</span> nonparametrically.</p>
-<p>. . .</p>
-<p><strong>Efron’s approach</strong>:</p>
-<ol type="1">
-<li>Estimate <span class="math inline">\(f(z)\)</span> from a histogram or density estimate of the observed <span class="math inline">\(z\)</span>-scores</li>
-<li>Assume <span class="math inline">\(f_0\)</span> is known (or estimate it—the “empirical null”)</li>
-<li>Estimate <span class="math inline">\(\pi_0\)</span> from the central peak of the histogram</li>
-</ol>
-<p>. . .</p>
-<p>This is <strong>empirical Bayes</strong>: we use the aggregate data to estimate the prior, then apply Bayes’ rule case by case.</p>
-<hr>
-</section>
 </section>
 <section id="the-local-false-discovery-rate" class="level2">
-<h2 class="anchored" data-anchor-id="the-local-false-discovery-rate">The Local False Discovery Rate</h2>
-<p><span class="math display">\[\text{fdr}(z) = P(\text{null} \mid Z = z) = \frac{\pi_0 f_0(z)}{f(z)}\]</span></p>
-<p>. . .</p>
-<p>This is a <strong>posterior probability</strong>—the chance that a specific case with <span class="math inline">\(z\)</span>-score <span class="math inline">\(z\)</span> is a false discovery.</p>
-<p>Contrast with the (tail-area) FDR, which is an expected proportion over a set of rejections.</p>
-<p>. . .</p>
-<section id="relationship" class="level3">
-<h3 class="anchored" data-anchor-id="relationship">Relationship</h3>
-<p><span class="math display">\[\text{FDR}(z_0) = E[\text{fdr}(Z) \mid Z \geq z_0] = \frac{\int_{z_0}^\infty \text{fdr}(z) f(z) \, dz}{\int_{z_0}^\infty f(z) \, dz}\]</span></p>
-<p>The tail-area FDR is the average of the local FDR over the rejection region.</p>
+<h2 class="anchored" data-anchor-id="the-local-false-discovery-rate">The local false discovery rate</h2>
+<p>The two-groups model affords a refinement that the tail-area FDR cannot: a per-test posterior probability of being null. Define</p>
+<p><span class="math display">\[\mathrm{fdr}(z) = \Pr(\mathrm{null} \mid Z = z) = \frac{\pi_0 f_0(z)}{f(z)}.\]</span></p>
+<p>The local false discovery rate <span class="math inline">\(\mathrm{fdr}(z)\)</span> is, for any specific test with statistic <span class="math inline">\(z\)</span>, the probability that the null hypothesis is true given that statistic. The tail-area FDR is its expectation over a rejection region:</p>
+<p><span class="math display">\[\mathrm{FDR}(z_0) = \mathbb{E}[\mathrm{fdr}(Z) \mid Z \geq z_0] = \frac{\int_{z_0}^\infty \mathrm{fdr}(z) f(z)\, dz}{\int_{z_0}^\infty f(z)\, dz}.\]</span></p>
+<p>A practical consequence: two tests with the same tail-area FDR can have very different local FDRs. A <span class="math inline">\(z\)</span>-score at the boundary of a rejection region carries a high posterior probability of being null; a <span class="math inline">\(z\)</span>-score deep in the tail carries a much lower one. The local FDR is the more informative summary at the level of individual tests.</p>
 <hr>
 </section>
+<section id="a-cautionary-case-the-empirical-null" class="level2">
+<h2 class="anchored" data-anchor-id="a-cautionary-case-the-empirical-null">A cautionary case: the empirical null</h2>
+<p>The two-groups model assumes that <span class="math inline">\(f_0\)</span> is known. In a textbook calculation, <span class="math inline">\(z\)</span>-scores derived from t-statistics with appropriate degrees of freedom are taken to be <span class="math inline">\(N(0,1)\)</span> under the null. Real data frequently fail this assumption.</p>
+<p>Efron analyzed a prostate-cancer microarray study (<a href="https://doi.org/10.1016/S1535-6108(02)00030-2">Singh et al., 2002</a>) consisting of 6,033 genes measured on 102 patients. The test statistics were converted to <span class="math inline">\(z\)</span>-scores, with the expectation that under the null they would follow <span class="math inline">\(N(0,1)\)</span>. The empirical histogram had a central peak that was wider than <span class="math inline">\(N(0,1)\)</span> would predict: the appropriate null was closer to <span class="math inline">\(N(\hat\delta_0, \hat\sigma_0^2)\)</span> with <span class="math inline">\(\hat\sigma_0 &gt; 1\)</span>.</p>
+<p>Applying the theoretical <span class="math inline">\(N(0,1)\)</span> null to such data overstates significance. Genes whose <span class="math inline">\(z\)</span>-scores fall in the inflated tails of the narrow theoretical null are declared discoveries even though they are consistent with the wider true null. The empirical null — fitted to the central portion of the observed distribution — corrects this by acknowledging that unobserved sources of variation (batch effects, latent population structure, correlation among tests) inflate the effective null variance.</p>
+<p>The diagnostic protocol is straightforward: estimate <span class="math inline">\(f_0\)</span> from the central portion of the histogram and verify whether <span class="math inline">\(\hat\sigma_0 \approx 1\)</span>. When it is not, use the empirical null in place of the theoretical one. The R package <code>locfdr</code> implements the full pipeline.</p>
+<hr>
 </section>
-<section id="connections-to-bayesian-thinking" class="level2">
-<h2 class="anchored" data-anchor-id="connections-to-bayesian-thinking">Connections to Bayesian Thinking</h2>
-<p>The two-groups model is inherently Bayesian:</p>
+<section id="when-does-this-framework-apply" class="level2">
+<h2 class="anchored" data-anchor-id="when-does-this-framework-apply">When does this framework apply?</h2>
+<p>The empirical-Bayes machinery requires three conditions. The number of tests <span class="math inline">\(m\)</span> must be large enough — at least several hundred, ideally several thousand — to support nonparametric estimation of <span class="math inline">\(f(z)\)</span>. The tests must be exchangeable, in the sense that they share the same null distribution and similar noise structure; mixing fundamentally different measurements (gene expression with DNA methylation, say) violates this requirement. Finally, the two-groups mixture must be a reasonable approximation to the data-generating process.</p>
+<p>Failures of these conditions are diagnosable. Small <span class="math inline">\(m\)</span> produces noisy estimates of <span class="math inline">\(f\)</span> and, consequently, of <span class="math inline">\(\hat\pi_0\)</span> and the local FDR. Strong correlation among tests can distort the empirical null; in the worst case, no decomposition of <span class="math inline">\(f\)</span> into a null and an alternative is interpretable. Heterogeneity across tests can render the null density itself ill-defined.</p>
+<p>A practical decision framework, scaled to the number of tests and the inferential goal, is:</p>
 <ul>
-<li><strong>Prior</strong>: <span class="math inline">\(P(\text{null}) = \pi_0\)</span></li>
-<li><strong>Likelihood</strong>: <span class="math inline">\(f_0(z)\)</span> under the null, <span class="math inline">\(f_1(z)\)</span> under the alternative</li>
-<li><strong>Posterior</strong>: <span class="math inline">\(\text{fdr}(z) = P(\text{null} \mid z)\)</span></li>
-</ul>
-<p>. . .</p>
-<p>But it’s <strong>empirical Bayes</strong>: instead of specifying a prior, we estimate <span class="math inline">\(\pi_0\)</span> and <span class="math inline">\(f_1\)</span> from the data.</p>
-<hr>
-</section>
-</section>
-<section id="when-n01-lies-to-you" class="level1 centered">
-<h1 class="centered">When <span class="math inline">\(N(0,1)\)</span> Lies to You</h1>
-<hr>
-<section id="a-cautionary-case-efrons-prostate-cancer-reanalysis" class="level2">
-<h2 class="anchored" data-anchor-id="a-cautionary-case-efrons-prostate-cancer-reanalysis">A Cautionary Case: Efron’s Prostate Cancer Reanalysis</h2>
-<p>Efron analyzed a prostate-cancer microarray study (<a href="https://doi.org/10.1016/S1535-6108(02)00030-2">Singh et al., 2002</a>): 6,033 genes, 102 patients.</p>
-<p>The test statistics were converted to <span class="math inline">\(z\)</span>-scores under the expectation that they would follow <span class="math inline">\(N(0,1)\)</span> under the null. The central peak of the empirical histogram was instead <strong>wider than expected</strong>: the empirical null was closer to <span class="math inline">\(N(\hat{\delta}_0, \hat{\sigma}_0^2)\)</span> with <span class="math inline">\(\hat{\sigma}_0 &gt; 1\)</span>.</p>
-<p>. . .</p>
-<p>Applying the theoretical <span class="math inline">\(N(0,1)\)</span> null would overstate significance: genes whose <span class="math inline">\(z\)</span>-scores fell in the (incorrectly narrow) tails would be declared discoveries despite being consistent with the actual, wider null.</p>
-<p>. . .</p>
-<p>The empirical null corrected the analysis and demonstrated that the theoretical <span class="math inline">\(N(0,1)\)</span> null cannot be assumed without verification. The estimated parameters depend on the dataset and procedure; the central observation is that <span class="math inline">\(\hat{\sigma}_0 \neq 1\)</span> in many real applications.</p>
-<hr>
-</section>
-<section id="the-empirical-null" class="level2">
-<h2 class="anchored" data-anchor-id="the-empirical-null">The Empirical Null</h2>
-<section id="why-the-theoretical-null-might-be-wrong" class="level3">
-<h3 class="anchored" data-anchor-id="why-the-theoretical-null-might-be-wrong">Why the theoretical null might be wrong</h3>
-<p>Efron observed that in many real datasets, the central peak of the <span class="math inline">\(z\)</span>-score histogram is <strong>wider</strong> than <span class="math inline">\(N(0,1)\)</span>.</p>
-<p>Possible causes:</p>
-<ul>
-<li>Unobserved covariates (batch effects, population structure)</li>
-<li>Correlation among tests</li>
-<li>Model misspecification</li>
-</ul>
-<p>. . .</p>
-</section>
-<section id="empirical-null" class="level3">
-<h3 class="anchored" data-anchor-id="empirical-null">Empirical null</h3>
-<p>Fit <span class="math inline">\(f_0(z) = N(\hat{\delta}_0, \hat{\sigma}_0^2)\)</span> to the central portion of the observed <span class="math inline">\(z\)</span>-score distribution.</p>
-<p>When <span class="math inline">\(\hat{\sigma}_0 &gt; 1\)</span>, the theoretical null is too narrow and the analysis would yield an excess of false discoveries.</p>
-<hr>
-</section>
-</section>
-<section id="empirical-null-illustration" class="level2">
-<h2 class="anchored" data-anchor-id="empirical-null-illustration">Empirical Null: Illustration</h2>
-<div id="287b3715" class="cell" data-fig-height="4.5" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> norm</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">123</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>m, m1 <span class="op">=</span> <span class="dv">5000</span>, <span class="dv">200</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>z_null <span class="op">=</span> rng.normal(loc<span class="op">=</span><span class="fl">0.2</span>, scale<span class="op">=</span><span class="fl">1.3</span>, size<span class="op">=</span>m <span class="op">-</span> m1)  <span class="co"># empirical null ≠ N(0,1)</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>z_alt <span class="op">=</span> rng.normal(loc<span class="op">=</span><span class="dv">3</span>, scale<span class="op">=</span><span class="dv">1</span>, size<span class="op">=</span>m1)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> np.concatenate([z_null, z_alt])</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>ax.hist(z, bins<span class="op">=</span><span class="dv">80</span>, density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"lightblue"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>x_grid <span class="op">=</span> np.linspace(z.<span class="bu">min</span>(), z.<span class="bu">max</span>(), <span class="dv">300</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>ax.plot(x_grid, norm.pdf(x_grid, <span class="dv">0</span>, <span class="dv">1</span>), color<span class="op">=</span><span class="st">"red"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, linestyle<span class="op">=</span><span class="st">"--"</span>,</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="st">"Theoretical N(0,1)"</span>)</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>ax.plot(x_grid, norm.pdf(x_grid, <span class="fl">0.2</span>, <span class="fl">1.3</span>), color<span class="op">=</span><span class="st">"blue"</span>, linewidth<span class="op">=</span><span class="dv">2</span>,</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="st">"Empirical null N(0.2, 1.3²)"</span>)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Observed z-scores with empirical null"</span>)</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"z-score"</span>)</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="lecture2_files/figure-html/cell-3-output-1.png" width="662" height="422" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<hr>
-</section>
-<section id="efrons-estimation-procedure" class="level2">
-<h2 class="anchored" data-anchor-id="efrons-estimation-procedure">Efron’s Estimation Procedure</h2>
-<section id="step-by-step-efron-large-scale-inference-ch.-45" class="level3">
-<h3 class="anchored" data-anchor-id="step-by-step-efron-large-scale-inference-ch.-45">Step by step (Efron, <em>Large-Scale Inference</em>, Ch. 4–5)</h3>
-<ol type="1">
-<li>Convert test statistics to <span class="math inline">\(z\)</span>-scores: <span class="math inline">\(z_i = \Phi^{-1}(1 - p_i)\)</span> or use the statistic directly</li>
-<li>Estimate <span class="math inline">\(f(z)\)</span> using Poisson regression on binned counts (Lindsey’s method)</li>
-<li>Estimate <span class="math inline">\(\pi_0\)</span> and <span class="math inline">\(f_0\)</span> (theoretical or empirical null)</li>
-<li>Compute <span class="math inline">\(\widehat{\text{fdr}}(z) = \hat{\pi}_0 \hat{f}_0(z) / \hat{f}(z)\)</span></li>
-</ol>
-<p>. . .</p>
-<p>The R package <code>locfdr</code> automates this.</p>
-<hr>
-</section>
-</section>
-<section id="when-does-this-work" class="level2">
-<h2 class="anchored" data-anchor-id="when-does-this-work">When Does This Work?</h2>
-<section id="requirements-for-empirical-bayes-fdr" class="level3">
-<h3 class="anchored" data-anchor-id="requirements-for-empirical-bayes-fdr">Requirements for empirical Bayes FDR</h3>
-<ol type="1">
-<li><strong>Large <span class="math inline">\(m\)</span></strong>: Need thousands of tests to estimate <span class="math inline">\(f(z)\)</span> well</li>
-<li><strong>Exchangeability</strong>: Tests should be “comparable” (same type of measurement, similar noise structure)</li>
-<li><strong>Mixture model is reasonable</strong>: The two-groups framework is a good approximation</li>
-</ol>
-<p>. . .</p>
-</section>
-<section id="when-it-can-fail" class="level3">
-<h3 class="anchored" data-anchor-id="when-it-can-fail">When it can fail</h3>
-<ul>
-<li>Small <span class="math inline">\(m\)</span> (say <span class="math inline">\(&lt; 100\)</span>): not enough data to estimate the mixture</li>
-<li>Strong correlation structure that distorts the null distribution</li>
-<li>Heterogeneous tests (mixing gene expression with methylation, for example)</li>
+<li>Few tests (1–20): the FWER, controlled by Bonferroni or Holm, is the right target.</li>
+<li>Many tests with confirmatory goals: FWER procedures remain appropriate.</li>
+<li>Many tests for discovery (100–1,000): Benjamini–Hochberg or Storey’s <span class="math inline">\(q\)</span>-values.</li>
+<li>Very many tests (1,000+): Efron’s two-groups model and local FDR.</li>
 </ul>
 <hr>
 </section>
-</section>
-<section id="multiple-testing-in-practice-a-decision-framework" class="level2">
-<h2 class="anchored" data-anchor-id="multiple-testing-in-practice-a-decision-framework">Multiple Testing in Practice: A Decision Framework</h2>
-<div class="cell" data-layout-align="default">
-<div class="cell-output-display">
-<div>
-<p></p><figure class="figure"><p></p>
-<div>
-<pre class="mermaid mermaid-js">flowchart TD
-    A[How many tests?] --&gt;|Few: 1–20| B[Use FWER: Bonferroni or Holm]
-    A --&gt;|Many: 100+| C{Goal?}
-    C --&gt;|Confirmation| D[Use FWER: Bonferroni-Holm]
-    C --&gt;|Discovery| E{How many tests?}
-    E --&gt;|100–1000| F[BH or Storey q-values]
-    E --&gt;|1000+| G[Efron local FDR / empirical Bayes]
-</pre>
-</div>
-<p></p><figcaption> Choosing an error rate</figcaption> </figure><p></p>
-</div>
-</div>
-</div>
-<hr>
-</section>
-<section id="software-ecosystem" class="level2">
-<h2 class="anchored" data-anchor-id="software-ecosystem">Software Ecosystem</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 42%">
-<col style="width: 15%">
-<col style="width: 42%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>R</th>
-<th>Python</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Bonferroni / Holm</td>
-<td><code>p.adjust()</code></td>
-<td><code>statsmodels.stats.multitest</code></td>
-</tr>
-<tr class="even">
-<td>Benjamini–Hochberg</td>
-<td><code>p.adjust(method="BH")</code></td>
-<td><code>multipletests(method='fdr_bh')</code></td>
-</tr>
-<tr class="odd">
-<td>Storey <span class="math inline">\(q\)</span>-values</td>
-<td><code>qvalue::qvalue()</code></td>
-<td><code>-- (custom or qvalue port)</code></td>
-</tr>
-<tr class="even">
-<td>Local FDR</td>
-<td><code>locfdr::locfdr()</code></td>
-<td><code>-- (custom implementation)</code></td>
-</tr>
-<tr class="odd">
-<td>Empirical Bayes (limma)</td>
-<td><code>limma::eBayes()</code></td>
-<td><code>-- (use R via rpy2)</code></td>
-</tr>
-</tbody>
-</table>
-<hr>
-</section>
-<section id="summary" class="level2">
-<h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<ol type="1">
-<li><strong>BH procedure</strong>: Simple; controls FDR under independence or PRDS. The default tool for high-dimensional inference.</li>
-<li><strong>Storey’s <span class="math inline">\(q\)</span>-value</strong>: Adaptive FDR control using <span class="math inline">\(\hat{\pi}_0\)</span>. More powerful when most tests are null.</li>
-<li><strong>Efron’s two-groups model</strong>: The foundational framework. The mixture <span class="math inline">\(f = \pi_0 f_0 + (1-\pi_0)f_1\)</span> unifies the procedures above.</li>
-<li><strong>Local FDR</strong>: A test-specific posterior probability of being null — the most informative single summary at the level of individual tests.</li>
-<li><strong>Empirical null</strong>: Always assess whether <span class="math inline">\(f_0 = N(0,1)\)</span> is appropriate; estimate it from the data when it is not.</li>
-</ol>
-<section id="up-next" class="level3">
-<h3 class="anchored" data-anchor-id="up-next">Up Next</h3>
-<p><strong>Lab 2</strong>: Apply BH, <span class="math inline">\(q\)</span>-values, and local FDR to a real gene-expression dataset.</p>
+<section id="summary-and-outlook" class="level2">
+<h2 class="anchored" data-anchor-id="summary-and-outlook">Summary and outlook</h2>
+<p>Five points constitute the lecture’s content. First, the false discovery rate is the right inferential target when the number of tests is large and the goal is discovery rather than confirmation. Second, the Benjamini–Hochberg procedure controls FDR under independence (and under PRDS), and remains the default tool. Third, Storey’s adaptive estimator of <span class="math inline">\(\pi_0\)</span> produces the <span class="math inline">\(q\)</span>-value, the natural multiple-testing analogue of the p-value. Fourth, Efron’s two-groups model provides the unifying framework: <span class="math inline">\(f = \pi_0 f_0 + (1-\pi_0)f_1\)</span> subsumes all of the procedures above and motivates the local FDR as the most informative per-test summary. Fifth, the assumed null distribution <span class="math inline">\(f_0\)</span> should always be checked against the empirical one; the prostate-cancer reanalysis is the standard cautionary case.</p>
+<p>Lab 2 applies these procedures to the Golub dataset directly. Day 2 turns from inference about individual variables to the discovery of low-dimensional structure in high-dimensional data — the geometry of dimension reduction.</p>
 
 
-<!-- -->
-
-</section>
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -798,57 +446,6 @@ window.Quarto = {
         container: window.document.getElementById('quarto-embedded-source-code-modal')
       });
       clipboardModal.on('success', onCopySuccess);
-    }
-    const viewSource = window.document.getElementById('quarto-view-source') ||
-                       window.document.getElementById('quarto-code-tools-source');
-    if (viewSource) {
-      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
-      viewSource.addEventListener("click", function(e) {
-        if (sourceUrl) {
-          // rstudio viewer pane
-          if (/\bcapabilities=\b/.test(window.location)) {
-            window.open(sourceUrl);
-          } else {
-            window.location.href = sourceUrl;
-          }
-        } else {
-          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
-          modal.show();
-        }
-        return false;
-      });
-    }
-    function toggleCodeHandler(show) {
-      return function(e) {
-        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
-        for (let i=0; i<detailsSrc.length; i++) {
-          const details = detailsSrc[i].parentElement;
-          if (show) {
-            details.open = true;
-          } else {
-            details.removeAttribute("open");
-          }
-        }
-        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
-        const fromCls = show ? "hidden" : "unhidden";
-        const toCls = show ? "unhidden" : "hidden";
-        for (let i=0; i<cellCodeDivs.length; i++) {
-          const codeDiv = cellCodeDivs[i];
-          if (codeDiv.classList.contains(fromCls)) {
-            codeDiv.classList.remove(fromCls);
-            codeDiv.classList.add(toCls);
-          } 
-        }
-        return false;
-      }
-    }
-    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
-    if (hideAllCode) {
-      hideAllCode.addEventListener("click", toggleCodeHandler(false));
-    }
-    const showAllCode = window.document.getElementById("quarto-show-all-code");
-    if (showAllCode) {
-      showAllCode.addEventListener("click", toggleCodeHandler(true));
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
@@ -1178,408 +775,7 @@ window.Quarto = {
       }
     }
   });
-  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Lecture 2: False Discovery Rates &amp; Empirical Bayes"</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "From Benjamini–Hochberg to Efron's Local FDR"</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "Day 1, 11:00–12:00"</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">  revealjs:</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">    theme: default</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">    slide-number: true</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">    chalkboard: true</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">    smaller: true</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">    scrollable: true</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">    footer: "High-Dimensional Data Analysis Workshop | BTP"</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">    math: mathjax</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">  pdf:</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">    number-sections: false</span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">    fig-pos: 'H'</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="fu"># The Histogram That Tells You Everything {.centered}</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="fu">## A Picture Worth 10,000 Tests</span></span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>A $p$-value histogram from a gene-expression study comparing two cancer subtypes has two components:</span>
-<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The **flat part** (uniform across $<span class="co">[</span><span class="ot">0,1</span><span class="co">]</span>$): null genes — no real signal</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The **spike near 0**: true discoveries — genes that actually differ</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>The proportion of true nulls $\pi_0$ is *visible* — it is the height of the flat region.</span>
-<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>That the histogram itself encodes the answer is the foundation of this lecture. Translating the visual intuition into a rigorous procedure took several decades.</span>
-<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="fu">## Recap from Lecture 1</span></span>
-<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>High-dimensional data: $p \gg n$</span>
-<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Multiple testing: $m$ simultaneous tests generate many false positives</span>
-<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>FWER (Bonferroni) is too conservative for discovery settings</span>
-<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>FDR = $E<span class="co">[</span><span class="ot">V / (R \vee 1)</span><span class="co">]</span>$ is the right error metric</span>
-<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>**This lecture**: How to control FDR, and the deeper theory behind it.</span>
-<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Benjamini–Hochberg (BH) Procedure</span></span>
-<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a>Given $m$ hypothesis tests with $p$-values $p_1, \ldots, p_m$:</span>
-<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Order the $p$-values: $p_{(1)} \leq p_{(2)} \leq \cdots \leq p_{(m)}$</span>
-<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Find the largest $k$ such that $p_{(k)} \leq \frac{k}{m} \alpha$</span>
-<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Reject all $H_{0(i)}$ for $i = 1, \ldots, k$</span>
-<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a>**Theorem** (<span class="co">[</span><span class="ot">Benjamini &amp; Hochberg, 1995</span><span class="co">](https://doi.org/10.1111/j.2517-6161.1995.tb02031.x)</span>): Under independence, $\text{FDR} \leq \frac{m_0}{m} \alpha \leq \alpha$.</span>
-<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a><span class="fu">## BH: Geometric Interpretation</span></span>
-<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a>Plot $p_{(i)}$ vs. $i/m$. The BH procedure finds the rightmost point where the $p$-value curve dips below the line $y = \alpha \cdot x$.</span>
-<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
-<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
-<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a>m, m1 <span class="op">=</span> <span class="dv">1000</span>, <span class="dv">50</span></span>
-<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a>p_null <span class="op">=</span> rng.uniform(size<span class="op">=</span>m <span class="op">-</span> m1)</span>
-<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a>p_alt <span class="op">=</span> rng.beta(<span class="fl">0.1</span>, <span class="dv">1</span>, size<span class="op">=</span>m1)  <span class="co"># small p-values for alternatives</span></span>
-<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a>pvals_sim <span class="op">=</span> np.sort(np.concatenate([p_null, p_alt]))</span>
-<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">4</span>))</span>
-<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a>ax.scatter(np.arange(<span class="dv">1</span>, m <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> m, pvals_sim, s<span class="op">=</span><span class="dv">3</span>, color<span class="op">=</span><span class="st">"black"</span>)</span>
-<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="fl">0.10</span>], color<span class="op">=</span><span class="st">"red"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"BH line (slope = α)"</span>)</span>
-<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"i / m"</span>)</span>
-<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Ordered p-value"</span>)</span>
-<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"BH procedure (α = 0.10)"</span>)</span>
-<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"upper left"</span>)</span>
-<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a><span class="fu">## BH Under Dependence</span></span>
-<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a>The original BH result assumes independence of test statistics. In genomics, genes are often correlated.</span>
-<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">**Benjamini &amp; Yekutieli (2001)**</span><span class="co">](https://doi.org/10.1214/aos/1013699998)</span>: Under arbitrary dependence, replace $\alpha$ with $\alpha / \sum_{i=1}^m 1/i \approx \alpha / \ln(m)$.</span>
-<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a>**But**: Under positive regression dependency on a subset (PRDS)---a condition often satisfied in practice---the original BH procedure still controls FDR at level $\alpha$.</span>
-<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a><span class="fu"># The Prior You Didn't Know You Had {.centered}</span></span>
-<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a><span class="fu">## Stein's Paradox: Borrowing Strength</span></span>
-<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a>In 1956, <span class="co">[</span><span class="ot">Charles Stein</span><span class="co">](https://projecteuclid.org/proceedings/berkeley-symposium-on-mathematical-statistics-and-probability/Proceedings-of-the-Third-Berkeley-Symposium-on-Mathematical-Statistics-and/Chapter/Inadmissibility-of-the-Usual-Estimator-for-the-Mean-of-a/bsmsp/1200501656)</span> established a result that reshaped the statistical landscape:</span>
-<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a>**The sample mean is inadmissible for estimating 3 or more means simultaneously.**</span>
-<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Efron &amp; Morris (1977)</span><span class="co">](https://www.jstor.org/stable/24953895)</span> illustrated the principle with baseball. End-of-season batting averages are better predicted by **shrinking each player's early-season average toward the grand mean across players** — despite the players being unrelated.</span>
-<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-129"><a href="#cb3-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-130"><a href="#cb3-130" aria-hidden="true" tabindex="-1"></a>The James–Stein estimator (<span class="co">[</span><span class="ot">James &amp; Stein, 1961</span><span class="co">](https://projecteuclid.org/proceedings/berkeley-symposium-on-mathematical-statistics-and-probability/Proceedings-of-the-Fourth-Berkeley-Symposium-on-Mathematical-Statistics-and/Chapter/Estimation-with-Quadratic-Loss/bsmsp/1200512173)</span>): $\hat{\theta}_i^{JS} = \bar{y} + \left(1 - \frac{(d-3)\sigma^2}{\sum_j (y_j - \bar{y})^2}\right)(y_i - \bar{y})$,</span>
-<span id="cb3-131"><a href="#cb3-131" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-132"><a href="#cb3-132" aria-hidden="true" tabindex="-1"></a>where $d \geq 4$ is the number of means estimated.</span>
-<span id="cb3-133"><a href="#cb3-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-136"><a href="#cb3-136" aria-hidden="true" tabindex="-1"></a>This is the founding insight of **empirical Bayes**: the other observations carry information about the observation under analysis. Efron generalized the idea — from baseball averages to 10,000 genes.</span>
-<span id="cb3-137"><a href="#cb3-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-138"><a href="#cb3-138" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-139"><a href="#cb3-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-140"><a href="#cb3-140" aria-hidden="true" tabindex="-1"></a><span class="fu">## From Baseball to Genes</span></span>
-<span id="cb3-141"><a href="#cb3-141" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-142"><a href="#cb3-142" aria-hidden="true" tabindex="-1"></a>In classical statistics each gene is tested in isolation; the test for gene #4,237 uses no information from genes #1–4,236.</span>
-<span id="cb3-143"><a href="#cb3-143" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-144"><a href="#cb3-144" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-145"><a href="#cb3-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-146"><a href="#cb3-146" aria-hidden="true" tabindex="-1"></a>Efron observed that, when 10,000 genes are tested simultaneously, the **other 9,999 results carry information about any particular gene** — just as other batters' averages refine the estimate for any single batter.</span>
-<span id="cb3-147"><a href="#cb3-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-148"><a href="#cb3-148" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-149"><a href="#cb3-149" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-150"><a href="#cb3-150" aria-hidden="true" tabindex="-1"></a>If most genes show no signal, the prior probability that any particular gene is non-null is low. The data themselves reveal the prior; the analyst need not specify one.</span>
-<span id="cb3-151"><a href="#cb3-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-152"><a href="#cb3-152" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-153"><a href="#cb3-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-154"><a href="#cb3-154" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; "Letting the data determine the prior turns Bayesian inference from a subjective into a largely objective technique." — Efron, </span><span class="co">[</span><span class="ot">*Large-Scale Inference*</span><span class="co">](https://doi.org/10.1017/CBO9780511761362)</span><span class="at">, Ch. 1</span></span>
-<span id="cb3-155"><a href="#cb3-155" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-156"><a href="#cb3-156" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-157"><a href="#cb3-157" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-158"><a href="#cb3-158" aria-hidden="true" tabindex="-1"></a><span class="fu">## Storey's Approach: Estimating $\pi_0$</span></span>
-<span id="cb3-159"><a href="#cb3-159" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-160"><a href="#cb3-160" aria-hidden="true" tabindex="-1"></a>BH controls FDR at level $\frac{m_0}{m}\alpha$, which is conservative when $m_0 &lt; m$.</span>
-<span id="cb3-161"><a href="#cb3-161" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-162"><a href="#cb3-162" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">**Storey (2002)**</span><span class="co">](https://doi.org/10.1111/1467-9868.00346)</span>: Estimate $\pi_0 = m_0/m$ and use an adaptive threshold.</span>
-<span id="cb3-163"><a href="#cb3-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-164"><a href="#cb3-164" aria-hidden="true" tabindex="-1"></a>For a tuning parameter $\lambda$ (e.g., $\lambda = 0.5$):</span>
-<span id="cb3-165"><a href="#cb3-165" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-166"><a href="#cb3-166" aria-hidden="true" tabindex="-1"></a>$$\hat{\pi}_0(\lambda) = \frac{<span class="sc">\#\{</span>p_i &gt; \lambda<span class="sc">\}</span>}{m(1 - \lambda)}$$</span>
-<span id="cb3-167"><a href="#cb3-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-168"><a href="#cb3-168" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-169"><a href="#cb3-169" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-170"><a href="#cb3-170" aria-hidden="true" tabindex="-1"></a>**Intuition**: $p$-values above $\lambda$ are mostly from true nulls (which are uniform). Count them.</span>
-<span id="cb3-171"><a href="#cb3-171" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-172"><a href="#cb3-172" aria-hidden="true" tabindex="-1"></a>The R package <span class="in">`qvalue`</span> implements this with automatic $\lambda$ selection.</span>
-<span id="cb3-173"><a href="#cb3-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-174"><a href="#cb3-174" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-175"><a href="#cb3-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-176"><a href="#cb3-176" aria-hidden="true" tabindex="-1"></a><span class="fu">## The $q$-value</span></span>
-<span id="cb3-177"><a href="#cb3-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-178"><a href="#cb3-178" aria-hidden="true" tabindex="-1"></a>**Definition** (<span class="co">[</span><span class="ot">Storey, 2003</span><span class="co">](https://doi.org/10.1214/aos/1074290335)</span>): The $q$-value of test $i$ is the minimum FDR at which test $i$ would be called significant.</span>
-<span id="cb3-179"><a href="#cb3-179" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-180"><a href="#cb3-180" aria-hidden="true" tabindex="-1"></a>$$q_i = \min_{t \geq p_i} \widehat{\text{FDR}}(t)$$</span>
-<span id="cb3-181"><a href="#cb3-181" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-182"><a href="#cb3-182" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-183"><a href="#cb3-183" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-184"><a href="#cb3-184" aria-hidden="true" tabindex="-1"></a>Analogous to a $p$-value, but for FDR instead of Type I error:</span>
-<span id="cb3-185"><a href="#cb3-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-186"><a href="#cb3-186" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$p$-value: "If I reject this one test, what's the false positive probability?"</span>
-<span id="cb3-187"><a href="#cb3-187" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>$q$-value: "If I reject all tests at least this significant, what fraction are false positives?"</span>
-<span id="cb3-188"><a href="#cb3-188" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-189"><a href="#cb3-189" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-190"><a href="#cb3-190" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-191"><a href="#cb3-191" aria-hidden="true" tabindex="-1"></a><span class="fu">## Efron's Two-Groups Model</span></span>
-<span id="cb3-192"><a href="#cb3-192" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-193"><a href="#cb3-193" aria-hidden="true" tabindex="-1"></a>A more foundational perspective (<span class="co">[</span><span class="ot">Efron, 2004, *JASA*</span><span class="co">](https://doi.org/10.1198/016214504000000089)</span>; developed fully in <span class="co">[</span><span class="ot">Efron, 2008, *Statistical Science*</span><span class="co">](https://doi.org/10.1214/07-STS236)</span>; and <span class="co">[</span><span class="ot">Efron, 2010, *Large-Scale Inference*</span><span class="co">](https://doi.org/10.1017/CBO9780511761362)</span>, Ch. 2–4).</span>
-<span id="cb3-194"><a href="#cb3-194" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-195"><a href="#cb3-195" aria-hidden="true" tabindex="-1"></a>Each of the $m$ cases belongs to one of two groups:</span>
-<span id="cb3-196"><a href="#cb3-196" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-197"><a href="#cb3-197" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Null group** (proportion $\pi_0$): $z_i \sim f_0(z)$, typically $N(0,1)$</span>
-<span id="cb3-198"><a href="#cb3-198" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Non-null group** (proportion $1 - \pi_0$): $z_i \sim f_1(z)$</span>
-<span id="cb3-199"><a href="#cb3-199" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-200"><a href="#cb3-200" aria-hidden="true" tabindex="-1"></a>The **mixture density** of the observed $z$-scores is:</span>
-<span id="cb3-201"><a href="#cb3-201" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-202"><a href="#cb3-202" aria-hidden="true" tabindex="-1"></a>$$f(z) = \pi_0 f_0(z) + (1 - \pi_0) f_1(z)$$</span>
-<span id="cb3-203"><a href="#cb3-203" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-204"><a href="#cb3-204" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-205"><a href="#cb3-205" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-206"><a href="#cb3-206" aria-hidden="true" tabindex="-1"></a><span class="fu">## Estimating the Mixture</span></span>
-<span id="cb3-207"><a href="#cb3-207" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-208"><a href="#cb3-208" aria-hidden="true" tabindex="-1"></a><span class="fu">### Key idea</span></span>
-<span id="cb3-209"><a href="#cb3-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-210"><a href="#cb3-210" aria-hidden="true" tabindex="-1"></a>We observe $m$ $z$-scores. With $m$ large (thousands), we can **estimate** $f(z)$ nonparametrically.</span>
-<span id="cb3-211"><a href="#cb3-211" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-212"><a href="#cb3-212" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-213"><a href="#cb3-213" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-214"><a href="#cb3-214" aria-hidden="true" tabindex="-1"></a>**Efron's approach**:</span>
-<span id="cb3-215"><a href="#cb3-215" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-216"><a href="#cb3-216" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Estimate $f(z)$ from a histogram or density estimate of the observed $z$-scores</span>
-<span id="cb3-217"><a href="#cb3-217" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Assume $f_0$ is known (or estimate it---the "empirical null")</span>
-<span id="cb3-218"><a href="#cb3-218" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Estimate $\pi_0$ from the central peak of the histogram</span>
-<span id="cb3-219"><a href="#cb3-219" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-220"><a href="#cb3-220" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-221"><a href="#cb3-221" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-222"><a href="#cb3-222" aria-hidden="true" tabindex="-1"></a>This is **empirical Bayes**: we use the aggregate data to estimate the prior, then apply Bayes' rule case by case.</span>
-<span id="cb3-223"><a href="#cb3-223" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-224"><a href="#cb3-224" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-225"><a href="#cb3-225" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-226"><a href="#cb3-226" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Local False Discovery Rate</span></span>
-<span id="cb3-227"><a href="#cb3-227" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-228"><a href="#cb3-228" aria-hidden="true" tabindex="-1"></a>$$\text{fdr}(z) = P(\text{null} \mid Z = z) = \frac{\pi_0 f_0(z)}{f(z)}$$</span>
-<span id="cb3-229"><a href="#cb3-229" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-230"><a href="#cb3-230" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-231"><a href="#cb3-231" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-232"><a href="#cb3-232" aria-hidden="true" tabindex="-1"></a>This is a **posterior probability**---the chance that a specific case with $z$-score $z$ is a false discovery.</span>
-<span id="cb3-233"><a href="#cb3-233" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-234"><a href="#cb3-234" aria-hidden="true" tabindex="-1"></a>Contrast with the (tail-area) FDR, which is an expected proportion over a set of rejections.</span>
-<span id="cb3-235"><a href="#cb3-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-236"><a href="#cb3-236" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-237"><a href="#cb3-237" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-238"><a href="#cb3-238" aria-hidden="true" tabindex="-1"></a><span class="fu">### Relationship</span></span>
-<span id="cb3-239"><a href="#cb3-239" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-240"><a href="#cb3-240" aria-hidden="true" tabindex="-1"></a>$$\text{FDR}(z_0) = E<span class="co">[</span><span class="ot">\text{fdr}(Z) \mid Z \geq z_0</span><span class="co">]</span> = \frac{\int_{z_0}^\infty \text{fdr}(z) f(z) \, dz}{\int_{z_0}^\infty f(z) \, dz}$$</span>
-<span id="cb3-241"><a href="#cb3-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-242"><a href="#cb3-242" aria-hidden="true" tabindex="-1"></a>The tail-area FDR is the average of the local FDR over the rejection region.</span>
-<span id="cb3-243"><a href="#cb3-243" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-244"><a href="#cb3-244" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-245"><a href="#cb3-245" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-246"><a href="#cb3-246" aria-hidden="true" tabindex="-1"></a><span class="fu">## Connections to Bayesian Thinking</span></span>
-<span id="cb3-247"><a href="#cb3-247" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-248"><a href="#cb3-248" aria-hidden="true" tabindex="-1"></a>The two-groups model is inherently Bayesian:</span>
-<span id="cb3-249"><a href="#cb3-249" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-250"><a href="#cb3-250" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Prior**: $P(\text{null}) = \pi_0$</span>
-<span id="cb3-251"><a href="#cb3-251" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Likelihood**: $f_0(z)$ under the null, $f_1(z)$ under the alternative</span>
-<span id="cb3-252"><a href="#cb3-252" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Posterior**: $\text{fdr}(z) = P(\text{null} \mid z)$</span>
-<span id="cb3-253"><a href="#cb3-253" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-254"><a href="#cb3-254" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-255"><a href="#cb3-255" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-256"><a href="#cb3-256" aria-hidden="true" tabindex="-1"></a>But it's **empirical Bayes**: instead of specifying a prior, we estimate $\pi_0$ and $f_1$ from the data.</span>
-<span id="cb3-257"><a href="#cb3-257" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-258"><a href="#cb3-258" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-259"><a href="#cb3-259" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-260"><a href="#cb3-260" aria-hidden="true" tabindex="-1"></a><span class="fu"># When $N(0,1)$ Lies to You {.centered}</span></span>
-<span id="cb3-261"><a href="#cb3-261" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-262"><a href="#cb3-262" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-263"><a href="#cb3-263" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-264"><a href="#cb3-264" aria-hidden="true" tabindex="-1"></a><span class="fu">## A Cautionary Case: Efron's Prostate Cancer Reanalysis</span></span>
-<span id="cb3-265"><a href="#cb3-265" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-266"><a href="#cb3-266" aria-hidden="true" tabindex="-1"></a>Efron analyzed a prostate-cancer microarray study (<span class="co">[</span><span class="ot">Singh et al., 2002</span><span class="co">]</span>(https://doi.org/10.1016/S1535-6108(02)00030-2)): 6,033 genes, 102 patients.</span>
-<span id="cb3-267"><a href="#cb3-267" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-268"><a href="#cb3-268" aria-hidden="true" tabindex="-1"></a>The test statistics were converted to $z$-scores under the expectation that they would follow $N(0,1)$ under the null. The central peak of the empirical histogram was instead **wider than expected**: the empirical null was closer to $N(\hat{\delta}_0, \hat{\sigma}_0^2)$ with $\hat{\sigma}_0 &gt; 1$.</span>
-<span id="cb3-269"><a href="#cb3-269" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-270"><a href="#cb3-270" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-271"><a href="#cb3-271" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-272"><a href="#cb3-272" aria-hidden="true" tabindex="-1"></a>Applying the theoretical $N(0,1)$ null would overstate significance: genes whose $z$-scores fell in the (incorrectly narrow) tails would be declared discoveries despite being consistent with the actual, wider null.</span>
-<span id="cb3-273"><a href="#cb3-273" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-274"><a href="#cb3-274" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-275"><a href="#cb3-275" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-276"><a href="#cb3-276" aria-hidden="true" tabindex="-1"></a>The empirical null corrected the analysis and demonstrated that the theoretical $N(0,1)$ null cannot be assumed without verification. The estimated parameters depend on the dataset and procedure; the central observation is that $\hat{\sigma}_0 \neq 1$ in many real applications.</span>
-<span id="cb3-277"><a href="#cb3-277" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-278"><a href="#cb3-278" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-279"><a href="#cb3-279" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-280"><a href="#cb3-280" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Empirical Null</span></span>
-<span id="cb3-281"><a href="#cb3-281" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-282"><a href="#cb3-282" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why the theoretical null might be wrong</span></span>
-<span id="cb3-283"><a href="#cb3-283" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-284"><a href="#cb3-284" aria-hidden="true" tabindex="-1"></a>Efron observed that in many real datasets, the central peak of the $z$-score histogram is **wider** than $N(0,1)$.</span>
-<span id="cb3-285"><a href="#cb3-285" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-286"><a href="#cb3-286" aria-hidden="true" tabindex="-1"></a>Possible causes:</span>
-<span id="cb3-287"><a href="#cb3-287" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-288"><a href="#cb3-288" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Unobserved covariates (batch effects, population structure)</span>
-<span id="cb3-289"><a href="#cb3-289" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Correlation among tests</span>
-<span id="cb3-290"><a href="#cb3-290" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Model misspecification</span>
-<span id="cb3-291"><a href="#cb3-291" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-292"><a href="#cb3-292" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-293"><a href="#cb3-293" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-294"><a href="#cb3-294" aria-hidden="true" tabindex="-1"></a><span class="fu">### Empirical null</span></span>
-<span id="cb3-295"><a href="#cb3-295" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-296"><a href="#cb3-296" aria-hidden="true" tabindex="-1"></a>Fit $f_0(z) = N(\hat{\delta}_0, \hat{\sigma}_0^2)$ to the central portion of the observed $z$-score distribution.</span>
-<span id="cb3-297"><a href="#cb3-297" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-298"><a href="#cb3-298" aria-hidden="true" tabindex="-1"></a>When $\hat{\sigma}_0 &gt; 1$, the theoretical null is too narrow and the analysis would yield an excess of false discoveries.</span>
-<span id="cb3-299"><a href="#cb3-299" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-300"><a href="#cb3-300" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-301"><a href="#cb3-301" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-302"><a href="#cb3-302" aria-hidden="true" tabindex="-1"></a><span class="fu">## Empirical Null: Illustration</span></span>
-<span id="cb3-303"><a href="#cb3-303" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-306"><a href="#cb3-306" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb3-307"><a href="#cb3-307" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: true</span></span>
-<span id="cb3-308"><a href="#cb3-308" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4.5</span></span>
-<span id="cb3-309"><a href="#cb3-309" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> norm</span>
-<span id="cb3-310"><a href="#cb3-310" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-311"><a href="#cb3-311" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">123</span>)</span>
-<span id="cb3-312"><a href="#cb3-312" aria-hidden="true" tabindex="-1"></a>m, m1 <span class="op">=</span> <span class="dv">5000</span>, <span class="dv">200</span></span>
-<span id="cb3-313"><a href="#cb3-313" aria-hidden="true" tabindex="-1"></a>z_null <span class="op">=</span> rng.normal(loc<span class="op">=</span><span class="fl">0.2</span>, scale<span class="op">=</span><span class="fl">1.3</span>, size<span class="op">=</span>m <span class="op">-</span> m1)  <span class="co"># empirical null ≠ N(0,1)</span></span>
-<span id="cb3-314"><a href="#cb3-314" aria-hidden="true" tabindex="-1"></a>z_alt <span class="op">=</span> rng.normal(loc<span class="op">=</span><span class="dv">3</span>, scale<span class="op">=</span><span class="dv">1</span>, size<span class="op">=</span>m1)</span>
-<span id="cb3-315"><a href="#cb3-315" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> np.concatenate([z_null, z_alt])</span>
-<span id="cb3-316"><a href="#cb3-316" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-317"><a href="#cb3-317" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">4.5</span>))</span>
-<span id="cb3-318"><a href="#cb3-318" aria-hidden="true" tabindex="-1"></a>ax.hist(z, bins<span class="op">=</span><span class="dv">80</span>, density<span class="op">=</span><span class="va">True</span>, color<span class="op">=</span><span class="st">"lightblue"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
-<span id="cb3-319"><a href="#cb3-319" aria-hidden="true" tabindex="-1"></a>x_grid <span class="op">=</span> np.linspace(z.<span class="bu">min</span>(), z.<span class="bu">max</span>(), <span class="dv">300</span>)</span>
-<span id="cb3-320"><a href="#cb3-320" aria-hidden="true" tabindex="-1"></a>ax.plot(x_grid, norm.pdf(x_grid, <span class="dv">0</span>, <span class="dv">1</span>), color<span class="op">=</span><span class="st">"red"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, linestyle<span class="op">=</span><span class="st">"--"</span>,</span>
-<span id="cb3-321"><a href="#cb3-321" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="st">"Theoretical N(0,1)"</span>)</span>
-<span id="cb3-322"><a href="#cb3-322" aria-hidden="true" tabindex="-1"></a>ax.plot(x_grid, norm.pdf(x_grid, <span class="fl">0.2</span>, <span class="fl">1.3</span>), color<span class="op">=</span><span class="st">"blue"</span>, linewidth<span class="op">=</span><span class="dv">2</span>,</span>
-<span id="cb3-323"><a href="#cb3-323" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span><span class="st">"Empirical null N(0.2, 1.3²)"</span>)</span>
-<span id="cb3-324"><a href="#cb3-324" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Observed z-scores with empirical null"</span>)</span>
-<span id="cb3-325"><a href="#cb3-325" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"z-score"</span>)</span>
-<span id="cb3-326"><a href="#cb3-326" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
-<span id="cb3-327"><a href="#cb3-327" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb3-328"><a href="#cb3-328" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
-<span id="cb3-329"><a href="#cb3-329" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb3-330"><a href="#cb3-330" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-331"><a href="#cb3-331" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-332"><a href="#cb3-332" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-333"><a href="#cb3-333" aria-hidden="true" tabindex="-1"></a><span class="fu">## Efron's Estimation Procedure</span></span>
-<span id="cb3-334"><a href="#cb3-334" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-335"><a href="#cb3-335" aria-hidden="true" tabindex="-1"></a><span class="fu">### Step by step (Efron, *Large-Scale Inference*, Ch. 4–5)</span></span>
-<span id="cb3-336"><a href="#cb3-336" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-337"><a href="#cb3-337" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Convert test statistics to $z$-scores: $z_i = \Phi^{-1}(1 - p_i)$ or use the statistic directly</span>
-<span id="cb3-338"><a href="#cb3-338" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Estimate $f(z)$ using Poisson regression on binned counts (Lindsey's method)</span>
-<span id="cb3-339"><a href="#cb3-339" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Estimate $\pi_0$ and $f_0$ (theoretical or empirical null)</span>
-<span id="cb3-340"><a href="#cb3-340" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>Compute $\widehat{\text{fdr}}(z) = \hat{\pi}_0 \hat{f}_0(z) / \hat{f}(z)$</span>
-<span id="cb3-341"><a href="#cb3-341" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-342"><a href="#cb3-342" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-343"><a href="#cb3-343" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-344"><a href="#cb3-344" aria-hidden="true" tabindex="-1"></a>The R package <span class="in">`locfdr`</span> automates this.</span>
-<span id="cb3-345"><a href="#cb3-345" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-346"><a href="#cb3-346" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-347"><a href="#cb3-347" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-348"><a href="#cb3-348" aria-hidden="true" tabindex="-1"></a><span class="fu">## When Does This Work?</span></span>
-<span id="cb3-349"><a href="#cb3-349" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-350"><a href="#cb3-350" aria-hidden="true" tabindex="-1"></a><span class="fu">### Requirements for empirical Bayes FDR</span></span>
-<span id="cb3-351"><a href="#cb3-351" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-352"><a href="#cb3-352" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Large $m$**: Need thousands of tests to estimate $f(z)$ well</span>
-<span id="cb3-353"><a href="#cb3-353" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Exchangeability**: Tests should be "comparable" (same type of measurement, similar noise structure)</span>
-<span id="cb3-354"><a href="#cb3-354" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Mixture model is reasonable**: The two-groups framework is a good approximation</span>
-<span id="cb3-355"><a href="#cb3-355" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-356"><a href="#cb3-356" aria-hidden="true" tabindex="-1"></a>. . .</span>
-<span id="cb3-357"><a href="#cb3-357" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-358"><a href="#cb3-358" aria-hidden="true" tabindex="-1"></a><span class="fu">### When it can fail</span></span>
-<span id="cb3-359"><a href="#cb3-359" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-360"><a href="#cb3-360" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Small $m$ (say $&lt; 100$): not enough data to estimate the mixture</span>
-<span id="cb3-361"><a href="#cb3-361" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Strong correlation structure that distorts the null distribution</span>
-<span id="cb3-362"><a href="#cb3-362" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Heterogeneous tests (mixing gene expression with methylation, for example)</span>
-<span id="cb3-363"><a href="#cb3-363" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-364"><a href="#cb3-364" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-365"><a href="#cb3-365" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-366"><a href="#cb3-366" aria-hidden="true" tabindex="-1"></a><span class="fu">## Multiple Testing in Practice: A Decision Framework</span></span>
-<span id="cb3-367"><a href="#cb3-367" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-370"><a href="#cb3-370" aria-hidden="true" tabindex="-1"></a><span class="in">```{mermaid}</span></span>
-<span id="cb3-371"><a href="#cb3-371" aria-hidden="true" tabindex="-1"></a>%%| fig-cap: <span class="ot">"</span><span class="st">Choosing an error rate</span><span class="ot">"</span></span>
-<span id="cb3-372"><a href="#cb3-372" aria-hidden="true" tabindex="-1"></a>flowchart TD</span>
-<span id="cb3-373"><a href="#cb3-373" aria-hidden="true" tabindex="-1"></a>    A[How many tests?] --&gt;|Few: <span class="dv">1</span>–<span class="dv">20</span>| B[Use FWER: Bonferroni <span class="ot">or</span> Holm]</span>
-<span id="cb3-374"><a href="#cb3-374" aria-hidden="true" tabindex="-1"></a>    A --&gt;|Many: <span class="dv">100</span>+| C{Goal?}</span>
-<span id="cb3-375"><a href="#cb3-375" aria-hidden="true" tabindex="-1"></a>    C --&gt;|Confirmation| D[Use FWER: Bonferroni-Holm]</span>
-<span id="cb3-376"><a href="#cb3-376" aria-hidden="true" tabindex="-1"></a>    C --&gt;|Discovery| E{How many tests?}</span>
-<span id="cb3-377"><a href="#cb3-377" aria-hidden="true" tabindex="-1"></a>    E --&gt;|<span class="dv">100</span>–<span class="dv">1000</span>| F[BH <span class="ot">or</span> Storey <span class="ot">q-</span><span class="ss">values]</span></span>
-<span id="cb3-378"><a href="#cb3-378" aria-hidden="true" tabindex="-1"></a><span class="ss">    E </span><span class="ot">-</span>-&gt;|<span class="dv">1000</span>+| G[Efron <span class="kw">local</span> FDR / empirical Bayes]</span>
-<span id="cb3-379"><a href="#cb3-379" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb3-380"><a href="#cb3-380" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-381"><a href="#cb3-381" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-382"><a href="#cb3-382" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-383"><a href="#cb3-383" aria-hidden="true" tabindex="-1"></a><span class="fu">## Software Ecosystem</span></span>
-<span id="cb3-384"><a href="#cb3-384" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-385"><a href="#cb3-385" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Method <span class="pp">|</span> R <span class="pp">|</span> Python <span class="pp">|</span></span>
-<span id="cb3-386"><a href="#cb3-386" aria-hidden="true" tabindex="-1"></a><span class="pp">|--------|---|--------|</span></span>
-<span id="cb3-387"><a href="#cb3-387" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Bonferroni / Holm <span class="pp">|</span> <span class="in">`p.adjust()`</span> <span class="pp">|</span> <span class="in">`statsmodels.stats.multitest`</span> <span class="pp">|</span></span>
-<span id="cb3-388"><a href="#cb3-388" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Benjamini–Hochberg <span class="pp">|</span> <span class="in">`p.adjust(method="BH")`</span> <span class="pp">|</span> <span class="in">`multipletests(method='fdr_bh')`</span> <span class="pp">|</span></span>
-<span id="cb3-389"><a href="#cb3-389" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Storey $q$-values <span class="pp">|</span> <span class="in">`qvalue::qvalue()`</span> <span class="pp">|</span> <span class="in">`-- (custom or qvalue port)`</span> <span class="pp">|</span></span>
-<span id="cb3-390"><a href="#cb3-390" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Local FDR <span class="pp">|</span> <span class="in">`locfdr::locfdr()`</span> <span class="pp">|</span> <span class="in">`-- (custom implementation)`</span> <span class="pp">|</span></span>
-<span id="cb3-391"><a href="#cb3-391" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Empirical Bayes (limma) <span class="pp">|</span> <span class="in">`limma::eBayes()`</span> <span class="pp">|</span> <span class="in">`-- (use R via rpy2)`</span> <span class="pp">|</span></span>
-<span id="cb3-392"><a href="#cb3-392" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-393"><a href="#cb3-393" aria-hidden="true" tabindex="-1"></a>---</span>
-<span id="cb3-394"><a href="#cb3-394" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-395"><a href="#cb3-395" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summary</span></span>
-<span id="cb3-396"><a href="#cb3-396" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-397"><a href="#cb3-397" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**BH procedure**: Simple; controls FDR under independence or PRDS. The default tool for high-dimensional inference.</span>
-<span id="cb3-398"><a href="#cb3-398" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Storey's $q$-value**: Adaptive FDR control using $\hat{\pi}_0$. More powerful when most tests are null.</span>
-<span id="cb3-399"><a href="#cb3-399" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Efron's two-groups model**: The foundational framework. The mixture $f = \pi_0 f_0 + (1-\pi_0)f_1$ unifies the procedures above.</span>
-<span id="cb3-400"><a href="#cb3-400" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>**Local FDR**: A test-specific posterior probability of being null — the most informative single summary at the level of individual tests.</span>
-<span id="cb3-401"><a href="#cb3-401" aria-hidden="true" tabindex="-1"></a><span class="ss">5. </span>**Empirical null**: Always assess whether $f_0 = N(0,1)$ is appropriate; estimate it from the data when it is not.</span>
-<span id="cb3-402"><a href="#cb3-402" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-403"><a href="#cb3-403" aria-hidden="true" tabindex="-1"></a><span class="fu">### Up Next</span></span>
-<span id="cb3-404"><a href="#cb3-404" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-405"><a href="#cb3-405" aria-hidden="true" tabindex="-1"></a>**Lab 2**: Apply BH, $q$-values, and local FDR to a real gene-expression dataset.</span>
-</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
-</div></div></div></div></div>
+  </script>
 </div> <!-- /content -->
 
 

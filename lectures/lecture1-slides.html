@@ -1,297 +1,422 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>The Gene That Wasn’t There – High-Dimensional Data Analysis — BTP Graduate Workshop</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.9.37">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-158031087360bce0ff56dc785ce39e06.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
 
-  <title>High-Dimensional Data Analysis — BTP Graduate Workshop – The Gene That Wasn’t There</title>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="../site_libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="../site_libs/revealjs/dist/reveal.css">
-  <style>
-    /* Default styles provided by pandoc.
-    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-    */
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
-      vertical-align: middle;
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
     }
-  </style>
-  <link rel="stylesheet" href="../site_libs/revealjs/dist/theme/quarto-2740581606dc327e82f18f789b69d8a0.css">
-  <link href="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="../site_libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
-  <link href="../site_libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
-  <link href="../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
-  <style type="text/css">
-    .reveal div.sourceCode {
-      margin: 0;
-      overflow: auto;
-    }
-    .reveal div.hanging-indent {
-      margin-left: 1em;
-      text-indent: -1em;
-    }
-    .reveal .slide:not(.center) {
-      height: 100%;
-      overflow-y: auto;
-    }
-    .reveal .slide.scrollable {
-      overflow-y: auto;
-    }
-    .reveal .footnotes {
-      height: 100%;
-      overflow-y: auto;
-    }
-    .reveal .slide .absolute {
-      position: absolute;
-      display: block;
-    }
-    .reveal .footnotes ol {
-      counter-reset: ol;
-      list-style-type: none; 
-      margin-left: 0;
-    }
-    .reveal .footnotes ol li:before {
-      counter-increment: ol;
-      content: counter(ol) ". "; 
-    }
-    .reveal .footnotes ol li > p:first-child {
-      display: inline-block;
-    }
-    .reveal .slide ul,
-    .reveal .slide ol {
-      margin-bottom: 0.5em;
-    }
-    .reveal .slide ul li,
-    .reveal .slide ol li {
-      margin-top: 0.4em;
-      margin-bottom: 0.2em;
-    }
-    .reveal .slide ul[role="tablist"] li {
-      margin-bottom: 0;
-    }
-    .reveal .slide ul li > *:first-child,
-    .reveal .slide ol li > *:first-child {
-      margin-block-start: 0;
-    }
-    .reveal .slide ul li > *:last-child,
-    .reveal .slide ol li > *:last-child {
-      margin-block-end: 0;
-    }
-    .reveal .slide .columns:nth-child(3) {
-      margin-block-start: 0.8em;
-    }
-    .reveal blockquote {
-      box-shadow: none;
-    }
-    .reveal .tippy-content>* {
-      margin-top: 0.2em;
-      margin-bottom: 0.7em;
-    }
-    .reveal .tippy-content>*:last-child {
-      margin-bottom: 0.2em;
-    }
-    .reveal .slide > img.stretch.quarto-figure-center,
-    .reveal .slide > img.r-stretch.quarto-figure-center {
-      display: block;
-      margin-left: auto;
-      margin-right: auto; 
-    }
-    .reveal .slide > img.stretch.quarto-figure-left,
-    .reveal .slide > img.r-stretch.quarto-figure-left  {
-      display: block;
-      margin-left: 0;
-      margin-right: auto; 
-    }
-    .reveal .slide > img.stretch.quarto-figure-right,
-    .reveal .slide > img.r-stretch.quarto-figure-right  {
-      display: block;
-      margin-left: auto;
-      margin-right: 0; 
-    }
-  </style>
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
 </head>
-<body class="quarto-light">
-  <div class="reveal">
-    <div class="slides">
 
-<section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">The Gene That Wasn’t There</h1>
-  <p class="subtitle">Lecture 1</p>
+<body class="nav-fixed quarto-light">
 
-<div class="quarto-title-authors">
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">High-Dimensional Data Analysis — BTP Graduate Workshop</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Syllabus</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-day-1" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Day 1</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-day-1">    
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture1.html">
+ <span class="dropdown-text">Lecture 1: The Gene That Wasn’t There</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture1-slides.html">
+ <span class="dropdown-text">Lecture 1 Slides</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab1.ipynb">
+ <span class="dropdown-text">Lab 1: The Multiple Testing Problem (Colab)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture2.html">
+ <span class="dropdown-text">Lecture 2: The Histogram That Was Too Wide</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture2-slides.html">
+ <span class="dropdown-text">Lecture 2 Slides</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab2.ipynb">
+ <span class="dropdown-text">Lab 2: FDR in Practice (Colab)</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-day-2" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Day 2</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-day-2">    
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture3.html">
+ <span class="dropdown-text">Lecture 3: The Map That Drew Itself</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture3-slides.html">
+ <span class="dropdown-text">Lecture 3 Slides</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab3.ipynb">
+ <span class="dropdown-text">Lab 3: Dimension Reduction (Colab)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture4.html">
+ <span class="dropdown-text">Lecture 4: Seventy Genes and a Fraud</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../lectures/lecture4-slides.html">
+ <span class="dropdown-text">Lecture 4 Slides</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/lab4.ipynb">
+ <span class="dropdown-text">Lab 4: Penalized Regression (Colab)</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-reference" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Reference</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-reference">    
+        <li>
+    <a class="dropdown-item" href="../syllabus/decision-guide.html">
+ <span class="dropdown-text">Decision Guide</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../syllabus/course-design.html">
+ <span class="dropdown-text">Course Design</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-assignments" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Assignments</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-assignments">    
+        <li>
+    <a class="dropdown-item" href="../assessments/pre-homework.html">
+ <span class="dropdown-text">Pre-Homework</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/pre-homework.ipynb">
+ <span class="dropdown-text">Pre-Homework (Colab)</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../assessments/homework.html">
+ <span class="dropdown-text">Homework</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://colab.research.google.com/github/pflahert/hd-stats-workshop/blob/main/notebooks/homework.ipynb">
+ <span class="dropdown-text">Homework (Colab)</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#section" id="toc-section" class="nav-link active" data-scroll-target="#section"></a></li>
+  <li><a href="#section-1" id="toc-section-1" class="nav-link" data-scroll-target="#section-1"></a></li>
+  <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations">8,000 citations</a></li>
+  <li><a href="#section-2" id="toc-section-2" class="nav-link" data-scroll-target="#section-2"></a></li>
+  <li><a href="#section-3" id="toc-section-3" class="nav-link" data-scroll-target="#section-3"></a></li>
+  <li><a href="#section-4" id="toc-section-4" class="nav-link" data-scroll-target="#section-4"></a></li>
+  <li><a href="#the-golub-dataset" id="toc-the-golub-dataset" class="nav-link" data-scroll-target="#the-golub-dataset">The Golub Dataset</a>
+  <ul class="collapse">
+  <li><a href="#section-5" id="toc-section-5" class="nav-link" data-scroll-target="#section-5"></a></li>
+  <li><a href="#section-6" id="toc-section-6" class="nav-link" data-scroll-target="#section-6"></a></li>
+  <li><a href="#section-7" id="toc-section-7" class="nav-link" data-scroll-target="#section-7"></a></li>
+  </ul></li>
+  <li><a href="#the-p-value-histogram" id="toc-the-p-value-histogram" class="nav-link" data-scroll-target="#the-p-value-histogram">The P-Value Histogram</a>
+  <ul class="collapse">
+  <li><a href="#what-nothing-looks-like" id="toc-what-nothing-looks-like" class="nav-link" data-scroll-target="#what-nothing-looks-like">What “nothing” looks like</a></li>
+  <li><a href="#the-golub-data" id="toc-the-golub-data" class="nav-link" data-scroll-target="#the-golub-data">The Golub data</a></li>
+  <li><a href="#three-things-this-histogram-tells-you" id="toc-three-things-this-histogram-tells-you" class="nav-link" data-scroll-target="#three-things-this-histogram-tells-you">Three things this histogram tells you</a></li>
+  <li><a href="#section-8" id="toc-section-8" class="nav-link" data-scroll-target="#section-8"></a></li>
+  </ul></li>
+  <li><a href="#bonferroni-and-family-wise-error-rate-control" id="toc-bonferroni-and-family-wise-error-rate-control" class="nav-link" data-scroll-target="#bonferroni-and-family-wise-error-rate-control">Bonferroni and Family-Wise Error Rate Control</a>
+  <ul class="collapse">
+  <li><a href="#bonferroni-correction" id="toc-bonferroni-correction" class="nav-link" data-scroll-target="#bonferroni-correction">Bonferroni correction</a></li>
+  <li><a href="#where-is-the-threshold" id="toc-where-is-the-threshold" class="nav-link" data-scroll-target="#where-is-the-threshold">Where is the threshold?</a></li>
+  <li><a href="#section-9" id="toc-section-9" class="nav-link" data-scroll-target="#section-9"></a></li>
+  <li><a href="#section-10" id="toc-section-10" class="nav-link" data-scroll-target="#section-10"></a></li>
+  <li><a href="#the-gap" id="toc-the-gap" class="nav-link" data-scroll-target="#the-gap">The gap</a></li>
+  <li><a href="#two-questions" id="toc-two-questions" class="nav-link" data-scroll-target="#two-questions">Two questions</a></li>
+  <li><a href="#three-approaches-one-dataset" id="toc-three-approaches-one-dataset" class="nav-link" data-scroll-target="#three-approaches-one-dataset">Three approaches, one dataset</a></li>
+  </ul></li>
+  <li><a href="#what-a-field-wide-false-positive-looks-like" id="toc-what-a-field-wide-false-positive-looks-like" class="nav-link" data-scroll-target="#what-a-field-wide-false-positive-looks-like">What a Field-Wide False Positive Looks Like</a>
+  <ul class="collapse">
+  <li><a href="#how-false-positives-survive" id="toc-how-false-positives-survive" class="nav-link" data-scroll-target="#how-false-positives-survive">How false positives survive</a></li>
+  <li><a href="#meanwhile-gwas-got-it-right" id="toc-meanwhile-gwas-got-it-right" class="nav-link" data-scroll-target="#meanwhile-gwas-got-it-right">Meanwhile, GWAS got it right</a></li>
+  <li><a href="#section-11" id="toc-section-11" class="nav-link" data-scroll-target="#section-11"></a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="lecture1-slides.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">The Gene That Wasn’t There</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+<p class="subtitle lead">Lecture 1</p>
 </div>
 
-  <p class="date">Invalid Date</p>
-</section>
-<section id="section" class="slide level2 centered" data-background-color="black">
-<h2></h2>
 
-<img data-src="images/caspi-2003-title.png" style="width:85.0%" alt="Title page of Caspi et al. 2003, Science" class="r-stretch"><aside class="notes">
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">Invalid Date</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="section" class="level2 centered" data-background-color="black">
+<h2 class="centered anchored" data-background-color="black" data-anchor-id="section"></h2>
+<p><img src="images/caspi-2003-title.png" class="img-fluid" style="width:85.0%" alt="Title page of Caspi et al. 2003, Science"></p>
+<div class="notes">
 <p>In 2003, Avshalom Caspi and a team of researchers published a paper in Science that would become one of the most influential findings in psychiatric genetics. They reported that a variant in the serotonin transporter gene — a gene called 5-HTTLPR — predicted whether people who experienced stressful life events would develop depression. The idea was elegant: some people carry a version of this gene that produces less serotonin transporter protein, and those people, when exposed to stress, are more vulnerable to depression. Nature plus nurture, mediated by a single gene.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="section-1" class="slide level2 centered" data-background-color="black">
-<h2></h2>
-
-<img data-src="images/caspi-2003-fig2.png" style="width:80.0%" alt="Caspi et al. 2003 Figure 2: gene-environment interaction" class="r-stretch"><aside class="notes">
+<section id="section-1" class="level2 centered" data-background-color="black">
+<h2 class="centered anchored" data-background-color="black" data-anchor-id="section-1"></h2>
+<p><img src="images/caspi-2003-fig2.png" class="img-fluid" style="width:80.0%" alt="Caspi et al. 2003 Figure 2: gene-environment interaction"></p>
+<div class="notes">
 <p>This is the key figure. The interaction looks clean — the short allele carriers show more depression under stress, the long allele carriers are protected. The paper was cited over 8,000 times. To put that in perspective, a typical well-cited paper in genetics gets maybe 200 citations. A famous one gets 1,000. 8,000 is a field-defining result. It launched an entire subfield. Hundreds of labs tried to replicate and extend the finding. Graduate students built dissertations around it. Textbooks cited it as a model of gene-environment interaction. If you took a psychology or genetics course between 2005 and 2015, you probably heard about it.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="citations" class="slide level2 centered">
-<h2>8,000 citations</h2>
+<section id="citations" class="level2 centered">
+<h2 class="centered anchored" data-anchor-id="citations">8,000 citations</h2>
 <div style="font-size: 1.5em; margin-top: 2em;">
 <p><strong>2003–2018</strong>: Hundreds of replication attempts</p>
 <p>Some positive. Some negative. Some null.</p>
 <p>Meta-analyses disagreed with each other.</p>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>Over the next fifteen years, hundreds of studies tried to replicate or extend the result. Some found the same thing. Some found the opposite. Some found nothing. Meta-analyses — studies that combine the results of many studies — disagreed with each other, depending on which studies they included and how they weighted them. This should have been a red flag. When a real effect exists, replications generally agree on its direction and approximate size. When studies disagree about whether an effect is positive, negative, or zero, that’s what noise looks like. But the field had reasons to keep believing. The biology was plausible — serotonin is genuinely involved in mood regulation. The original study was well-designed by the standards of its time.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="section-2" class="slide level2 centered" data-background-color="black">
-<h2></h2>
-
-<img data-src="images/border-2019-title.png" style="width:85.0%" alt="Title page of Border et al. 2019, AJPSYCH" class="r-stretch"><aside class="notes">
+<section id="section-2" class="level2 centered" data-background-color="black">
+<h2 class="centered anchored" data-background-color="black" data-anchor-id="section-2"></h2>
+<p><img src="images/border-2019-title.png" class="img-fluid" style="width:85.0%" alt="Title page of Border et al. 2019, AJPSYCH"></p>
+<div class="notes">
 <p>In 2019, a team led by Richard Border tested the 5-HTTLPR hypothesis — along with 17 other “candidate gene” hypotheses for depression — in samples ranging from 62,000 to 443,000 people. They had preregistered their analysis plan. They used the same measures and the same statistical approaches that the original studies had used, just with vastly more data.</p>
 <p>They found nothing. Not “a smaller effect than expected.” Nothing. The serotonin transporter variant had no detectable relationship to depression, with or without stress. Neither did any of the other 17 candidate genes.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="section-3" class="slide level2 centered" data-background-color="black">
-<h2></h2>
-
-<img data-src="images/border-2019-fig.png" style="width:80.0%" alt="Border et al. 2019: null results across 18 candidate genes" class="r-stretch"><aside class="notes">
+<section id="section-3" class="level2 centered" data-background-color="black">
+<h2 class="centered anchored" data-background-color="black" data-anchor-id="section-3"></h2>
+<p><img src="images/border-2019-fig.png" class="img-fluid" style="width:80.0%" alt="Border et al. 2019: null results across 18 candidate genes"></p>
+<div class="notes">
 <p>This is the figure. Eighteen candidate genes. Zero replication. The entire candidate gene literature for depression was, in effect, noise.</p>
 <p>How does a false positive survive for fifteen years? The short answer is: it wasn’t one false positive. It was thousands of them, across hundreds of studies, in a field that was running many statistical tests without accounting for how many tests it was running. And the tools to prevent this — to control the rate of false discovery when you’re testing many hypotheses — existed the entire time. The field just wasn’t using them.</p>
 <p>That’s what this lecture is about. Not the serotonin gene specifically, but the general problem: what happens when you test many hypotheses, and what it looks like when you don’t account for it.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="section-4" class="slide level2 centered">
-<h2></h2>
+<section id="section-4" class="level2 centered">
+<h2 class="centered anchored" data-anchor-id="section-4"></h2>
 <div style="font-size: 2em; margin-top: 2em;">
 <p>How does a false positive survive for <strong>fifteen years</strong>?</p>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>Pause here. Let the question hang. Then: “We’re going to see this problem firsthand, using a real dataset that we’ll work with for the rest of the workshop. And we’ll start building the diagnostic tools to catch it.”</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section class="slide level2">
-
-</section>
-<section>
-<section id="the-golub-dataset" class="title-slide slide level1 centered center">
-<h1>The Golub Dataset</h1>
-<aside class="notes">
+<section id="the-golub-dataset" class="level1 centered">
+<h1 class="centered">The Golub Dataset</h1>
+<div class="notes">
 <p>Shift gears. “Let’s start with a dataset.”</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="section-5" class="slide level2 centered" data-background-color="black">
-<h2></h2>
-
-<img data-src="images/golub-1999-title.png" style="width:85.0%" alt="Golub et al. 1999, Science — molecular classification of cancer" class="r-stretch"><aside class="notes">
+</div>
+<hr>
+<section id="section-5" class="level2 centered" data-background-color="black">
+<h2 class="centered anchored" data-background-color="black" data-anchor-id="section-5"></h2>
+<p><img src="images/golub-1999-title.png" class="img-fluid" style="width:85.0%" alt="Golub et al. 1999, Science — molecular classification of cancer"></p>
+<div class="notes">
 <p>In 1999, Todd Golub and colleagues published a landmark paper in Science showing that gene expression patterns alone could distinguish between two types of leukemia: acute lymphoblastic leukemia (ALL) and acute myeloid leukemia (AML). Each patient’s tumor was profiled using a microarray — a technology that measures the expression level of thousands of genes simultaneously. In this case, 3,051 genes per patient after preprocessing. This is the dataset we’ll work with for the rest of the workshop.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="section-6" class="slide level2 centered">
-<h2></h2>
+<section id="section-6" class="level2 centered">
+<h2 class="centered anchored" data-anchor-id="section-6"></h2>
 <div style="font-size: 1.3em;">
-<table class="caption-top">
+<table class="caption-top table">
 <tbody>
 <tr class="odd">
 <td><strong>Patients</strong></td>
@@ -316,128 +441,81 @@
 </tbody>
 </table>
 </div>
-<div class="fragment">
+<p>. . .</p>
 <div style="font-size: 1.3em; margin-top: 1em;">
 <p>More variables than observations. <strong>42× more.</strong></p>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>The 72 patients fall into two groups: 47 with ALL and 25 with AML. These are different types of leukemia — they have different prognoses, different treatment responses, different biology. The question is: which genes are expressed differently between the two types?</p>
 <p>This is a perfectly reasonable question. A clinician might want to know which genes distinguish the types so they can develop better diagnostics. A biologist might want to understand the molecular basis of the distinction.</p>
 <p>So you do what anyone would do. You take each gene, one at a time, and ask: is this gene expressed at a different level in ALL patients than in AML patients? The standard tool is a t-test. You compute a test statistic, you get a p-value, and you decide whether the difference is “statistically significant.” Do this for all 3,051 genes and you get 3,051 p-values.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
 </div>
+<hr>
 </section>
-<section id="section-7" class="slide level2 centered">
-<h2></h2>
+<section id="section-7" class="level2 centered">
+<h2 class="centered anchored" data-anchor-id="section-7"></h2>
 <div style="font-size: 2em;">
 <p><span class="math display">\[3{,}051 \times 0.05 = 153\]</span></p>
 </div>
-<div class="fragment">
+<p>. . .</p>
 <div style="font-size: 1.3em; margin-top: 1em;">
 <p><strong>153 “significant” genes from pure noise.</strong></p>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>Here’s the thing about p-values that everyone learns in their first statistics course and then immediately forgets the implications of: a p-value of 0.05 means that if the gene is not differentially expressed — if there is truly no difference between ALL and AML — there’s still a 5% chance of getting a test statistic this extreme or more extreme, just by chance. That’s fine for one test. You accept a 5% false positive rate as the cost of doing business.</p>
 <p>But you’re not running one test. You’re running 3,051.</p>
 <p>If none of the genes were actually different between ALL and AML — if the two types were molecularly identical, which they’re not, but bear with me — you’d still expect about 5% of your tests to come back significant at the 0.05 level. Five percent of 3,051 is 153. You’d get 153 “significant” results from pure noise.</p>
 <p>The false positive rate is still 5%. The false positive count is 153. And if you’re a biologist looking at your results, you don’t see a rate — you see a list of genes. A long list. A list that looks like you’ve discovered something.</p>
 <p>This is the multiple testing problem. It’s not subtle. The math is first-semester probability. And yet it fooled an entire field of psychiatric genetics for fifteen years.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
 </div>
+<hr>
 </section>
-<section class="slide level2">
-
-</section></section>
-<section>
-<section id="the-p-value-histogram" class="title-slide slide level1 centered center">
-<h1>The P-Value Histogram</h1>
-<aside class="notes">
+</section>
+<section id="the-p-value-histogram" class="level1 centered">
+<h1 class="centered">The P-Value Histogram</h1>
+<div class="notes">
 <p>“I want to show you the single most useful plot in high-dimensional statistics. It’s not a volcano plot. It’s not a heatmap. It’s a histogram of p-values.”</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="what-nothing-looks-like" class="slide level2">
-<h2>What “nothing” looks like</h2>
+</div>
+<hr>
+<section id="what-nothing-looks-like" class="level2">
+<h2 class="anchored" data-anchor-id="what-nothing-looks-like">What “nothing” looks like</h2>
 <div id="cell-null-histogram" class="cell" data-fig-height="5" data-fig-width="9" data-execution_count="1">
 <div class="cell-output cell-output-display">
 <div>
-<figure>
-<p><img data-src="lecture1-slides_files/figure-revealjs/null-histogram-output-1.png" id="null-histogram" width="853" height="470"></p>
+<figure class="figure">
+<p><img src="lecture1-slides_files/figure-html/null-histogram-output-1.png" id="null-histogram" width="853" height="470" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>Here’s what you’d see if none of the genes were differentially expressed: a flat histogram. Uniform. Equal numbers of p-values in every bin. This is because, under the null hypothesis, p-values are uniformly distributed between 0 and 1. That’s not an approximation or an asymptotic result — it’s exact. Technically, this is true for continuous test statistics. Discrete test statistics produce p-values that are stochastically larger than uniform, which makes the test conservative. For gene expression data with continuous measurements, the uniform assumption is essentially exact. If nothing is going on, every bin gets the same number of p-values. Memorize this shape — it’s your baseline.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="the-golub-data" class="slide level2">
-<h2>The Golub data</h2>
+<section id="the-golub-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-golub-data">The Golub data</h2>
 <div id="cell-all-histogram" class="cell" data-fig-height="5.5" data-fig-width="10" data-execution_count="2">
+<div class="cell-output cell-output-stderr">
+<pre><code>/Users/flaherty/.venvs/hd-stats-workshop/lib/python3.13/site-packages/scipy/stats/_axis_nan_policy.py:635: RuntimeWarning: Precision loss occurred in moment calculation due to catastrophic cancellation. This occurs when the data are nearly identical. Results may be unreliable.
+  res = hypotest_fun_out(*samples, axis=axis, **kwds)</code></pre>
+</div>
 <div class="cell-output cell-output-display">
 <div>
-<figure>
-<p><img data-src="lecture1-slides_files/figure-revealjs/all-histogram-output-1.png" id="all-histogram" width="949" height="518"></p>
+<figure class="figure">
+<p><img src="lecture1-slides_files/figure-html/all-histogram-output-2.png" id="all-histogram" width="949" height="518" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>Now consider the Golub data. The histogram is not flat. There is a pronounced spike near zero — hundreds of genes with very small p-values — and then a roughly flat region for the rest. The spike is signal: genes that are genuinely differentially expressed between ALL and AML. The flat part is the null genes — the genes where no real difference is present, producing the uniform distribution we would expect.</p>
 <p>Don’t explain yet. Ask the audience: “What do you see?” Let them describe it — spike near zero, flat region, excess above the red line. Then confirm what they said.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="three-things-this-histogram-tells-you" class="slide level2 scrollable">
-<h2>Three things this histogram tells you</h2>
+<section id="three-things-this-histogram-tells-you" class="level2">
+<h2 class="anchored" data-anchor-id="three-things-this-histogram-tells-you">Three things this histogram tells you</h2>
 <div style="font-size: 1.2em;">
 <ol type="1">
 <li><p><strong>Is there signal?</strong> Spike near zero → yes.</p></li>
@@ -445,169 +523,100 @@
 <li><p><strong>Is your analysis trustworthy?</strong> Flat part should be flat. If not, something is wrong.</p></li>
 </ol>
 </div>
-<div class="fragment">
+<p>. . .</p>
 <div style="font-size: 1.2em; margin-top: 1em;">
-<blockquote>
+<blockquote class="blockquote">
 <p>Plot the histogram before you do anything else.</p>
 </blockquote>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>This one plot tells you three things. First, whether there’s signal. If the histogram is flat, there is nothing to detect. If there’s a spike near zero, something real is happening.</p>
 <p>Second, roughly how much signal. The height of the flat part tells you the density of null p-values. If the flat part is at, say, 80% of the total, then roughly 80% of your genes are null and 20% are non-null. In the Golub data, the spike is substantial — ALL and AML are genuinely different diseases, and the transcriptomic differences are large.</p>
 <p>Third, whether your analysis is trustworthy. A well-behaved analysis produces a histogram with a flat right side and a spike on the left. But sometimes the histogram looks wrong. If the bars increase toward the right — more large p-values than expected — your test is conservative. If there’s a bump in the middle, something is off with your test statistics. If the entire histogram is shifted left with no flat region, your null model is wrong. These pathological histograms are surprisingly common, and they tell you to stop and fix your analysis before interpreting any results.</p>
 <p>I want you to internalize this: before you look at gene lists, before you compute adjusted p-values, before you run any correction procedure — plot the histogram. It takes ten seconds and it tells you whether the rest of your analysis is worth doing.</p>
 <p>We’ll come back to this histogram in Lecture 2, where it turns from a diagnostic into an estimator. The flat part isn’t just telling you “these genes are null” — it’s telling you the proportion of null genes, and that proportion is the key ingredient in false discovery rate estimation. But I’m getting ahead of myself.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
 </div>
+<hr>
 </section>
-<section id="section-8" class="slide level2 centered">
-<h2></h2>
-
-<img data-src="images/pval-histogram-pathologies.png" style="width:90.0%" alt="Examples of well-behaved vs. pathological p-value histograms" class="r-stretch"><aside class="notes">
+<section id="section-8" class="level2 centered">
+<h2 class="centered anchored" data-anchor-id="section-8"></h2>
+<p><img src="images/pval-histogram-pathologies.png" class="img-fluid" style="width:90.0%" alt="Examples of well-behaved vs. pathological p-value histograms"></p>
+<div class="notes">
 <p>[PLACEHOLDER — create a 2×2 panel showing: (1) well-behaved with signal, (2) all null/uniform, (3) anti-conservative (too many small p-values, inflated null), (4) conservative (dip near zero). Label each panel clearly.]</p>
 <p>These are the shapes you’ll learn to recognize. Top left is what we just saw — signal plus a well-behaved null. Top right is all null — flat, no detectable signal. Bottom left is anti-conservative — the null is inflated, indicating a problem with the analysis, often batch effects or unaddressed confounders. Bottom right is conservative — the test is overly cautious, possibly because the test statistic is discrete. In every case, the histogram tells you what to do before you run any correction.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section class="slide level2">
-
-</section></section>
-<section>
-<section id="bonferroni-and-family-wise-error-rate-control" class="title-slide slide level1 centered center">
-<h1>Bonferroni and Family-Wise Error Rate Control</h1>
-<aside class="notes">
+</section>
+<section id="bonferroni-and-family-wise-error-rate-control" class="level1 centered">
+<h1 class="centered">Bonferroni and Family-Wise Error Rate Control</h1>
+<div class="notes">
 <p>“So you have 3,051 p-values and a histogram that shows real signal. You want to call some genes significant. But you know that if you use the standard 0.05 threshold, you’ll get over a hundred false positives mixed in with the real results. What do you do?”</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="bonferroni-correction" class="slide level2">
-<h2>Bonferroni correction</h2>
+</div>
+<hr>
+<section id="bonferroni-correction" class="level2">
+<h2 class="anchored" data-anchor-id="bonferroni-correction">Bonferroni correction</h2>
 <div style="font-size: 1.8em; text-align: center; margin-top: 1.5em;">
 <p><span class="math display">\[\frac{0.05}{3{,}051} \approx 1.6 \times 10^{-5}\]</span></p>
 </div>
-<div class="fragment">
+<p>. . .</p>
 <div style="font-size: 1.2em; text-align: center; margin-top: 1em;">
 <p>Controls the <strong>family-wise error rate</strong>: P(any false positive) ≤ 0.05</p>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>The oldest and simplest answer is Bonferroni correction. The idea is almost embarrassingly straightforward: divide your significance level by the number of tests. Instead of calling a gene significant at p &lt; 0.05, you call it significant at p &lt; 0.05 / 3,051 ≈ 1.6 × 10⁻⁵.</p>
 <p>The logic goes like this. You want the probability of making any false positive — even one — to be at most 5%. This is called the family-wise error rate, or FWER. If each individual test has a false positive probability of α/m, then by the union bound, the probability that at least one of the m tests produces a false positive is at most m × (α/m) = α. Done.</p>
 <p>Bonferroni is clean, easy to explain, and requires no assumptions about the dependence structure of your tests. It works whether your genes are independent or correlated. It works whether you’re testing 10 hypotheses or 10 million. In genome-wide association studies, where you’re testing around a million genetic variants, the convention is a significance threshold of 5 × 10⁻⁸ — which is just Bonferroni at the million-variant scale. The actual number comes from a more sophisticated calculation involving linkage disequilibrium and the effective number of independent tests in the genome, but it’s in the Bonferroni ballpark.</p>
 <p>And Bonferroni works, in the sense that it does what it promises. If you apply Bonferroni to 3,051 tests, the probability that any of your declared significant genes is a false positive is at most 5%.</p>
 <p>But here’s the problem: Bonferroni controls the wrong thing.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
 </div>
+<hr>
 </section>
-<section id="where-is-the-threshold" class="slide level2">
-<h2>Where is the threshold?</h2>
+<section id="where-is-the-threshold" class="level2">
+<h2 class="anchored" data-anchor-id="where-is-the-threshold">Where is the threshold?</h2>
 <div id="cell-bonf-histogram" class="cell" data-fig-height="5.5" data-fig-width="10" data-execution_count="3">
 <div class="cell-output cell-output-display">
 <div>
-<figure>
-<p><img data-src="lecture1-slides_files/figure-revealjs/bonf-histogram-output-1.png" id="bonf-histogram" width="949" height="518"></p>
+<figure class="figure">
+<p><img src="lecture1-slides_files/figure-html/bonf-histogram-output-1.png" id="bonf-histogram" width="949" height="518" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>Think about what the family-wise error rate actually means. It’s the probability of any false positive. Any. Even one. In a list of 500 significant genes, Bonferroni demands a guarantee that not a single one is a false discovery. That’s an extraordinarily high standard. And to achieve it, the threshold becomes so stringent that you miss most of the real signal.</p>
 <p>You can barely see the red line. It’s jammed against zero. Only the very tip of the spike survives. Everything else — including real signal — gets thrown away.</p>
 <p>If you’re an astronomer and you’re about to announce the discovery of gravitational waves, yes, you want to be very sure you haven’t made even one false positive. The standard there is “five sigma,” roughly one in 3.5 million. The cost of a false claim is enormous.</p>
 <p>But if you’re a biologist screening 12,625 genes to find candidates for follow-up experiments, you’re in a completely different situation. You don’t need a guarantee that every gene on your list is real. You need a useful list — one where most of the genes are real and the false positives are a manageable fraction. If your list of 500 genes contains 25 false positives, that’s a 5% false discovery rate, and for most biological applications, that’s fine. You’ll validate the interesting ones in follow-up experiments anyway.</p>
 <p>Bonferroni can’t give you that list. It’s trying to prevent a different kind of error — any error at all — and in doing so, it throws away most of your real discoveries.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="section-9" class="slide level2 centered" data-background-color="black">
-<h2></h2>
-
-<img data-src="images/dead-salmon-poster.png" style="width:80.0%" alt="Bennett et al. 2009 — dead salmon fMRI poster" class="r-stretch"><aside class="notes">
+<section id="section-9" class="level2 centered" data-background-color="black">
+<h2 class="centered anchored" data-background-color="black" data-anchor-id="section-9"></h2>
+<p><img src="images/dead-salmon-poster.png" class="img-fluid" style="width:80.0%" alt="Bennett et al. 2009 — dead salmon fMRI poster"></p>
+<div class="notes">
 <p>In 2009, a neuroscientist named Craig Bennett and his colleagues put a dead Atlantic salmon in an fMRI scanner. It was purchased at a local fish market. It was, by all accounts, very dead.</p>
 <p>They showed the salmon a series of photographs of people in social situations and asked it — well, they ran the standard fMRI analysis pipeline — to determine the emotional valence of each photograph. The scanner measured blood oxygenation levels across thousands of tiny volume elements, called voxels, in the salmon’s body. For each voxel, a statistical test asked: does the signal in this voxel change in response to the photographs?</p>
 <p>Without any correction for multiple comparisons, a cluster of voxels in the salmon’s brain cavity showed statistically significant “neural activity.” The dead fish appeared to be processing human emotions.</p>
 <p>With a standard correction for multiple comparisons, the signal disappeared. Because of course it did — the salmon was dead.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="section-10" class="slide level2 centered" data-background-color="black">
-<h2></h2>
-
-<img data-src="images/dead-salmon-activation.png" style="width:75.0%" alt="Dead salmon fMRI showing spurious activation without correction" class="r-stretch"><aside class="notes">
+<section id="section-10" class="level2 centered" data-background-color="black">
+<h2 class="centered anchored" data-background-color="black" data-anchor-id="section-10"></h2>
+<p><img src="images/dead-salmon-activation.png" class="img-fluid" style="width:75.0%" alt="Dead salmon fMRI showing spurious activation without correction"></p>
+<div class="notes">
 <p>This is the figure. The colored blobs are “statistically significant” voxels in the dead salmon’s brain cavity. Without correction, the salmon is thinking about human emotions. With correction, it’s a dead fish.</p>
 <p>Bennett presented this as a poster at a conference, and it became widely circulated, partly for its memorable framing and partly because it made a serious point: every fMRI analysis involves thousands of voxels, each tested independently, and the multiple testing problem is the same as in genomics. Bennett surveyed published fMRI studies and found that between 25% and 40% did not report correcting for multiple comparisons. The poster was memorable. The survey was concerning.</p>
 <p>I’m telling you the salmon story because it’s memorable and because it makes the multiple testing problem feel visceral in a way that abstract calculations don’t. But the salmon was caught quickly — it was a deliberate demonstration. The next story is about what happens when false positives aren’t caught at all.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="the-gap" class="slide level2">
-<h2>The gap</h2>
+<section id="the-gap" class="level2">
+<h2 class="anchored" data-anchor-id="the-gap">The gap</h2>
 <div style="font-size: 1.2em;">
-<table class="caption-top">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Approach</th>
@@ -629,27 +638,17 @@
 </tbody>
 </table>
 </div>
-<div class="fragment">
+<p>. . .</p>
 <div style="font-size: 1.3em; margin-top: 1em;">
 <p>You need a different question.</p>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>You need a different question. Not “did I make any false positives?” but “what fraction of my discoveries are false?” That question has an answer, and it’s the subject of Lecture 2. But before we get there, I want to show you what happens when people skip the correction entirely.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
 </div>
+<hr>
 </section>
-<section id="two-questions" class="slide level2">
-<h2>Two questions</h2>
+<section id="two-questions" class="level2">
+<h2 class="anchored" data-anchor-id="two-questions">Two questions</h2>
 <div style="font-size: 1.2em;">
 <p><strong>FWER</strong> (Bonferroni): Did I make <strong>any</strong> false positive?</p>
 <p><span class="math display">\[P(\text{at least one false positive}) \leq \alpha\]</span></p>
@@ -657,68 +656,37 @@
 <p><strong>FDR</strong> (Benjamini-Hochberg): What <strong>fraction</strong> of my discoveries are false?</p>
 <p><span class="math display">\[E\!\left[\frac{\text{false positives}}{\text{total discoveries}}\right] \leq \alpha\]</span></p>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>This is the conceptual reframe. Bonferroni asks: what’s the probability of any false positive? FDR asks: of the genes I called significant, what fraction are wrong? If I call 200 genes significant and the FDR is 10%, I expect about 20 of them to be wrong. The other 180 are real. That’s a useful list.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="three-approaches-one-dataset" class="slide level2">
-<h2>Three approaches, one dataset</h2>
+<section id="three-approaches-one-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="three-approaches-one-dataset">Three approaches, one dataset</h2>
 <div id="cell-three-methods" class="cell" data-fig-height="5.5" data-fig-width="9" data-execution_count="4">
 <div class="cell-output cell-output-display">
 <div>
-<figure>
-<p><img data-src="lecture1-slides_files/figure-revealjs/three-methods-output-1.png" id="three-methods" width="854" height="519"></p>
+<figure class="figure">
+<p><img src="lecture1-slides_files/figure-html/three-methods-output-1.png" id="three-methods" width="854" height="519" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>The Benjamini-Hochberg procedure finds the middle ground. We’ll learn how it works in Lecture 2. For now, just see the result: uncorrected gives you thousands with hundreds of false positives. Bonferroni gives you a handful. BH gives you a useful discovery set. Which list would you want for follow-up experiments?</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section class="slide level2">
-
-</section></section>
-<section>
-<section id="what-a-field-wide-false-positive-looks-like" class="title-slide slide level1 centered center">
-<h1>What a Field-Wide False Positive Looks Like</h1>
-<aside class="notes">
+</section>
+<section id="what-a-field-wide-false-positive-looks-like" class="level1 centered">
+<h1 class="centered">What a Field-Wide False Positive Looks Like</h1>
+<div class="notes">
 <p>The dead salmon study became a memorable cautionary tale. Now back to a case that was anything but: the case where the false-positive cost was real.</p>
 <p>Let’s go back to the serotonin gene. Caspi et al.&nbsp;published their finding in 2003. Over the next fifteen years, hundreds of studies tried to replicate or extend the result. This should have been a red flag. When a real effect exists, replications generally agree on its direction and approximate size. When studies disagree about whether an effect is positive, negative, or zero, that’s what noise looks like.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="how-false-positives-survive" class="slide level2">
-<h2>How false positives survive</h2>
+</div>
+<hr>
+<section id="how-false-positives-survive" class="level2">
+<h2 class="anchored" data-anchor-id="how-false-positives-survive">How false positives survive</h2>
 <div style="font-size: 1.2em;">
 <p><strong>Publication bias</strong> Studies finding nothing sit in file drawers.</p>
 <p>. . .</p>
@@ -726,28 +694,19 @@
 <p>. . .</p>
 <p><strong>Garden of forking paths</strong> Many defensible analytical choices, each a branch point. The effective number of tests is much larger than reported.</p>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>How did the false positives survive? Three mechanisms, each reinforcing the others.</p>
 <p>Publication bias. Studies that found a significant result for 5-HTTLPR were more likely to be published. Studies that found nothing were more likely to sit in a file drawer. The published literature was a biased sample of the evidence.</p>
 <p>Winner’s curse. The studies that did get published — the ones that found significant results — necessarily overestimated the effect size. To cross the significance threshold with a small, noisy sample, the observed effect has to be larger than the true effect. So the early estimates of the 5-HTTLPR effect were inflated, and later studies with more realistic estimates looked like “failures to replicate.”</p>
 <p>The garden of forking paths. There are many defensible choices in any analysis: which covariates to include, which subgroups to analyze, which outcome measure to use, how to define “stressful life events.” Each choice is a branch point, and the analysts — without any intent to deceive — could explore different branches until they found one that produced a significant result. This isn’t the same as running 12,625 explicit tests, but it has the same effect: the number of implicit tests is much larger than the number of reported tests.</p>
 <p>None of this required bad intentions. The researchers who studied 5-HTTLPR were, for the most part, careful scientists who believed in their hypothesis and interpreted ambiguous evidence in its favor. That’s not fraud — that’s human cognition. The problem wasn’t the scientists. The problem was the statistical framework, which didn’t account for the scale of testing that was actually happening.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
+</div>
+<hr>
 </section>
-<section id="meanwhile-gwas-got-it-right" class="slide level2">
-<h2>Meanwhile, GWAS got it right</h2>
+<section id="meanwhile-gwas-got-it-right" class="level2">
+<h2 class="anchored" data-anchor-id="meanwhile-gwas-got-it-right">Meanwhile, GWAS got it right</h2>
 <div style="font-size: 1.2em;">
-<table class="caption-top">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th></th>
@@ -774,28 +733,18 @@
 </tbody>
 </table>
 </div>
-<div class="fragment">
+<p>. . .</p>
 <div style="font-size: 1.2em; margin-top: 1em;">
 <p>Same biology. Different statistical framework. <strong>Different results.</strong></p>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>Meanwhile, a parallel approach had been yielding real results. Genome-wide association studies, which test hundreds of thousands or millions of genetic variants and apply stringent multiple testing correction — that 5 × 10⁻⁸ threshold — had been steadily finding genetic loci associated with depression. By 2019, GWAS had identified over 100 loci. These weren’t the same genes that the candidate gene studies had focused on. The two approaches — one without proper correction, one with — were studying the same biology and getting completely different answers.</p>
 <p>The fix was known the entire time. GWAS adopted it from the beginning: test everything, correct for everything, accept the stringent thresholds. The candidate gene field tested one or a few genes per study, which seemed like it shouldn’t require correction — but across the entire literature, across hundreds of studies each making dozens of analytical choices, the effective number of tests was enormous. The correction should have happened at the field level, not just the study level.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
 </div>
+<hr>
 </section>
-<section id="section-11" class="slide level2 centered">
-<h2></h2>
+<section id="section-11" class="level2 centered">
+<h2 class="centered anchored" data-anchor-id="section-11"></h2>
 <div style="font-size: 1.5em; margin-top: 3em;">
 <p>The 5-HTTLPR story isn’t a story about bad scientists.</p>
 <p>. . .</p>
@@ -804,408 +753,1013 @@
 <p>The framework exists.</p>
 <p>That’s what we’ll build in Lecture 2.</p>
 </div>
-<aside class="notes">
+<div class="notes">
 <p>The 5-HTTLPR story isn’t a story about bad scientists. It’s a story about what happens when a field’s statistical framework doesn’t match the scale of its questions. The framework to handle that scale exists — it’s what we’ll build in Lecture 2. But first, in the lab, you’re going to see it for yourself. You’ll take the Golub dataset, run those 3,051 tests, plot the histogram, apply Bonferroni, and feel the gap between “controls any error” and “gives you a useful answer.” That gap is where the false discovery rate lives.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-
-
-
-</section></section>
-    </div>
-  <div class="quarto-auto-generated-content" style="display: none;">
-<div class="footer footer-default">
-<p>High-Dimensional Data Analysis Workshop | BTP</p>
 </div>
-</div></div>
 
-  <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="../site_libs/revealjs/dist/reveal.js"></script>
-  <!-- reveal.js plugins -->
-  <script src="../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="../site_libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
-  <script src="../site_libs/revealjs/plugin/quarto-support/support.js"></script>
-  
 
-  <script src="../site_libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="../site_libs/revealjs/plugin/search/search.js"></script>
-  <script src="../site_libs/revealjs/plugin/zoom/zoom.js"></script>
-  <script src="../site_libs/revealjs/plugin/math/math.js"></script>
-  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+<!-- -->
 
-  <script>
+</section>
+</section>
 
-      // Full list of configuration options available at:
-      // https://revealjs.com/config/
-      Reveal.initialize({
-'controlsAuto': true,
-'previewLinksAuto': false,
-'pdfSeparateFragments': false,
-'autoAnimateEasing': "ease",
-'autoAnimateDuration': 1,
-'autoAnimateUnmatched': true,
-'jumpToSlide': true,
-'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
-'chalkboard': {"buttons":true},
-'smaller': true,
- 
-        // Display controls in the bottom right corner
-        controls: false,
-
-        // Help the user learn the controls by providing hints, for example by
-        // bouncing the down arrow when they first encounter a vertical slide
-        controlsTutorial: false,
-
-        // Determines where controls appear, "edges" or "bottom-right"
-        controlsLayout: 'edges',
-
-        // Visibility rule for backwards navigation arrows; "faded", "hidden"
-        // or "visible"
-        controlsBackArrows: 'faded',
-
-        // Display a presentation progress bar
-        progress: true,
-
-        // Display the page number of the current slide
-        slideNumber: 'c/t',
-
-        // 'all', 'print', or 'speaker'
-        showSlideNumber: 'all',
-
-        // Add the current slide number to the URL hash so that reloading the
-        // page/copying the URL will return you to the same slide
-        hash: true,
-
-        // Start with 1 for the hash rather than 0
-        hashOneBasedIndex: false,
-
-        // Flags if we should monitor the hash and change slides accordingly
-        respondToHashChanges: true,
-
-        // Push each slide change to the browser history
-        history: true,
-
-        // Enable keyboard shortcuts for navigation
-        keyboard: true,
-
-        // Enable the slide overview mode
-        overview: true,
-
-        // Disables the default reveal.js slide layout (scaling and centering)
-        // so that you can use custom CSS layout
-        disableLayout: false,
-
-        // Vertical centering of slides
-        center: false,
-
-        // Enables touch navigation on devices with touch input
-        touch: true,
-
-        // Loop the presentation
-        loop: false,
-
-        // Change the presentation direction to be RTL
-        rtl: false,
-
-        // see https://revealjs.com/vertical-slides/#navigation-mode
-        navigationMode: 'linear',
-
-        // Randomizes the order of slides each time the presentation loads
-        shuffle: false,
-
-        // Turns fragments on and off globally
-        fragments: true,
-
-        // Flags whether to include the current fragment in the URL,
-        // so that reloading brings you to the same fragment position
-        fragmentInURL: false,
-
-        // Flags if the presentation is running in an embedded mode,
-        // i.e. contained within a limited portion of the screen
-        embedded: false,
-
-        // Flags if we should show a help overlay when the questionmark
-        // key is pressed
-        help: true,
-
-        // Flags if it should be possible to pause the presentation (blackout)
-        pause: true,
-
-        // Flags if speaker notes should be visible to all viewers
-        showNotes: false,
-
-        // Global override for autoplaying embedded media (null/true/false)
-        autoPlayMedia: null,
-
-        // Global override for preloading lazy-loaded iframes (null/true/false)
-        preloadIframes: null,
-
-        // Number of milliseconds between automatically proceeding to the
-        // next slide, disabled when set to 0, this value can be overwritten
-        // by using a data-autoslide attribute on your slides
-        autoSlide: 0,
-
-        // Stop auto-sliding after user input
-        autoSlideStoppable: true,
-
-        // Use this method for navigation when auto-sliding
-        autoSlideMethod: null,
-
-        // Specify the average time in seconds that you think you will spend
-        // presenting each slide. This is used to show a pacing timer in the
-        // speaker view
-        defaultTiming: null,
-
-        // Enable slide navigation via mouse wheel
-        mouseWheel: false,
-
-        // The display mode that will be used to show slides
-        display: 'block',
-
-        // Hide cursor if inactive
-        hideInactiveCursor: true,
-
-        // Time before the cursor is hidden (in ms)
-        hideCursorTime: 5000,
-
-        // Opens links in an iframe preview overlay
-        previewLinks: false,
-
-        // Transition style (none/fade/slide/convex/concave/zoom)
-        transition: 'none',
-
-        // Transition speed (default/fast/slow)
-        transitionSpeed: 'default',
-
-        // Transition style for full page slide backgrounds
-        // (none/fade/slide/convex/concave/zoom)
-        backgroundTransition: 'none',
-
-        // Number of slides away from the current that are visible
-        viewDistance: 3,
-
-        // Number of slides away from the current that are visible on mobile
-        // devices. It is advisable to set this to a lower number than
-        // viewDistance in order to save resources.
-        mobileViewDistance: 2,
-
-        // The "normal" size of the presentation, aspect ratio will be preserved
-        // when the presentation is scaled to fit different resolutions. Can be
-        // specified using percentage units.
-        width: 1050,
-
-        height: 700,
-
-        // Factor of the display size that should remain empty around the content
-        margin: 0.1,
-
-        math: {
-          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
-          config: 'TeX-AMS_HTML-full',
-          tex2jax: {
-            inlineMath: [['\\(','\\)']],
-            displayMath: [['\\[','\\]']],
-            balanceBraces: true,
-            processEscapes: false,
-            processRefs: true,
-            processEnvironments: true,
-            preview: 'TeX',
-            skipTags: ['script','noscript','style','textarea','pre','code'],
-            ignoreClass: 'tex2jax_ignore',
-            processClass: 'tex2jax_process'
-          },
-        },
-
-        // reveal.js plugins
-        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
-
-          RevealMath,
-          RevealNotes,
-          RevealSearch,
-          RevealZoom
-        ]
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
       });
-    </script>
-    <script id="quarto-html-after-body" type="application/javascript">
-      window.document.addEventListener("DOMContentLoaded", function (event) {
-        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
-        tabsets.forEach(function(tabset) {
-          const tabby = new Tabby('#' + tabset.id);
-        });
-        const isCodeAnnotation = (el) => {
-          for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {                     
-              return true;
-            }
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
           }
-          return false;
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
         }
-        const onCopySuccess = function(e) {
-          // button target
-          const button = e.trigger;
-          // don't keep focus
-          button.blur();
-          // flash "checked"
-          button.classList.add('code-copy-button-checked');
-          var currentTitle = button.getAttribute("title");
-          button.setAttribute("title", "Copied!");
-          let tooltip;
-          if (window.bootstrap) {
-            button.setAttribute("data-bs-toggle", "tooltip");
-            button.setAttribute("data-bs-placement", "left");
-            button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button, 
-              { trigger: "manual", 
-                customClass: "code-copy-button-tooltip",
-                offset: [0, -8]});
-            tooltip.show();    
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
           }
-          setTimeout(function() {
-            if (tooltip) {
-              tooltip.hide();
-              button.removeAttribute("data-bs-title");
-              button.removeAttribute("data-bs-toggle");
-              button.removeAttribute("data-bs-placement");
-            }
-            button.setAttribute("title", currentTitle);
-            button.classList.remove('code-copy-button-checked');
-          }, 1000);
-          // clear code selection
-          e.clearSelection();
         }
-        const getTextToCopy = function(trigger) {
-          const outerScaffold = trigger.parentElement.cloneNode(true);
-          const codeEl = outerScaffold.querySelector('code');
-          for (const childEl of codeEl.children) {
-            if (isCodeAnnotation(childEl)) {
-              childEl.remove();
-            }
-          }
-          return codeEl.innerText;
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
         }
-        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-          text: getTextToCopy
-        });
-        clipboard.on('success', onCopySuccess);
-        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-            text: getTextToCopy,
-            container: window.document.getElementById('quarto-embedded-source-code-modal')
-          });
-          clipboardModal.on('success', onCopySuccess);
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
         }
-          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-          var mailtoRegex = new RegExp(/^mailto:/);
-            var filterRegex = new RegExp('/' + window.location.host + '/');
-          var isInternal = (href) => {
-              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-          }
-          // Inspect non-navigation links and adorn them if external
-         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-          for (var i=0; i<links.length; i++) {
-            const link = links[i];
-            if (!isInternal(link.href)) {
-              // undo the damage that might have been done by quarto-nav.js in the case of
-              // links that we want to consider external
-              if (link.dataset.originalHref !== undefined) {
-                link.href = link.dataset.originalHref;
-              }
-            }
-          }
-        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-          const config = {
-            allowHTML: true,
-            maxWidth: 500,
-            delay: 100,
-            arrow: false,
-            appendTo: function(el) {
-                return el.closest('section.slide') || el.parentElement;
-            },
-            interactive: true,
-            interactiveBorder: 10,
-            theme: 'light-border',
-            placement: 'bottom-start',
-          };
-          if (contentFn) {
-            config.content = contentFn;
-          }
-          if (onTriggerFn) {
-            config.onTrigger = onTriggerFn;
-          }
-          if (onUntriggerFn) {
-            config.onUntrigger = onUntriggerFn;
-          }
-            config['offset'] = [0,0];
-            config['maxWidth'] = 700;
-          window.tippy(el, config); 
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
         }
-        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-        for (var i=0; i<noterefs.length; i++) {
-          const ref = noterefs[i];
-          tippyHover(ref, function() {
-            // use id or data attribute instead here
-            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-            try { href = new URL(href).hash; } catch {}
-            const id = href.replace(/^#\/?/, "");
-            const note = window.document.getElementById(id);
-            if (note) {
-              return note.innerHTML;
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
             } else {
-              return "";
+              container.appendChild(child.cloneNode(true));
+              break;
             }
-          });
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
         }
-        const findCites = (el) => {
-          const parentEl = el.parentElement;
-          if (parentEl) {
-            const cites = parentEl.dataset.cites;
-            if (cites) {
-              return {
-                el,
-                cites: cites.split(' ')
-              };
-            } else {
-              return findCites(el.parentElement)
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
             }
           } else {
-            return undefined;
-          }
-        };
-        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-        for (var i=0; i<bibliorefs.length; i++) {
-          const ref = bibliorefs[i];
-          const citeInfo = findCites(ref);
-          if (citeInfo) {
-            tippyHover(citeInfo.el, function() {
-              var popup = window.document.createElement('div');
-              citeInfo.cites.forEach(function(cite) {
-                var citeDiv = window.document.createElement('div');
-                citeDiv.classList.add('hanging-indent');
-                citeDiv.classList.add('csl-entry');
-                var biblioDiv = window.document.getElementById('ref-' + cite);
-                if (biblioDiv) {
-                  citeDiv.innerHTML = biblioDiv.innerHTML;
-                }
-                popup.appendChild(citeDiv);
-              });
-              return popup.innerHTML;
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
             });
           }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
         }
+      }, function(instance) {
       });
-      </script>
-    
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "The Gene That Wasn't There"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Lecture 1"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "Day 1, 9:00–10:00"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">  revealjs:</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">    theme: default</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">    slide-number: true</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">    chalkboard: true</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">    smaller: true</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">    scrollable: true</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">    footer: "High-Dimensional Data Analysis Workshop | BTP"</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">    math: mathjax</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="fu">## {background-color="black" .centered}</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="al">![](images/caspi-2003-title.png)</span>{fig-alt="Title page of Caspi et al. 2003, Science" width="85%"}</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>In 2003, Avshalom Caspi and a team of researchers published a paper in Science that would become one of the most influential findings in psychiatric genetics. They reported that a variant in the serotonin transporter gene — a gene called 5-HTTLPR — predicted whether people who experienced stressful life events would develop depression. The idea was elegant: some people carry a version of this gene that produces less serotonin transporter protein, and those people, when exposed to stress, are more vulnerable to depression. Nature plus nurture, mediated by a single gene.</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## {background-color="black" .centered}</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="al">![](images/caspi-2003-fig2.png)</span>{fig-alt="Caspi et al. 2003 Figure 2: gene-environment interaction" width="80%"}</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>This is the key figure. The interaction looks clean — the short allele carriers show more depression under stress, the long allele carriers are protected. The paper was cited over 8,000 times. To put that in perspective, a typical well-cited paper in genetics gets maybe 200 citations. A famous one gets 1,000. 8,000 is a field-defining result. It launched an entire subfield. Hundreds of labs tried to replicate and extend the finding. Graduate students built dissertations around it. Textbooks cited it as a model of gene-environment interaction. If you took a psychology or genetics course between 2005 and 2015, you probably heard about it.</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## 8,000 citations {.centered}</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.5em; margin-top: 2em;"}</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>**2003–2018**: Hundreds of replication attempts</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>Some positive. Some negative. Some null.</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>Meta-analyses disagreed with each other.</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>Over the next fifteen years, hundreds of studies tried to replicate or extend the result. Some found the same thing. Some found the opposite. Some found nothing. Meta-analyses — studies that combine the results of many studies — disagreed with each other, depending on which studies they included and how they weighted them. This should have been a red flag. When a real effect exists, replications generally agree on its direction and approximate size. When studies disagree about whether an effect is positive, negative, or zero, that's what noise looks like. But the field had reasons to keep believing. The biology was plausible — serotonin is genuinely involved in mood regulation. The original study was well-designed by the standards of its time.</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="fu">## {background-color="black" .centered}</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a><span class="al">![](images/border-2019-title.png)</span>{fig-alt="Title page of Border et al. 2019, AJPSYCH" width="85%"}</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>In 2019, a team led by Richard Border tested the 5-HTTLPR hypothesis — along with 17 other "candidate gene" hypotheses for depression — in samples ranging from 62,000 to 443,000 people. They had preregistered their analysis plan. They used the same measures and the same statistical approaches that the original studies had used, just with vastly more data.</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>They found nothing. Not "a smaller effect than expected." Nothing. The serotonin transporter variant had no detectable relationship to depression, with or without stress. Neither did any of the other 17 candidate genes.</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="fu">## {background-color="black" .centered}</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="al">![](images/border-2019-fig.png)</span>{fig-alt="Border et al. 2019: null results across 18 candidate genes" width="80%"}</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>This is the figure. Eighteen candidate genes. Zero replication. The entire candidate gene literature for depression was, in effect, noise.</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>How does a false positive survive for fifteen years? The short answer is: it wasn't one false positive. It was thousands of them, across hundreds of studies, in a field that was running many statistical tests without accounting for how many tests it was running. And the tools to prevent this — to control the rate of false discovery when you're testing many hypotheses — existed the entire time. The field just wasn't using them.</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>That's what this lecture is about. Not the serotonin gene specifically, but the general problem: what happens when you test many hypotheses, and what it looks like when you don't account for it.</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a><span class="fu">## {.centered}</span></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 2em; margin-top: 2em;"}</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>How does a false positive survive for **fifteen years**?</span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>Pause here. Let the question hang. Then: "We're going to see this problem firsthand, using a real dataset that we'll work with for the rest of the workshop. And we'll start building the diagnostic tools to catch it."</span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="fu"># The Golub Dataset {.centered}</span></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>Shift gears. "Let's start with a dataset."</span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="fu">## {background-color="black" .centered}</span></span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a><span class="al">![](images/golub-1999-title.png)</span>{fig-alt="Golub et al. 1999, Science — molecular classification of cancer" width="85%"}</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>In 1999, Todd Golub and colleagues published a landmark paper in Science showing that gene expression patterns alone could distinguish between two types of leukemia: acute lymphoblastic leukemia (ALL) and acute myeloid leukemia (AML). Each patient's tumor was profiled using a microarray — a technology that measures the expression level of thousands of genes simultaneously. In this case, 3,051 genes per patient after preprocessing. This is the dataset we'll work with for the rest of the workshop.</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a><span class="fu">## {.centered}</span></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.3em;"}</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="pp">|</span> <span class="pp">|</span></span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|</span></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Patients** <span class="pp">|</span> 72 <span class="pp">|</span></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Genes** <span class="pp">|</span> 3,051 <span class="pp">|</span></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **ALL** <span class="pp">|</span> 47 <span class="pp">|</span></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **AML** <span class="pp">|</span> 25 <span class="pp">|</span></span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Ratio p/n** <span class="pp">|</span> ~42 <span class="pp">|</span></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>. . .</span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.3em; margin-top: 1em;"}</span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>More variables than observations. **42× more.**</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>The 72 patients fall into two groups: 47 with ALL and 25 with AML. These are different types of leukemia — they have different prognoses, different treatment responses, different biology. The question is: which genes are expressed differently between the two types?</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>This is a perfectly reasonable question. A clinician might want to know which genes distinguish the types so they can develop better diagnostics. A biologist might want to understand the molecular basis of the distinction.</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>So you do what anyone would do. You take each gene, one at a time, and ask: is this gene expressed at a different level in ALL patients than in AML patients? The standard tool is a t-test. You compute a test statistic, you get a p-value, and you decide whether the difference is "statistically significant." Do this for all 3,051 genes and you get 3,051 p-values.</span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a><span class="fu">## {.centered}</span></span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 2em;"}</span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>$$3{,}051 \times 0.05 = 153$$</span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>. . .</span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.3em; margin-top: 1em;"}</span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>**153 "significant" genes from pure noise.**</span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>Here's the thing about p-values that everyone learns in their first statistics course and then immediately forgets the implications of: a p-value of 0.05 means that if the gene is not differentially expressed — if there is truly no difference between ALL and AML — there's still a 5% chance of getting a test statistic this extreme or more extreme, just by chance. That's fine for one test. You accept a 5% false positive rate as the cost of doing business.</span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>But you're not running one test. You're running 3,051.</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>If none of the genes were actually different between ALL and AML — if the two types were molecularly identical, which they're not, but bear with me — you'd still expect about 5% of your tests to come back significant at the 0.05 level. Five percent of 3,051 is 153. You'd get 153 "significant" results from pure noise.</span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>The false positive rate is still 5%. The false positive count is 153. And if you're a biologist looking at your results, you don't see a rate — you see a list of genes. A long list. A list that looks like you've discovered something.</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>This is the multiple testing problem. It's not subtle. The math is first-semester probability. And yet it fooled an entire field of psychiatric genetics for fifteen years.</span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a><span class="fu"># The P-Value Histogram {.centered}</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>"I want to show you the single most useful plot in high-dimensional statistics. It's not a volcano plot. It's not a heatmap. It's a histogram of p-values."</span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a><span class="fu">## What "nothing" looks like</span></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: null-histogram</span></span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 5</span></span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 9</span></span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">123</span>)</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>null_pvals <span class="op">=</span> rng.uniform(size<span class="op">=</span><span class="dv">3051</span>)</span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="dv">5</span>))</span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a>ax.hist(null_pvals, bins<span class="op">=</span><span class="dv">50</span>, color<span class="op">=</span><span class="st">"gray"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>ax.axhline(y<span class="op">=</span><span class="dv">3051</span> <span class="op">/</span> <span class="dv">50</span>, color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Simulated: all genes are null"</span>, fontsize<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"P-value"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>Here's what you'd see if none of the genes were differentially expressed: a flat histogram. Uniform. Equal numbers of p-values in every bin. This is because, under the null hypothesis, p-values are uniformly distributed between 0 and 1. That's not an approximation or an asymptotic result — it's exact. Technically, this is true for continuous test statistics. Discrete test statistics produce p-values that are stochastically larger than uniform, which makes the test conservative. For gene expression data with continuous measurements, the uniform assumption is essentially exact. If nothing is going on, every bin gets the same number of p-values. Memorize this shape — it's your baseline.</span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Golub data</span></span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: all-histogram</span></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 5.5</span></span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 10</span></span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>expr <span class="op">=</span> pd.read_csv(<span class="st">"../data/golub_expression.csv"</span>, index_col<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>meta <span class="op">=</span> pd.read_csv(<span class="st">"../data/golub_metadata.csv"</span>, dtype<span class="op">=</span>{<span class="st">"sample_id"</span>: <span class="bu">str</span>})</span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>subtype <span class="op">=</span> meta[<span class="st">"subtype"</span>].values</span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>all_mask <span class="op">=</span> subtype <span class="op">==</span> <span class="st">"ALL"</span></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>_, pvals <span class="op">=</span> stats.ttest_ind(expr.loc[:, all_mask].values, expr.loc[:, <span class="op">~</span>all_mask].values, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="fl">5.5</span>))</span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a>ax.hist(pvals, bins<span class="op">=</span><span class="dv">100</span>, color<span class="op">=</span><span class="st">"steelblue"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>ax.axhline(y<span class="op">=</span><span class="bu">len</span>(pvals) <span class="op">/</span> <span class="dv">100</span>, color<span class="op">=</span><span class="st">"red"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, linewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>ax.legend([<span class="st">"Expected if all null"</span>], loc<span class="op">=</span><span class="st">"upper right"</span>, fontsize<span class="op">=</span><span class="dv">12</span>, frameon<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"P-value histogram: 3,051 genes, ALL vs. AML"</span>, fontsize<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"P-value"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>Now consider the Golub data. The histogram is not flat. There is a pronounced spike near zero — hundreds of genes with very small p-values — and then a roughly flat region for the rest. The spike is signal: genes that are genuinely differentially expressed between ALL and AML. The flat part is the null genes — the genes where no real difference is present, producing the uniform distribution we would expect.</span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>Don't explain yet. Ask the audience: "What do you see?" Let them describe it — spike near zero, flat region, excess above the red line. Then confirm what they said.</span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a><span class="fu">## Three things this histogram tells you</span></span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.2em;"}</span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Is there signal?** Spike near zero → yes.</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**How much?** The flat part estimates π₀ (fraction of null genes).</span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Is your analysis trustworthy?** Flat part should be flat. If not, something is wrong.</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>. . .</span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.2em; margin-top: 1em;"}</span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a><span class="at">&gt; Plot the histogram before you do anything else.</span></span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a><span class="at">:::</span></span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>This one plot tells you three things. First, whether there's signal. If the histogram is flat, there is nothing to detect. If there's a spike near zero, something real is happening.</span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>Second, roughly how much signal. The height of the flat part tells you the density of null p-values. If the flat part is at, say, 80% of the total, then roughly 80% of your genes are null and 20% are non-null. In the Golub data, the spike is substantial — ALL and AML are genuinely different diseases, and the transcriptomic differences are large.</span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a>Third, whether your analysis is trustworthy. A well-behaved analysis produces a histogram with a flat right side and a spike on the left. But sometimes the histogram looks wrong. If the bars increase toward the right — more large p-values than expected — your test is conservative. If there's a bump in the middle, something is off with your test statistics. If the entire histogram is shifted left with no flat region, your null model is wrong. These pathological histograms are surprisingly common, and they tell you to stop and fix your analysis before interpreting any results.</span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>I want you to internalize this: before you look at gene lists, before you compute adjusted p-values, before you run any correction procedure — plot the histogram. It takes ten seconds and it tells you whether the rest of your analysis is worth doing.</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>We'll come back to this histogram in Lecture 2, where it turns from a diagnostic into an estimator. The flat part isn't just telling you "these genes are null" — it's telling you the proportion of null genes, and that proportion is the key ingredient in false discovery rate estimation. But I'm getting ahead of myself.</span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a><span class="fu">## {.centered}</span></span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a><span class="al">![](images/pval-histogram-pathologies.png)</span>{fig-alt="Examples of well-behaved vs. pathological p-value histograms" width="90%"}</span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">PLACEHOLDER — create a 2×2 panel showing: (1) well-behaved with signal, (2) all null/uniform, (3) anti-conservative (too many small p-values, inflated null), (4) conservative (dip near zero). Label each panel clearly.</span><span class="co">]</span></span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>These are the shapes you'll learn to recognize. Top left is what we just saw — signal plus a well-behaved null. Top right is all null — flat, no detectable signal. Bottom left is anti-conservative — the null is inflated, indicating a problem with the analysis, often batch effects or unaddressed confounders. Bottom right is conservative — the test is overly cautious, possibly because the test statistic is discrete. In every case, the histogram tells you what to do before you run any correction.</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a><span class="fu"># Bonferroni and Family-Wise Error Rate Control {.centered}</span></span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>"So you have 3,051 p-values and a histogram that shows real signal. You want to call some genes significant. But you know that if you use the standard 0.05 threshold, you'll get over a hundred false positives mixed in with the real results. What do you do?"</span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a><span class="fu">## Bonferroni correction</span></span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.8em; text-align: center; margin-top: 1.5em;"}</span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a>$$\frac{0.05}{3{,}051} \approx 1.6 \times 10^{-5}$$</span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a>. . .</span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.2em; text-align: center; margin-top: 1em;"}</span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a>Controls the **family-wise error rate**: P(any false positive) ≤ 0.05</span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a>The oldest and simplest answer is Bonferroni correction. The idea is almost embarrassingly straightforward: divide your significance level by the number of tests. Instead of calling a gene significant at p &lt; 0.05, you call it significant at p &lt; 0.05 / 3,051 ≈ 1.6 × 10⁻⁵.</span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>The logic goes like this. You want the probability of making any false positive — even one — to be at most 5%. This is called the family-wise error rate, or FWER. If each individual test has a false positive probability of α/m, then by the union bound, the probability that at least one of the m tests produces a false positive is at most m × (α/m) = α. Done.</span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>Bonferroni is clean, easy to explain, and requires no assumptions about the dependence structure of your tests. It works whether your genes are independent or correlated. It works whether you're testing 10 hypotheses or 10 million. In genome-wide association studies, where you're testing around a million genetic variants, the convention is a significance threshold of 5 × 10⁻⁸ — which is just Bonferroni at the million-variant scale. The actual number comes from a more sophisticated calculation involving linkage disequilibrium and the effective number of independent tests in the genome, but it's in the Bonferroni ballpark.</span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>And Bonferroni works, in the sense that it does what it promises. If you apply Bonferroni to 3,051 tests, the probability that any of your declared significant genes is a false positive is at most 5%.</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>But here's the problem: Bonferroni controls the wrong thing.</span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a><span class="fu">## Where is the threshold?</span></span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: bonf-histogram</span></span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 5.5</span></span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 10</span></span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>bonf_threshold <span class="op">=</span> <span class="fl">0.05</span> <span class="op">/</span> <span class="bu">len</span>(pvals)</span>
+<span id="cb2-328"><a href="#cb2-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-329"><a href="#cb2-329" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="fl">5.5</span>))</span>
+<span id="cb2-330"><a href="#cb2-330" aria-hidden="true" tabindex="-1"></a>ax.hist(pvals, bins<span class="op">=</span><span class="dv">100</span>, color<span class="op">=</span><span class="st">"steelblue"</span>, edgecolor<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb2-331"><a href="#cb2-331" aria-hidden="true" tabindex="-1"></a>ax.axvline(x<span class="op">=</span>bonf_threshold, color<span class="op">=</span><span class="st">"red"</span>, linewidth<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb2-332"><a href="#cb2-332" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="ss">f"← Bonferroni: </span><span class="sc">{</span>bonf_threshold<span class="sc">:.2e}</span><span class="ss">"</span>, xy<span class="op">=</span>(bonf_threshold <span class="op">+</span> <span class="fl">0.015</span>, ax.get_ylim()[<span class="dv">1</span>] <span class="op">*</span> <span class="fl">0.9</span>),</span>
+<span id="cb2-333"><a href="#cb2-333" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"red"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-334"><a href="#cb2-334" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"The Bonferroni threshold"</span>, fontsize<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb2-335"><a href="#cb2-335" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"P-value"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-336"><a href="#cb2-336" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Frequency"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-337"><a href="#cb2-337" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-338"><a href="#cb2-338" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-339"><a href="#cb2-339" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-340"><a href="#cb2-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-341"><a href="#cb2-341" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-342"><a href="#cb2-342" aria-hidden="true" tabindex="-1"></a>Think about what the family-wise error rate actually means. It's the probability of any false positive. Any. Even one. In a list of 500 significant genes, Bonferroni demands a guarantee that not a single one is a false discovery. That's an extraordinarily high standard. And to achieve it, the threshold becomes so stringent that you miss most of the real signal.</span>
+<span id="cb2-343"><a href="#cb2-343" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-344"><a href="#cb2-344" aria-hidden="true" tabindex="-1"></a>You can barely see the red line. It's jammed against zero. Only the very tip of the spike survives. Everything else — including real signal — gets thrown away.</span>
+<span id="cb2-345"><a href="#cb2-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-346"><a href="#cb2-346" aria-hidden="true" tabindex="-1"></a>If you're an astronomer and you're about to announce the discovery of gravitational waves, yes, you want to be very sure you haven't made even one false positive. The standard there is "five sigma," roughly one in 3.5 million. The cost of a false claim is enormous.</span>
+<span id="cb2-347"><a href="#cb2-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-348"><a href="#cb2-348" aria-hidden="true" tabindex="-1"></a>But if you're a biologist screening 12,625 genes to find candidates for follow-up experiments, you're in a completely different situation. You don't need a guarantee that every gene on your list is real. You need a useful list — one where most of the genes are real and the false positives are a manageable fraction. If your list of 500 genes contains 25 false positives, that's a 5% false discovery rate, and for most biological applications, that's fine. You'll validate the interesting ones in follow-up experiments anyway.</span>
+<span id="cb2-349"><a href="#cb2-349" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-350"><a href="#cb2-350" aria-hidden="true" tabindex="-1"></a>Bonferroni can't give you that list. It's trying to prevent a different kind of error — any error at all — and in doing so, it throws away most of your real discoveries.</span>
+<span id="cb2-351"><a href="#cb2-351" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-352"><a href="#cb2-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-353"><a href="#cb2-353" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-354"><a href="#cb2-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-355"><a href="#cb2-355" aria-hidden="true" tabindex="-1"></a><span class="fu">## {background-color="black" .centered}</span></span>
+<span id="cb2-356"><a href="#cb2-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-357"><a href="#cb2-357" aria-hidden="true" tabindex="-1"></a><span class="al">![](images/dead-salmon-poster.png)</span>{fig-alt="Bennett et al. 2009 — dead salmon fMRI poster" width="80%"}</span>
+<span id="cb2-358"><a href="#cb2-358" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-359"><a href="#cb2-359" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-360"><a href="#cb2-360" aria-hidden="true" tabindex="-1"></a>In 2009, a neuroscientist named Craig Bennett and his colleagues put a dead Atlantic salmon in an fMRI scanner. It was purchased at a local fish market. It was, by all accounts, very dead.</span>
+<span id="cb2-361"><a href="#cb2-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a>They showed the salmon a series of photographs of people in social situations and asked it — well, they ran the standard fMRI analysis pipeline — to determine the emotional valence of each photograph. The scanner measured blood oxygenation levels across thousands of tiny volume elements, called voxels, in the salmon's body. For each voxel, a statistical test asked: does the signal in this voxel change in response to the photographs?</span>
+<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a>Without any correction for multiple comparisons, a cluster of voxels in the salmon's brain cavity showed statistically significant "neural activity." The dead fish appeared to be processing human emotions.</span>
+<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a>With a standard correction for multiple comparisons, the signal disappeared. Because of course it did — the salmon was dead.</span>
+<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a><span class="fu">## {background-color="black" .centered}</span></span>
+<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a><span class="al">![](images/dead-salmon-activation.png)</span>{fig-alt="Dead salmon fMRI showing spurious activation without correction" width="75%"}</span>
+<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>This is the figure. The colored blobs are "statistically significant" voxels in the dead salmon's brain cavity. Without correction, the salmon is thinking about human emotions. With correction, it's a dead fish.</span>
+<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a>Bennett presented this as a poster at a conference, and it became widely circulated, partly for its memorable framing and partly because it made a serious point: every fMRI analysis involves thousands of voxels, each tested independently, and the multiple testing problem is the same as in genomics. Bennett surveyed published fMRI studies and found that between 25% and 40% did not report correcting for multiple comparisons. The poster was memorable. The survey was concerning.</span>
+<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a>I'm telling you the salmon story because it's memorable and because it makes the multiple testing problem feel visceral in a way that abstract calculations don't. But the salmon was caught quickly — it was a deliberate demonstration. The next story is about what happens when false positives aren't caught at all.</span>
+<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a><span class="fu">## The gap</span></span>
+<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.2em;"}</span>
+<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Approach <span class="pp">|</span> Genes significant <span class="pp">|</span> Problem <span class="pp">|</span></span>
+<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a><span class="pp">|----------|:---:|---------|</span></span>
+<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> No correction <span class="pp">|</span> Thousands <span class="pp">|</span> Hundreds of false positives <span class="pp">|</span></span>
+<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Bonferroni <span class="pp">|</span> A handful <span class="pp">|</span> Most real signal missed <span class="pp">|</span></span>
+<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a>. . .</span>
+<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.3em; margin-top: 1em;"}</span>
+<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a>You need a different question.</span>
+<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a>You need a different question. Not "did I make any false positives?" but "what fraction of my discoveries are false?" That question has an answer, and it's the subject of Lecture 2. But before we get there, I want to show you what happens when people skip the correction entirely.</span>
+<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a><span class="fu">## Two questions</span></span>
+<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.2em;"}</span>
+<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a>**FWER** (Bonferroni): Did I make **any** false positive?</span>
+<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a>$$P(\text{at least one false positive}) \leq \alpha$$</span>
+<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-413"><a href="#cb2-413" aria-hidden="true" tabindex="-1"></a>. . .</span>
+<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a>**FDR** (Benjamini-Hochberg): What **fraction** of my discoveries are false?</span>
+<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a>$$E<span class="sc">\!</span>\left<span class="co">[</span><span class="ot">\frac{\text{false positives}}{\text{total discoveries}}\right</span><span class="co">]</span> \leq \alpha$$</span>
+<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a>This is the conceptual reframe. Bonferroni asks: what's the probability of any false positive? FDR asks: of the genes I called significant, what fraction are wrong? If I call 200 genes significant and the FDR is 10%, I expect about 20 of them to be wrong. The other 180 are real. That's a useful list.</span>
+<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-424"><a href="#cb2-424" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a><span class="fu">## Three approaches, one dataset</span></span>
+<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: three-methods</span></span>
+<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 5.5</span></span>
+<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 9</span></span>
+<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.stats.multitest <span class="im">import</span> multipletests</span>
+<span id="cb2-436"><a href="#cb2-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a>_, p_bh, _, _ <span class="op">=</span> multipletests(pvals, alpha<span class="op">=</span><span class="fl">0.05</span>, method<span class="op">=</span><span class="st">"fdr_bh"</span>)</span>
+<span id="cb2-438"><a href="#cb2-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-439"><a href="#cb2-439" aria-hidden="true" tabindex="-1"></a>methods <span class="op">=</span> [<span class="st">"No correction</span><span class="ch">\n</span><span class="st">(α = 0.05)"</span>, <span class="st">"Bonferroni</span><span class="ch">\n</span><span class="st">(FWER ≤ 0.05)"</span>, <span class="st">"BH procedure</span><span class="ch">\n</span><span class="st">(FDR ≤ 0.05)"</span>]</span>
+<span id="cb2-440"><a href="#cb2-440" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> [np.<span class="bu">sum</span>(pvals <span class="op">&lt;</span> <span class="fl">0.05</span>), np.<span class="bu">sum</span>(pvals <span class="op">&lt;</span> bonf_threshold), np.<span class="bu">sum</span>(p_bh <span class="op">&lt;=</span> <span class="fl">0.05</span>)]</span>
+<span id="cb2-441"><a href="#cb2-441" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"firebrick"</span>, <span class="st">"gray"</span>, <span class="st">"steelblue"</span>]</span>
+<span id="cb2-442"><a href="#cb2-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-443"><a href="#cb2-443" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">9</span>, <span class="fl">5.5</span>))</span>
+<span id="cb2-444"><a href="#cb2-444" aria-hidden="true" tabindex="-1"></a>bars <span class="op">=</span> ax.bar(methods, counts, width<span class="op">=</span><span class="fl">0.6</span>, color<span class="op">=</span>colors)</span>
+<span id="cb2-445"><a href="#cb2-445" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> bar, count <span class="kw">in</span> <span class="bu">zip</span>(bars, counts):</span>
+<span id="cb2-446"><a href="#cb2-446" aria-hidden="true" tabindex="-1"></a>    ax.text(bar.get_x() <span class="op">+</span> bar.get_width() <span class="op">/</span> <span class="dv">2</span>, bar.get_height() <span class="op">+</span> <span class="bu">max</span>(counts) <span class="op">*</span> <span class="fl">0.02</span>,</span>
+<span id="cb2-447"><a href="#cb2-447" aria-hidden="true" tabindex="-1"></a>            <span class="bu">str</span>(count), ha<span class="op">=</span><span class="st">"center"</span>, va<span class="op">=</span><span class="st">"bottom"</span>, fontsize<span class="op">=</span><span class="dv">16</span>)</span>
+<span id="cb2-448"><a href="#cb2-448" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Number of genes"</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
+<span id="cb2-449"><a href="#cb2-449" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Genes called significant under three approaches"</span>, fontsize<span class="op">=</span><span class="dv">16</span>)</span>
+<span id="cb2-450"><a href="#cb2-450" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">0</span>, <span class="bu">max</span>(counts) <span class="op">*</span> <span class="fl">1.15</span>)</span>
+<span id="cb2-451"><a href="#cb2-451" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-452"><a href="#cb2-452" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb2-453"><a href="#cb2-453" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-454"><a href="#cb2-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-455"><a href="#cb2-455" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-456"><a href="#cb2-456" aria-hidden="true" tabindex="-1"></a>The Benjamini-Hochberg procedure finds the middle ground. We'll learn how it works in Lecture 2. For now, just see the result: uncorrected gives you thousands with hundreds of false positives. Bonferroni gives you a handful. BH gives you a useful discovery set. Which list would you want for follow-up experiments?</span>
+<span id="cb2-457"><a href="#cb2-457" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-458"><a href="#cb2-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-459"><a href="#cb2-459" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-460"><a href="#cb2-460" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-461"><a href="#cb2-461" aria-hidden="true" tabindex="-1"></a><span class="fu"># What a Field-Wide False Positive Looks Like {.centered}</span></span>
+<span id="cb2-462"><a href="#cb2-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-463"><a href="#cb2-463" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-464"><a href="#cb2-464" aria-hidden="true" tabindex="-1"></a>The dead salmon study became a memorable cautionary tale. Now back to a case that was anything but: the case where the false-positive cost was real.</span>
+<span id="cb2-465"><a href="#cb2-465" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-466"><a href="#cb2-466" aria-hidden="true" tabindex="-1"></a>Let's go back to the serotonin gene. Caspi et al. published their finding in 2003. Over the next fifteen years, hundreds of studies tried to replicate or extend the result. This should have been a red flag. When a real effect exists, replications generally agree on its direction and approximate size. When studies disagree about whether an effect is positive, negative, or zero, that's what noise looks like.</span>
+<span id="cb2-467"><a href="#cb2-467" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-468"><a href="#cb2-468" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-469"><a href="#cb2-469" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-470"><a href="#cb2-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-471"><a href="#cb2-471" aria-hidden="true" tabindex="-1"></a><span class="fu">## How false positives survive</span></span>
+<span id="cb2-472"><a href="#cb2-472" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-473"><a href="#cb2-473" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.2em;"}</span>
+<span id="cb2-474"><a href="#cb2-474" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-475"><a href="#cb2-475" aria-hidden="true" tabindex="-1"></a>**Publication bias**</span>
+<span id="cb2-476"><a href="#cb2-476" aria-hidden="true" tabindex="-1"></a>Studies finding nothing sit in file drawers.</span>
+<span id="cb2-477"><a href="#cb2-477" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-478"><a href="#cb2-478" aria-hidden="true" tabindex="-1"></a>. . .</span>
+<span id="cb2-479"><a href="#cb2-479" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-480"><a href="#cb2-480" aria-hidden="true" tabindex="-1"></a>**Winner's curse**</span>
+<span id="cb2-481"><a href="#cb2-481" aria-hidden="true" tabindex="-1"></a>To cross the significance threshold in a small sample, the observed effect has to overshoot the true value.</span>
+<span id="cb2-482"><a href="#cb2-482" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-483"><a href="#cb2-483" aria-hidden="true" tabindex="-1"></a>. . .</span>
+<span id="cb2-484"><a href="#cb2-484" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-485"><a href="#cb2-485" aria-hidden="true" tabindex="-1"></a>**Garden of forking paths**</span>
+<span id="cb2-486"><a href="#cb2-486" aria-hidden="true" tabindex="-1"></a>Many defensible analytical choices, each a branch point. The effective number of tests is much larger than reported.</span>
+<span id="cb2-487"><a href="#cb2-487" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-488"><a href="#cb2-488" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-489"><a href="#cb2-489" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-490"><a href="#cb2-490" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-491"><a href="#cb2-491" aria-hidden="true" tabindex="-1"></a>How did the false positives survive? Three mechanisms, each reinforcing the others.</span>
+<span id="cb2-492"><a href="#cb2-492" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-493"><a href="#cb2-493" aria-hidden="true" tabindex="-1"></a>Publication bias. Studies that found a significant result for 5-HTTLPR were more likely to be published. Studies that found nothing were more likely to sit in a file drawer. The published literature was a biased sample of the evidence.</span>
+<span id="cb2-494"><a href="#cb2-494" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-495"><a href="#cb2-495" aria-hidden="true" tabindex="-1"></a>Winner's curse. The studies that did get published — the ones that found significant results — necessarily overestimated the effect size. To cross the significance threshold with a small, noisy sample, the observed effect has to be larger than the true effect. So the early estimates of the 5-HTTLPR effect were inflated, and later studies with more realistic estimates looked like "failures to replicate."</span>
+<span id="cb2-496"><a href="#cb2-496" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-497"><a href="#cb2-497" aria-hidden="true" tabindex="-1"></a>The garden of forking paths. There are many defensible choices in any analysis: which covariates to include, which subgroups to analyze, which outcome measure to use, how to define "stressful life events." Each choice is a branch point, and the analysts — without any intent to deceive — could explore different branches until they found one that produced a significant result. This isn't the same as running 12,625 explicit tests, but it has the same effect: the number of implicit tests is much larger than the number of reported tests.</span>
+<span id="cb2-498"><a href="#cb2-498" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-499"><a href="#cb2-499" aria-hidden="true" tabindex="-1"></a>None of this required bad intentions. The researchers who studied 5-HTTLPR were, for the most part, careful scientists who believed in their hypothesis and interpreted ambiguous evidence in its favor. That's not fraud — that's human cognition. The problem wasn't the scientists. The problem was the statistical framework, which didn't account for the scale of testing that was actually happening.</span>
+<span id="cb2-500"><a href="#cb2-500" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-501"><a href="#cb2-501" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-502"><a href="#cb2-502" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-503"><a href="#cb2-503" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-504"><a href="#cb2-504" aria-hidden="true" tabindex="-1"></a><span class="fu">## Meanwhile, GWAS got it right</span></span>
+<span id="cb2-505"><a href="#cb2-505" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-506"><a href="#cb2-506" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.2em;"}</span>
+<span id="cb2-507"><a href="#cb2-507" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-508"><a href="#cb2-508" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="pp">|</span> Candidate genes <span class="pp">|</span> GWAS <span class="pp">|</span></span>
+<span id="cb2-509"><a href="#cb2-509" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>--<span class="pp">|:---:|:---:|</span></span>
+<span id="cb2-510"><a href="#cb2-510" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Tests per study** <span class="pp">|</span> 1–few <span class="pp">|</span> ~1,000,000 <span class="pp">|</span></span>
+<span id="cb2-511"><a href="#cb2-511" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Correction** <span class="pp">|</span> Usually none <span class="pp">|</span> 5 × 10⁻⁸ <span class="pp">|</span></span>
+<span id="cb2-512"><a href="#cb2-512" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Depression loci found** <span class="pp">|</span> 0 (replicated) <span class="pp">|</span> 100+ <span class="pp">|</span></span>
+<span id="cb2-513"><a href="#cb2-513" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-514"><a href="#cb2-514" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-515"><a href="#cb2-515" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-516"><a href="#cb2-516" aria-hidden="true" tabindex="-1"></a>. . .</span>
+<span id="cb2-517"><a href="#cb2-517" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-518"><a href="#cb2-518" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.2em; margin-top: 1em;"}</span>
+<span id="cb2-519"><a href="#cb2-519" aria-hidden="true" tabindex="-1"></a>Same biology. Different statistical framework. **Different results.**</span>
+<span id="cb2-520"><a href="#cb2-520" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-521"><a href="#cb2-521" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-522"><a href="#cb2-522" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-523"><a href="#cb2-523" aria-hidden="true" tabindex="-1"></a>Meanwhile, a parallel approach had been yielding real results. Genome-wide association studies, which test hundreds of thousands or millions of genetic variants and apply stringent multiple testing correction — that 5 × 10⁻⁸ threshold — had been steadily finding genetic loci associated with depression. By 2019, GWAS had identified over 100 loci. These weren't the same genes that the candidate gene studies had focused on. The two approaches — one without proper correction, one with — were studying the same biology and getting completely different answers.</span>
+<span id="cb2-524"><a href="#cb2-524" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-525"><a href="#cb2-525" aria-hidden="true" tabindex="-1"></a>The fix was known the entire time. GWAS adopted it from the beginning: test everything, correct for everything, accept the stringent thresholds. The candidate gene field tested one or a few genes per study, which seemed like it shouldn't require correction — but across the entire literature, across hundreds of studies each making dozens of analytical choices, the effective number of tests was enormous. The correction should have happened at the field level, not just the study level.</span>
+<span id="cb2-526"><a href="#cb2-526" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-527"><a href="#cb2-527" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-528"><a href="#cb2-528" aria-hidden="true" tabindex="-1"></a>---</span>
+<span id="cb2-529"><a href="#cb2-529" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-530"><a href="#cb2-530" aria-hidden="true" tabindex="-1"></a><span class="fu">## {.centered}</span></span>
+<span id="cb2-531"><a href="#cb2-531" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-532"><a href="#cb2-532" aria-hidden="true" tabindex="-1"></a>::: {style="font-size: 1.5em; margin-top: 3em;"}</span>
+<span id="cb2-533"><a href="#cb2-533" aria-hidden="true" tabindex="-1"></a>The 5-HTTLPR story isn't a story about bad scientists.</span>
+<span id="cb2-534"><a href="#cb2-534" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-535"><a href="#cb2-535" aria-hidden="true" tabindex="-1"></a>. . .</span>
+<span id="cb2-536"><a href="#cb2-536" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-537"><a href="#cb2-537" aria-hidden="true" tabindex="-1"></a>It's a story about what happens when a field's statistical framework doesn't match the scale of its questions.</span>
+<span id="cb2-538"><a href="#cb2-538" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-539"><a href="#cb2-539" aria-hidden="true" tabindex="-1"></a>. . .</span>
+<span id="cb2-540"><a href="#cb2-540" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-541"><a href="#cb2-541" aria-hidden="true" tabindex="-1"></a>The framework exists.</span>
+<span id="cb2-542"><a href="#cb2-542" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-543"><a href="#cb2-543" aria-hidden="true" tabindex="-1"></a>That's what we'll build in Lecture 2.</span>
+<span id="cb2-544"><a href="#cb2-544" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb2-545"><a href="#cb2-545" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-546"><a href="#cb2-546" aria-hidden="true" tabindex="-1"></a>::: {.notes}</span>
+<span id="cb2-547"><a href="#cb2-547" aria-hidden="true" tabindex="-1"></a>The 5-HTTLPR story isn't a story about bad scientists. It's a story about what happens when a field's statistical framework doesn't match the scale of its questions. The framework to handle that scale exists — it's what we'll build in Lecture 2. But first, in the lab, you're going to see it for yourself. You'll take the Golub dataset, run those 3,051 tests, plot the histogram, apply Bonferroni, and feel the gap between "controls any error" and "gives you a useful answer." That gap is where the false discovery rate lives.</span>
+<span id="cb2-548"><a href="#cb2-548" aria-hidden="true" tabindex="-1"></a>:::</span>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
 
 </body></html>
