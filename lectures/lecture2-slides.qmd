@@ -361,15 +361,59 @@ The R package `locfdr` automates this.
 
 ## Multiple Testing in Practice: A Decision Framework
 
-```{mermaid}
-%%| fig-cap: "Choosing an error rate"
-flowchart TD
-    A[How many tests?] -->|Few: 1–20| B[Use FWER: Bonferroni or Holm]
-    A -->|Many: 100+| C{Goal?}
-    C -->|Confirmation| D[Use FWER: Bonferroni-Holm]
-    C -->|Discovery| E{How many tests?}
-    E -->|100–1000| F[BH or Storey q-values]
-    E -->|1000+| G[Efron local FDR / empirical Bayes]
+```{python}
+#| echo: false
+#| fig-cap: "Choosing an error rate"
+#| fig-height: 4.5
+import matplotlib.pyplot as plt
+from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
+
+def box(ax, xy, text, kind="proc", w=2.6, h=0.7):
+    x, y = xy
+    if kind == "decision":
+        style = "round,pad=0.05"
+        fc = "#FFE0B2"; ec = "#E65100"
+    else:
+        style = "round,pad=0.05"
+        fc = "#BBDEFB"; ec = "#0D47A1"
+    p = FancyBboxPatch((x - w/2, y - h/2), w, h, boxstyle=style,
+                        linewidth=1.4, facecolor=fc, edgecolor=ec)
+    ax.add_patch(p)
+    ax.text(x, y, text, ha="center", va="center", fontsize=9)
+    return (x, y, w, h)
+
+def arrow(ax, p_from, p_to, label=""):
+    x0, y0, w0, h0 = p_from
+    x1, y1, w1, h1 = p_to
+    a = FancyArrowPatch((x0, y0 - h0/2), (x1, y1 + h1/2),
+                         arrowstyle="-|>", mutation_scale=14,
+                         linewidth=1.2, color="#444444")
+    ax.add_patch(a)
+    if label:
+        ax.text((x0 + x1) / 2 + 0.05, (y0 + y1) / 2,
+                label, fontsize=8, color="#444444",
+                ha="left", va="center")
+
+fig, ax = plt.subplots(figsize=(9, 4.5))
+ax.set_xlim(0, 12); ax.set_ylim(0, 8); ax.axis("off")
+
+A = box(ax, (6, 7), "How many tests?", kind="decision")
+B = box(ax, (2, 5), "FWER:\nBonferroni or Holm")
+C = box(ax, (9, 5), "Goal?", kind="decision")
+D = box(ax, (6.5, 3), "FWER:\nBonferroni–Holm")
+E = box(ax, (10.5, 3), "How many tests?", kind="decision")
+F = box(ax, (8.5, 1), "BH or Storey\nq-values")
+G = box(ax, (11.5, 1), "Efron local FDR /\nempirical Bayes")
+
+arrow(ax, A, B, "Few: 1–20")
+arrow(ax, A, C, "Many: 100+")
+arrow(ax, C, D, "Confirmation")
+arrow(ax, C, E, "Discovery")
+arrow(ax, E, F, "100–1,000")
+arrow(ax, E, G, "1,000+")
+
+plt.tight_layout()
+plt.show()
 ```
 
 ---
