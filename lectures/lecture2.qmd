@@ -24,18 +24,18 @@ format:
 
 ## A Picture Worth 10,000 Tests
 
-Look at a $p$-value histogram from a gene expression study comparing two cancer subtypes:
+A $p$-value histogram from a gene-expression study comparing two cancer subtypes has two components:
 
-- The **flat part** (uniform across $[0,1]$) represents null genes — no real signal
-- The **spike near 0** represents true discoveries — genes that actually differ
-
-. . .
-
-You can *see* $\pi_0$ (the proportion of true nulls) directly: it's the height of the flat part.
+- The **flat part** (uniform across $[0,1]$): null genes — no real signal
+- The **spike near 0**: true discoveries — genes that actually differ
 
 . . .
 
-This remarkably simple observation — that the histogram itself encodes the answer — is the foundation of everything in this lecture. But turning visual intuition into a rigorous procedure took decades.
+The proportion of true nulls $\pi_0$ is *visible* — it is the height of the flat region.
+
+. . .
+
+That the histogram itself encodes the answer is the foundation of this lecture. Translating the visual intuition into a rigorous procedure took several decades.
 
 ---
 
@@ -62,7 +62,7 @@ Given $m$ hypothesis tests with $p$-values $p_1, \ldots, p_m$:
 
 . . .
 
-**Theorem** (Benjamini & Hochberg, 1995): Under independence, $\text{FDR} \leq \frac{m_0}{m} \alpha \leq \alpha$.
+**Theorem** ([Benjamini & Hochberg, 1995](https://doi.org/10.1111/j.2517-6161.1995.tb02031.x)): Under independence, $\text{FDR} \leq \frac{m_0}{m} \alpha \leq \alpha$.
 
 ---
 
@@ -101,7 +101,7 @@ The original BH result assumes independence of test statistics. In genomics, gen
 
 . . .
 
-**Benjamini & Yekutieli (2001)**: Under arbitrary dependence, replace $\alpha$ with $\alpha / \sum_{i=1}^m 1/i \approx \alpha / \ln(m)$.
+[**Benjamini & Yekutieli (2001)**](https://doi.org/10.1214/aos/1013699998): Under arbitrary dependence, replace $\alpha$ with $\alpha / \sum_{i=1}^m 1/i \approx \alpha / \ln(m)$.
 
 . . .
 
@@ -115,41 +115,41 @@ The original BH result assumes independence of test statistics. In genomics, gen
 
 ## Stein's Paradox: Borrowing Strength
 
-In 1956, Charles Stein proved something that stunned the statistics world:
+In 1956, [Charles Stein](https://projecteuclid.org/proceedings/berkeley-symposium-on-mathematical-statistics-and-probability/Proceedings-of-the-Third-Berkeley-Symposium-on-Mathematical-Statistics-and/Chapter/Inadmissibility-of-the-Usual-Estimator-for-the-Mean-of-a/bsmsp/1200501656) established a result that reshaped the statistical landscape:
 
 **The sample mean is inadmissible for estimating 3 or more means simultaneously.**
 
 . . .
 
-Efron & Morris (1977) made this concrete with baseball. To predict a batter's end-of-season average, you do better by **shrinking each player's early-season average toward the grand mean of all players** — even though the players have nothing to do with each other.
+[Efron & Morris (1977)](https://www.jstor.org/stable/24953895) illustrated the principle with baseball. End-of-season batting averages are better predicted by **shrinking each player's early-season average toward the grand mean across players** — despite the players being unrelated.
 
 . . .
 
-The James-Stein estimator (James & Stein, 1961): $\hat{\theta}_i^{JS} = \bar{y} + \left(1 - \frac{(d-3)\sigma^2}{\sum_j (y_j - \bar{y})^2}\right)(y_i - \bar{y})$
+The James–Stein estimator ([James & Stein, 1961](https://projecteuclid.org/proceedings/berkeley-symposium-on-mathematical-statistics-and-probability/Proceedings-of-the-Fourth-Berkeley-Symposium-on-Mathematical-Statistics-and/Chapter/Estimation-with-Quadratic-Loss/bsmsp/1200512173)): $\hat{\theta}_i^{JS} = \bar{y} + \left(1 - \frac{(d-3)\sigma^2}{\sum_j (y_j - \bar{y})^2}\right)(y_i - \bar{y})$,
 
-where $d \geq 4$ is the number of means being estimated.
+where $d \geq 4$ is the number of means estimated.
 
 . . .
 
-This is the founding insight of **empirical Bayes**: the other observations tell you something about the observation you are looking at. Efron generalized the idea — from baseball averages to 10,000 genes.
+This is the founding insight of **empirical Bayes**: the other observations carry information about the observation under analysis. Efron generalized the idea — from baseball averages to 10,000 genes.
 
 ---
 
 ## From Baseball to Genes
 
-In classical statistics, you test each gene in isolation. Gene #4,237 knows nothing about genes #1–4,236.
+In classical statistics each gene is tested in isolation; the test for gene #4,237 uses no information from genes #1–4,236.
 
 . . .
 
-Efron realized: when you test 10,000 genes simultaneously, the **other 9,999 results tell you something about the gene you're looking at** — just as the other batters' averages improve your estimate of any single batter.
+Efron observed that, when 10,000 genes are tested simultaneously, the **other 9,999 results carry information about any particular gene** — just as other batters' averages refine the estimate for any single batter.
 
 . . .
 
-If most genes show no signal, then the prior probability that *any particular* gene is non-null is low. The data itself reveals the prior — without you having to specify one.
+If most genes show no signal, the prior probability that any particular gene is non-null is low. The data themselves reveal the prior; the analyst need not specify one.
 
 . . .
 
-> "Letting the data determine the prior turns Bayesian inference from a subjective into a largely objective technique." — Efron, *Large-Scale Inference*, Ch. 1
+> "Letting the data determine the prior turns Bayesian inference from a subjective into a largely objective technique." — Efron, [*Large-Scale Inference*](https://doi.org/10.1017/CBO9780511761362), Ch. 1
 
 ---
 
@@ -157,7 +157,7 @@ If most genes show no signal, then the prior probability that *any particular* g
 
 BH controls FDR at level $\frac{m_0}{m}\alpha$, which is conservative when $m_0 < m$.
 
-**Storey (2002)**: Estimate $\pi_0 = m_0/m$ and use an adaptive threshold.
+[**Storey (2002)**](https://doi.org/10.1111/1467-9868.00346): Estimate $\pi_0 = m_0/m$ and use an adaptive threshold.
 
 For a tuning parameter $\lambda$ (e.g., $\lambda = 0.5$):
 
@@ -173,7 +173,7 @@ The R package `qvalue` implements this with automatic $\lambda$ selection.
 
 ## The $q$-value
 
-**Definition** (Storey, 2003): The $q$-value of test $i$ is the minimum FDR at which test $i$ would be called significant.
+**Definition** ([Storey, 2003](https://doi.org/10.1214/aos/1074290335)): The $q$-value of test $i$ is the minimum FDR at which test $i$ would be called significant.
 
 $$q_i = \min_{t \geq p_i} \widehat{\text{FDR}}(t)$$
 
@@ -188,7 +188,7 @@ Analogous to a $p$-value, but for FDR instead of Type I error:
 
 ## Efron's Two-Groups Model
 
-A more foundational perspective (Efron, 2004, *JASA*; developed fully in Efron, 2008, *Statistical Science*; and Efron, 2010, *Large-Scale Inference*, Ch. 2–4).
+A more foundational perspective ([Efron, 2004, *JASA*](https://doi.org/10.1198/016214504000000089); developed fully in [Efron, 2008, *Statistical Science*](https://doi.org/10.1214/07-STS236); and [Efron, 2010, *Large-Scale Inference*](https://doi.org/10.1017/CBO9780511761362), Ch. 2–4).
 
 Each of the $m$ cases belongs to one of two groups:
 
@@ -259,19 +259,19 @@ But it's **empirical Bayes**: instead of specifying a prior, we estimate $\pi_0$
 
 ---
 
-## Efron's Prostate Cancer Surprise
+## A Cautionary Case: Efron's Prostate Cancer Reanalysis
 
-Efron analyzed a prostate cancer microarray study (Singh et al., 2002): 6,033 genes, 102 patients.
+Efron analyzed a prostate-cancer microarray study ([Singh et al., 2002](https://doi.org/10.1016/S1535-6108(02)00030-2)): 6,033 genes, 102 patients.
 
-He converted the test statistics to $z$-scores expecting them to follow $N(0,1)$ under the null. Instead, the central peak of the histogram was **wider than expected**: the empirical null was closer to $N(\hat{\delta}_0, \hat{\sigma}_0^2)$ with $\hat{\sigma}_0 > 1$.
-
-. . .
-
-Using the theoretical $N(0,1)$ null would overstate significance — genes whose $z$-scores fell in the inflated tails would be called discoveries when they were actually consistent with the (wider) true null.
+The test statistics were converted to $z$-scores under the expectation that they would follow $N(0,1)$ under the null. The central peak of the empirical histogram was instead **wider than expected**: the empirical null was closer to $N(\hat{\delta}_0, \hat{\sigma}_0^2)$ with $\hat{\sigma}_0 > 1$.
 
 . . .
 
-**The "empirical null" saved the analysis** — and showed that blindly trusting $N(0,1)$ can be dangerous. The exact parameters depend on the dataset and estimation method; the key insight is that $\hat{\sigma}_0 \neq 1$.
+Applying the theoretical $N(0,1)$ null would overstate significance: genes whose $z$-scores fell in the (incorrectly narrow) tails would be declared discoveries despite being consistent with the actual, wider null.
+
+. . .
+
+The empirical null corrected the analysis and demonstrated that the theoretical $N(0,1)$ null cannot be assumed without verification. The estimated parameters depend on the dataset and procedure; the central observation is that $\hat{\sigma}_0 \neq 1$ in many real applications.
 
 ---
 
@@ -291,9 +291,9 @@ Possible causes:
 
 ### Empirical null
 
-Fit $f_0(z) = N(\hat{\delta}_0, \hat{\sigma}_0^2)$ from the central part of the observed $z$-score distribution.
+Fit $f_0(z) = N(\hat{\delta}_0, \hat{\sigma}_0^2)$ to the central portion of the observed $z$-score distribution.
 
-If $\hat{\sigma}_0 > 1$, the theoretical null is too narrow and we'd get too many false discoveries.
+When $\hat{\sigma}_0 > 1$, the theoretical null is too narrow and the analysis would yield an excess of false discoveries.
 
 ---
 
@@ -388,11 +388,11 @@ flowchart TD
 
 ## Summary
 
-1. **BH procedure**: Simple, controls FDR under independence (or PRDS). Your go-to tool.
-2. **Storey's $q$-value**: Adaptive FDR control using $\hat{\pi}_0$. More powerful when many nulls.
-3. **Efron's two-groups model**: The foundational framework. The mixture $f = \pi_0 f_0 + (1-\pi_0)f_1$ unifies everything.
-4. **Local FDR**: A test-specific posterior probability of being null. The most informative single summary.
-5. **Empirical null**: Always check whether $f_0 = N(0,1)$ is reasonable. If not, estimate it.
+1. **BH procedure**: Simple; controls FDR under independence or PRDS. The default tool for high-dimensional inference.
+2. **Storey's $q$-value**: Adaptive FDR control using $\hat{\pi}_0$. More powerful when most tests are null.
+3. **Efron's two-groups model**: The foundational framework. The mixture $f = \pi_0 f_0 + (1-\pi_0)f_1$ unifies the procedures above.
+4. **Local FDR**: A test-specific posterior probability of being null — the most informative single summary at the level of individual tests.
+5. **Empirical null**: Always assess whether $f_0 = N(0,1)$ is appropriate; estimate it from the data when it is not.
 
 ### Up Next
 

@@ -24,15 +24,15 @@ format:
 
 ## From Faces to Genes
 
-In 1991, Turk and Pentland ran PCA on a database of face photographs. The principal components — ghostly, blurred images they called **"eigenfaces"** — could reconstruct any face in the database using just 100 numbers instead of thousands of pixels.
+In 1991, [Turk and Pentland](https://doi.org/10.1162/jocn.1991.3.1.71) applied PCA to a database of face photographs. The leading principal components — diffuse, low-resolution images they termed **"eigenfaces"** — sufficed to reconstruct any face in the database from approximately 100 coefficients in place of thousands of pixels.
 
 . . .
 
-This was the moment dimension reduction went from mathematical abstraction to transformative tool: a high-dimensional object (a face) could be faithfully represented in a far lower-dimensional space.
+The result marked the transition of dimension reduction from a mathematical construct to a practical tool: a high-dimensional object (a face) could be faithfully represented in a far lower-dimensional space.
 
 . . .
 
-The same idea now drives single-cell genomics, where 30,000 gene measurements per cell are routinely compressed to 30–50 principal components before any analysis.
+The same principle now drives single-cell genomics, where 30,000 gene measurements per cell are routinely compressed to 30–50 principal components before any further analysis.
 
 ---
 
@@ -168,18 +168,18 @@ Read it as: arrows pointing in the same direction as a cluster of points tell yo
 
 ---
 
-## When t-SNE Lies
+## When t-SNE Misleads
 
-In 2016, Wattenberg, Viégas, and Johnson published **"How to Use t-SNE Effectively"** — a landmark interactive article showing that:
+In 2016, [Wattenberg, Viégas, and Johnson](https://distill.pub/2016/misread-tsne/) published *How to Use t-SNE Effectively*, an interactive article that documented several systematic failure modes:
 
-- t-SNE can create **clusters from completely uniform data**
-- It can **split a single group** into two apparent clusters
-- It can make **distant groups appear adjacent**
-- Cluster **sizes** and **distances between clusters** are meaningless
+- t-SNE can produce **apparent clusters from uniformly distributed data**
+- It can **partition a single population** into two apparent clusters
+- It can render **distant groups visually adjacent**
+- Cluster **sizes** and **between-cluster distances** are not meaningful
 
 . . .
 
-Yet thousands of papers treat t-SNE and UMAP plots as ground truth. A t-SNE plot is a sketch, not a photograph.
+Despite this, t-SNE and UMAP plots are routinely treated in the literature as veridical representations of the data. A t-SNE plot is a sketch, not a photograph.
 
 ---
 
@@ -187,11 +187,11 @@ Yet thousands of papers treat t-SNE and UMAP plots as ground truth. A t-SNE plot
 
 When the data lies on a **nonlinear manifold** (common in single-cell biology), PCA may miss important structure.
 
-Three popular nonlinear methods:
+Three nonlinear methods in widespread use:
 
-1. **t-SNE** (van der Maaten & Hinton, 2008)
-2. **UMAP** (McInnes et al., 2018)
-3. **Diffusion maps** (Coifman & Lafon, 2006)
+1. **t-SNE** ([van der Maaten & Hinton, 2008](https://jmlr.org/papers/v9/vandermaaten08a.html))
+2. **UMAP** ([McInnes, Healy & Melville, 2018](https://arxiv.org/abs/1802.03426))
+3. **Diffusion maps** ([Coifman & Lafon, 2006](https://doi.org/10.1016/j.acha.2006.04.006))
 
 ---
 
@@ -270,19 +270,19 @@ Based on topological data analysis concepts. Constructs a fuzzy simplicial compl
 
 ---
 
-## The Phase Transition You Can't Cross
+## A Detection Phase Transition
 
-Baik, Ben Arous, and Péché (2005) proved a remarkable result: there is a **sharp threshold** below which PCA cannot detect a signal, no matter how much data you have.
-
-. . .
-
-For a signal-plus-noise model with $p/n \to \gamma$, a signal eigenvalue $\ell$ is detectable only if:
-
-$$\ell > 1 + \sqrt{\gamma}$$
+[Baik, Ben Arous, and Péché (2005)](https://doi.org/10.1214/009117905000000233) established a sharp threshold below which PCA cannot detect a signal regardless of sample size.
 
 . . .
 
-With $p = 10{,}000$ and $n = 100$ ($\gamma = 100$), you need signal strength $> 11$ to detect a component. **Weak signals literally merge with noise and become invisible.**
+For a signal-plus-noise model with $p/n \to \gamma$, a signal eigenvalue $\ell$ is detectable only if
+
+$$\ell > 1 + \sqrt{\gamma}.$$
+
+. . .
+
+With $p = 10{,}000$ and $n = 100$ ($\gamma = 100$), the required signal strength exceeds $11$. Below the threshold, signal eigenvalues are absorbed into the bulk noise spectrum and become irrecoverable from the leading components alone.
 
 ---
 
@@ -298,9 +298,9 @@ For high-dimensional biological data:
 
 ### Why PCA first?
 
-- Removes noise dimensions that confuse t-SNE/UMAP
-- Standard practice in single-cell analysis (Seurat, Scanpy both do this)
-- The "Johnson–Lindenstrauss" intuition: random projections preserve distances approximately, and PCA is even better than random
+- Removes noise dimensions that distort t-SNE and UMAP embeddings
+- Standard practice in single-cell pipelines (Seurat, Scanpy)
+- The [Johnson–Lindenstrauss](https://doi.org/10.1090/conm/026/737400) intuition: random projections approximately preserve distances, and PCA is strictly better than random in the relevant noise regime
 
 ---
 
@@ -384,12 +384,12 @@ In practice, 20–50 PCs is a common default in single-cell workflows (Seurat us
 
 ## Summary
 
-1. **PCA** is the workhorse: fast, interpretable, optimal for linear structure. Always start here.
-2. **Scree plots and Marchenko–Pastur** help decide how many components to keep.
-3. **t-SNE and UMAP** reveal nonlinear structure but distort distances and sizes.
-4. **Best practice**: PCA first, then nonlinear embedding on top PCs.
-5. **Nonlinear plots are for exploration, not confirmation.**
-6. In the $p \gg n$ regime, random matrix theory tells us about the limits of what PCA can detect.
+1. **PCA**: fast, interpretable, optimal for linear structure ([Eckart & Young, 1936](https://doi.org/10.1007/BF02288367)). The default first step.
+2. **Scree plots and the Marchenko–Pastur threshold** support principled selection of the number of components.
+3. **t-SNE and UMAP** can reveal nonlinear structure but distort distances and cluster sizes.
+4. **Recommended workflow**: PCA first, then nonlinear embedding on the top PCs.
+5. Nonlinear embeddings are tools for exploration, not for confirmation.
+6. In the $p \gg n$ regime, random matrix theory characterizes the fundamental detection limits of PCA.
 
 ### Up Next
 

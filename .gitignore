@@ -24,6 +24,9 @@ __pycache__/
 **/*.quarto_ipynb
 notebooks/*_exec.ipynb
 
+# Data fetched at notebook-execution time (e.g. labs that pull from Zenodo)
+notebooks/*.rda
+
 # LaTeX intermediates from `quarto render --to pdf`
 *.aux
 *.log

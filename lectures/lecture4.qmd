@@ -24,20 +24,20 @@ format:
 
 ## Perfect Training, Catastrophic Prediction
 
-A research team fitted ordinary least squares to predict patient outcomes from 500 gene expression features on 80 patients.
+Consider an ordinary-least-squares fit predicting patient outcomes from 500 gene-expression features on 80 patients.
 
 . . .
 
-- **Training $R^2$**: 0.99 — the model fit the data almost perfectly
-- **Test $R^2$**: $-0.3$ — worse than simply predicting the mean for everyone
+- **Training $R^2$**: 0.99 — near-perfect fit on the training data
+- **Test $R^2$**: $-0.3$ — worse than predicting the sample mean
 
 . . .
 
-The model had **memorized noise**. With more features than samples, OLS finds a perfect interpolation — not because the biology is that clean, but because there are infinitely many solutions that pass through every data point.
+The model has memorized noise. When the number of features exceeds the number of samples, the OLS system is underdetermined: there are infinitely many coefficient vectors that interpolate the training data exactly. The fit reflects this degeneracy, not any property of the underlying biology.
 
 . . .
 
-**This is the overfitting catastrophe that regularization prevents.**
+This is the overfitting failure mode that regularization is designed to prevent.
 
 ---
 
@@ -98,29 +98,27 @@ Ridge is optimal when **many predictors have small effects** (no true sparsity).
 
 ---
 
-## The Most Elegant Geometry in Modern Statistics
+## A Geometric Account of Sparsity
 
-Why does changing $\|\beta\|_2^2$ to $\|\beta\|_1$ — changing a **sphere** to a **diamond** — cause coefficients to become exactly zero?
-
-. . .
-
-The answer is **corners**.
+Why does replacing $\|\beta\|_2^2$ with $\|\beta\|_1$ — substituting a **sphere** for a **diamond** — drive coefficients to exactly zero?
 
 . . .
 
-The $\ell_1$ constraint set (a diamond / cross-polytope) has corners on every coordinate axis. The $\ell_2$ constraint set (a sphere) is perfectly smooth.
-
-When the OLS contour ellipse expands until it touches the constraint set, it almost always hits a **corner** of the diamond — where one or more coordinates are exactly zero.
+The mechanism is the geometry of the constraint set: the $\ell_1$ ball has corners on every coordinate axis; the $\ell_2$ ball is smooth.
 
 . . .
 
-In $p$ dimensions: the $\ell_1$ ball has $2p$ vertices, all on coordinate axes. High-dimensional geometry makes corner intersections even more likely.
+As the level sets of the squared-error loss expand outward from the OLS solution, they generally first contact the $\ell_1$ ball at a vertex, at which one or more coordinates are exactly zero. The smooth $\ell_2$ ball has no such distinguished points.
+
+. . .
+
+In $p$ dimensions, the $\ell_1$ ball has $2p$ vertices — one per signed axis — and the probability of contact at a vertex grows with dimension.
 
 ---
 
 ## The LASSO
 
-**Least Absolute Shrinkage and Selection Operator** (Tibshirani, 1996):
+**Least Absolute Shrinkage and Selection Operator** ([Tibshirani, 1996](https://doi.org/10.1111/j.2517-6161.1996.tb02080.x)):
 
 $$\hat{\beta}_{\text{lasso}} = \arg\min_\beta \left\{ \frac{1}{2n}\|y - X\beta\|_2^2 + \lambda \|\beta\|_1 \right\}$$
 
@@ -151,7 +149,7 @@ In $p$ dimensions: the $\ell_1$ ball has $2p$ vertices (one per axis), making sp
 As $\lambda$ decreases from $\lambda_{\max}$ (where $\hat{\beta} = 0$) to 0:
 
 - Coefficients enter the model one at a time
-- The **regularization path** $\hat{\beta}(\lambda)$ is piecewise linear (Efron et al., 2004, LARS)
+- The **regularization path** $\hat{\beta}(\lambda)$ is piecewise linear ([Efron et al., 2004, LARS](https://doi.org/10.1214/009053604000000067))
 - Can compute the entire path efficiently
 
 ```{python}
@@ -202,7 +200,7 @@ plt.show()
 
 ## Elastic Net
 
-Compromise between ridge and LASSO (Zou & Hastie, 2005):
+A convex combination of the ridge and LASSO penalties ([Zou & Hastie, 2005](https://doi.org/10.1111/j.1467-9868.2005.00503.x)):
 
 $$\hat{\beta}_{\text{enet}} = \arg\min_\beta \left\{ \frac{1}{2n}\|y - X\beta\|_2^2 + \lambda\left[\alpha\|\beta\|_1 + \frac{1-\alpha}{2}\|\beta\|_2^2\right] \right\}$$
 
@@ -232,7 +230,7 @@ All are available in `glmnet` (R) and `scikit-learn` (Python).
 
 ## Theoretical Guarantees
 
-### LASSO consistency (Zhao & Yu, 2006)
+### LASSO consistency ([Zhao & Yu, 2006](https://www.jmlr.org/papers/v7/zhao06a.html))
 
 Under the **irrepresentable condition** and sufficient signal strength, LASSO recovers the true support (nonzero coefficients) with probability $\to 1$ as $n \to \infty$.
 
@@ -246,75 +244,75 @@ where $s$ = number of true nonzero coefficients. This is **near-optimal**---you 
 
 ---
 
-# Seventy Genes and a Fraud {.centered}
+# Two Case Studies: Validation Determines Outcome {.centered}
 
 ---
 
-## MammaPrint: When Regularization Saves Lives
+## MammaPrint: Regularization in Clinical Practice
 
-In 2002, Laura van 't Veer measured 25,000 genes on 78 breast cancer patients and used a supervised method to find a **70-gene signature** predicting metastasis (van 't Veer et al., 2002, *Nature*).
-
-. . .
-
-The signature was commercialized as **MammaPrint**, cleared by the FDA, and validated in the **MINDACT trial** (Cardoso et al., 2016, *NEJM*): 6,693 patients. Women classified as high clinical risk but low genomic risk were randomized to chemotherapy vs. no chemotherapy.
+In 2002, [van 't Veer and colleagues](https://doi.org/10.1038/415530a) measured 25,000 genes on 78 breast-cancer patients and identified a **70-gene signature** predicting metastasis through a supervised feature-selection procedure.
 
 . . .
 
-**Result**: 94.7% five-year distant metastasis-free survival without chemo. **46% of women who would have received chemotherapy were spared** — because a model built on 25,000 variables and 78 patients turned out to be right.
+The signature was commercialized as **MammaPrint**, cleared by the U.S. Food and Drug Administration, and prospectively validated in the **MINDACT trial** ([Cardoso et al., 2016, *NEJM*](https://doi.org/10.1056/NEJMoa1602253)): 6,693 patients with high clinical but low genomic risk were randomized to chemotherapy or no chemotherapy.
+
+. . .
+
+**Result**: a 94.7 percent five-year distant-metastasis-free survival rate without chemotherapy. **Approximately 46 percent of women who would otherwise have received chemotherapy were spared it** — on the basis of a model built on 25,000 variables and 78 patients.
 
 ---
 
-## The Duke Fraud: When the Same Method Destroys Trust
+## The Duke Episode: When the Same Method Fails
 
-At Duke University, Anil Potti used gene expression signatures to predict which chemotherapy drug a tumor would respond to. Clinical trials enrolled patients based on these signatures.
-
-. . .
-
-Two statisticians at MD Anderson — **Keith Baggerly and Kevin Coombes** — spent years trying to reproduce the analysis (Baggerly & Coombes, 2009, *Ann. Appl. Stat.*). They found mislabeled samples, off-by-one errors in gene indices, and results that were literally the opposite of what was claimed.
+At Duke University, Anil Potti and colleagues used gene-expression signatures to predict tumor response to specific chemotherapy agents. Clinical trials enrolled patients on the basis of those signatures.
 
 . . .
 
-**18 papers retracted.** Potti's medical license revoked. Patients had been assigned to treatments based on fraudulent models.
+Statisticians at MD Anderson — Keith Baggerly and Kevin Coombes — spent several years attempting to reproduce the Duke analyses ([Baggerly & Coombes, 2009, *Ann. Appl. Stat.*](https://doi.org/10.1214/09-AOAS291)). They identified mislabeled samples, off-by-one errors in gene indices, and conclusions that were the inverse of what the data actually supported.
+
+. . .
+
+The episode resulted in **eighteen retracted papers** and the revocation of Potti's medical license. Patients had been assigned to treatments on the basis of erroneous models.
 
 ---
 
 ## The Same Method, Different Outcomes
 
-MammaPrint and the Duke fraud used the **same method** on the **same kind of data** for the **same kind of question**. The difference:
+The Duke and MammaPrint analyses applied the **same class of methods** to the **same kind of data** for the **same kind of question**. The differences lay entirely in execution:
 
 . . .
 
-- **Validation**: MammaPrint was tested in a 6,693-patient prospective randomized trial. Duke's signatures were never properly validated.
-- **Reproducibility**: Baggerly and Coombes couldn't reproduce the Duke analysis because the code and data were not shared. Van 't Veer's 70 genes replicated.
-- **Cross-validation done correctly**: The Duke group leaked information between training and test sets. MammaPrint did not.
+- **Validation**: MammaPrint was tested in a 6,693-patient prospective randomized trial. The Duke signatures were not subjected to comparable external validation.
+- **Reproducibility**: The Duke analysis could not be reproduced because code and data were not shared. The 70-gene signature was independently replicated.
+- **Information leakage**: The Duke pipeline leaked information between training and test sets. The MammaPrint pipeline did not.
 
 . . .
 
-**The lesson**: Regularization is a tool, not a guarantee. The model is only as good as the analysis pipeline.
+The lesson is that regularization is a tool, not a guarantee. A model is only as reliable as the analysis pipeline that produced it.
 
 ---
 
-## LASSO Instability: A Warning
+## A Reproducibility Caveat: LASSO Selection Instability
 
-Even when the method is applied honestly, LASSO has a reproducibility challenge:
-
-. . .
-
-When predictors are correlated (as genes always are), LASSO arbitrarily picks one from each correlated group. Different samples → different arbitrary picks → different gene lists, **same prediction accuracy**.
+Even under correct application, LASSO exhibits a notable instability:
 
 . . .
 
-This is why **bootstrap stability analysis** matters: it tells you which genes are consistently selected, not just selected once. Elastic net mitigates this via the grouping property.
+When predictors are correlated — as gene-expression measurements typically are — LASSO selects one representative from each correlated group, with the choice determined essentially arbitrarily by sampling noise. Resampling produces different selected subsets while leaving prediction accuracy nearly unchanged.
+
+. . .
+
+The implication is that **bootstrap stability analysis** is necessary to determine which variables are consistently selected, as opposed to selected in any one fit. Elastic net mitigates this via its grouping property.
 
 ---
 
-## Using Generative AI in High-Dimensional Analysis
+## Generative AI in High-Dimensional Analysis
 
-Large language models (Claude, ChatGPT, and others) can now write and debug analysis code, explain statistical output, suggest analysis strategies, and provide first-pass biological interpretations.
+Large language models (Claude, ChatGPT, and others) can write and debug analysis code, summarize statistical output, suggest analysis strategies, and produce first-pass biological interpretations.
 
 . . .
 
-They are useful for code generation, syntax lookup, and boilerplate. They are unreliable for statistical judgment, numerical computation, and novel biological claims. Code may contain subtle bugs; gene function descriptions may be fabricated.
+They are well suited to code generation, syntax lookup, and boilerplate. They are unreliable for statistical judgment, numerical computation, and novel biological claims: generated code may contain subtle bugs and reported gene functions may be fabricated.
 
 ---
 
@@ -429,11 +427,11 @@ $\lambda_{1\text{se}}$. Its prediction error is statistically indistinguishable 
 
 ## Summary
 
-1. **Ridge, LASSO, elastic net** handle the $p > n$ problem through regularization.
-2. **LASSO** gives sparse solutions; **ridge** when you expect many small effects; **elastic net** for correlated predictors.
-3. **Cross-validation** chooses the regularization strength.
-4. **LLMs** are powerful tools for code generation and interpretation, but require critical evaluation.
-5. **Classical methods remain strong** for moderate $n$; deep learning shines with massive datasets.
+1. **Ridge, LASSO, and elastic net** address the $p > n$ regression problem through regularization.
+2. Use **LASSO** for sparse solutions, **ridge** when many small effects are anticipated, and **elastic net** when predictors are correlated.
+3. **Cross-validation** selects the regularization strength.
+4. **LLMs** are useful for code generation and interpretation but require critical evaluation of every claim.
+5. Classical methods remain competitive for moderate $n$; deep learning advantages emerge with very large datasets.
 
 ### Up Next
 
