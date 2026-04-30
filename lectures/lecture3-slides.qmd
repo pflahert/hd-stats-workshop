@@ -1,0 +1,396 @@
+---
+title: "Lecture 3: Dimension Reduction"
+subtitle: "Finding Structure in High-Dimensional Data"
+date: "Day 2, 8:00–9:00"
+format:
+  revealjs:
+    theme: default
+    slide-number: true
+    chalkboard: true
+    smaller: true
+    scrollable: true
+    code-fold: true
+    footer: "High-Dimensional Data Analysis Workshop | BTP"
+    math: mathjax
+  pdf:
+    toc: true
+    number-sections: false
+    fig-pos: 'H'
+---
+
+# The Eigenface That Launched a Thousand Papers {.centered}
+
+---
+
+## From Faces to Genes
+
+In 1991, [Turk and Pentland](https://doi.org/10.1162/jocn.1991.3.1.71) applied PCA to a database of face photographs. The leading principal components — diffuse, low-resolution images they termed **"eigenfaces"** — sufficed to reconstruct any face in the database from approximately 100 coefficients in place of thousands of pixels.
+
+. . .
+
+The result marked the transition of dimension reduction from a mathematical construct to a practical tool: a high-dimensional object (a face) could be faithfully represented in a far lower-dimensional space.
+
+. . .
+
+The same principle now drives single-cell genomics, where 30,000 gene measurements per cell are routinely compressed to 30–50 principal components before any further analysis.
+
+---
+
+## The Problem
+
+We have data $X \in \mathbb{R}^{n \times p}$ with $p$ large (thousands to tens of thousands).
+
+**Goals**:
+
+- **Visualization**: Project to 2D or 3D for exploration
+- **Denoising**: Separate signal from noise
+- **Preprocessing**: Reduce $p$ before applying downstream methods (clustering, regression)
+
+. . .
+
+**Core question**: Can we represent the data in a lower-dimensional space $\mathbb{R}^k$ with $k \ll p$, preserving the important structure?
+
+---
+
+## Principal Component Analysis (PCA)
+
+### The idea
+
+Find orthogonal directions of maximum variance in the data.
+
+### Formally
+
+Given centered data $X$ ($n \times p$), PCA solves:
+
+$$\mathbf{v}_1 = \arg\max_{\|\mathbf{v}\| = 1} \text{Var}(X\mathbf{v}) = \arg\max_{\|\mathbf{v}\| = 1} \mathbf{v}^T \hat{\Sigma} \mathbf{v}$$
+
+The solution $\mathbf{v}_1$ is the eigenvector of $\hat{\Sigma} = \frac{1}{n-1}X^TX$ with the largest eigenvalue.
+
+---
+
+## PCA via the SVD
+
+The **singular value decomposition** of $X$:
+
+$$X = U D V^T$$
+
+- $U$ ($n \times r$): left singular vectors (sample directions)
+- $D$ ($r \times r$): diagonal matrix of singular values $d_1 \geq d_2 \geq \cdots \geq 0$
+- $V$ ($p \times r$): right singular vectors (loadings = principal component directions)
+
+where $r = \min(n, p)$. Software returns this "thin" SVD by default.
+
+. . .
+
+**Connection**: Eigenvalues of $\hat{\Sigma}$ are $\lambda_j = d_j^2 / (n-1)$.
+
+**PC scores**: $Z = XV = UD$ (the $j$-th column of $Z$ is the $j$-th principal component).
+
+---
+
+## How Many Components?
+
+### Scree plot
+
+Plot $\lambda_j$ (or proportion of variance explained) vs. $j$. Look for an "elbow."
+
+### Proportion of variance explained
+
+$$\text{PVE}(k) = \frac{\sum_{j=1}^k \lambda_j}{\sum_{j=1}^p \lambda_j}$$
+
+### Formal methods
+
+- **Marchenko–Pastur threshold**: Under null ($\Sigma = I$) with $\gamma = p/n$, eigenvalues lie in $[\max(0,\,(1-\sqrt{\gamma})^2),\; (1+\sqrt{\gamma})^2]$. When $p > n$ (our regime), the lower edge is 0 and only the upper edge matters. Eigenvalues above $(1+\sqrt{\gamma})^2$ are signal.
+- **Parallel analysis**: Compare observed eigenvalues to those from permuted data.
+
+---
+
+## PCA: Strengths and Limitations
+
+### Strengths
+
+- Computationally fast; solved by standard linear algebra
+- Optimal for linear reconstruction (Eckart–Young theorem)
+- Interpretable loadings: which variables contribute to each PC?
+
+### Limitations
+
+- **Linear only**: Cannot capture nonlinear manifold structure
+- **Sensitive to scaling**: Must standardize or choose units carefully
+- **Rotation ambiguity**: PCs are identified only up to sign
+- **High-D noise bias**: In the $p \gg n$ regime, the Marchenko–Pastur law inflates eigenvalues. Leading PCs can be distorted.
+
+---
+
+## Biplots
+
+A biplot overlays sample scores and variable loadings on the same 2D plot.
+
+```{python}
+#| echo: true
+#| fig-height: 5
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import load_iris
+
+iris = load_iris()
+X_iris = StandardScaler().fit_transform(iris.data)
+pca_iris = PCA(n_components=2).fit(X_iris)
+scores = pca_iris.transform(X_iris)
+loadings = pca_iris.components_.T  # (4, 2)
+
+fig, ax = plt.subplots(figsize=(7, 5))
+ax.scatter(scores[:, 0], scores[:, 1], s=15, color="gray", alpha=0.6)
+scale = np.abs(scores).max() / np.abs(loadings).max() * 0.8
+for i, name in enumerate(iris.feature_names):
+    ax.arrow(0, 0, loadings[i, 0] * scale, loadings[i, 1] * scale,
+             color="red", head_width=0.1, linewidth=1.5)
+    ax.text(loadings[i, 0] * scale * 1.15, loadings[i, 1] * scale * 1.15,
+            name, color="red", fontsize=9, ha="center")
+ax.set_xlabel(f"PC1 ({pca_iris.explained_variance_ratio_[0]:.1%})")
+ax.set_ylabel(f"PC2 ({pca_iris.explained_variance_ratio_[1]:.1%})")
+ax.set_title("Biplot of Iris Data")
+ax.axhline(0, color="gray", linewidth=0.5)
+ax.axvline(0, color="gray", linewidth=0.5)
+plt.tight_layout()
+plt.show()
+```
+
+. . .
+
+Read it as: arrows pointing in the same direction as a cluster of points tell you which variables are high in that cluster.
+
+---
+
+# The Map Is Not the Territory {.centered}
+
+---
+
+## When t-SNE Misleads
+
+In 2016, [Wattenberg, Viégas, and Johnson](https://distill.pub/2016/misread-tsne/) published *How to Use t-SNE Effectively*, an interactive article that documented several systematic failure modes:
+
+- t-SNE can produce **apparent clusters from uniformly distributed data**
+- It can **partition a single population** into two apparent clusters
+- It can render **distant groups visually adjacent**
+- Cluster **sizes** and **between-cluster distances** are not meaningful
+
+. . .
+
+Despite this, t-SNE and UMAP plots are routinely treated in the literature as veridical representations of the data. A t-SNE plot is a sketch, not a photograph.
+
+---
+
+## Beyond PCA: Nonlinear Methods
+
+When the data lies on a **nonlinear manifold** (common in single-cell biology), PCA may miss important structure.
+
+Three nonlinear methods in widespread use:
+
+1. **t-SNE** ([van der Maaten & Hinton, 2008](https://jmlr.org/papers/v9/vandermaaten08a.html))
+2. **UMAP** ([McInnes, Healy & Melville, 2018](https://arxiv.org/abs/1802.03426))
+3. **Diffusion maps** ([Coifman & Lafon, 2006](https://doi.org/10.1016/j.acha.2006.04.006))
+
+---
+
+## t-SNE: Intuition
+
+**t-Distributed Stochastic Neighbor Embedding**
+
+1. In high-D: compute pairwise "affinities" $p_{ij}$ using Gaussian kernels
+2. In low-D (2D): compute affinities $q_{ij}$ using a **Student-$t$ distribution** (heavier tails)
+3. Minimize the KL divergence: $\text{KL}(P \| Q) = \sum_{i \neq j} p_{ij} \log \frac{p_{ij}}{q_{ij}}$
+
+. . .
+
+The heavy-tailed $t$-distribution in low-D allows distant points to spread apart while keeping nearby points close → good cluster separation.
+
+---
+
+## t-SNE: Key Parameters
+
+### Perplexity
+
+- Controls the effective number of neighbors
+- Typical range: 5–50
+- Low perplexity: fine local structure; high perplexity: more global structure
+
+### Iterations
+
+- t-SNE uses gradient descent; needs enough iterations to converge (typically 500–1000)
+
+. . .
+
+### Cautions
+
+- **Distances between clusters are not meaningful**
+- **Cluster sizes are not meaningful**
+- Results depend on random initialization—run multiple times
+- Does not preserve global structure well
+
+---
+
+## UMAP: Intuition
+
+**Uniform Manifold Approximation and Projection**
+
+Based on topological data analysis concepts. Constructs a fuzzy simplicial complex (weighted graph) in high-D and optimizes a low-D layout to match.
+
+. . .
+
+### Advantages over t-SNE
+
+- Better preservation of global structure (relative cluster positions)
+- Faster (scales better to large $n$)
+- Theoretical grounding in Riemannian geometry and algebraic topology
+
+### Key parameters
+
+- `n_neighbors`: similar to perplexity. Controls local vs. global balance.
+- `min_dist`: controls how tightly points cluster in the embedding.
+
+---
+
+## Comparing PCA, t-SNE, UMAP
+
+| Feature | PCA | t-SNE | UMAP |
+|---------|-----|-------|------|
+| Linear? | Yes | No | No |
+| Preserves global structure? | Yes | Poorly | Moderately |
+| Preserves local structure? | Somewhat | Very well | Very well |
+| Scalability | Excellent | Slow for large $n$ | Fast |
+| Deterministic? | Yes | No | No |
+| Interpretable axes? | Yes (loadings) | No | No |
+
+---
+
+# The Invisible Signal {.centered}
+
+---
+
+## A Detection Phase Transition
+
+[Baik, Ben Arous, and Péché (2005)](https://doi.org/10.1214/009117905000000233) established a sharp threshold below which PCA cannot detect a signal regardless of sample size.
+
+. . .
+
+For a signal-plus-noise model with $p/n \to \gamma$, a signal eigenvalue $\ell$ is detectable only if
+
+$$\ell > 1 + \sqrt{\gamma}.$$
+
+. . .
+
+With $p = 10{,}000$ and $n = 100$ ($\gamma = 100$), the required signal strength exceeds $11$. Below the threshold, signal eigenvalues are absorbed into the bulk noise spectrum and become irrecoverable from the leading components alone.
+
+---
+
+## A Practical Workflow
+
+For high-dimensional biological data:
+
+1. **Start with PCA** to get an overview, check for batch effects, choose number of informative dimensions
+2. **Apply t-SNE or UMAP** on the top $k$ PCs (not the raw $p$-dimensional data)
+3. **Never skip PCA**---it denoises and speeds up nonlinear methods
+
+. . .
+
+### Why PCA first?
+
+- Removes noise dimensions that distort t-SNE and UMAP embeddings
+- Standard practice in single-cell pipelines (Seurat, Scanpy)
+- The [Johnson–Lindenstrauss](https://doi.org/10.1090/conm/026/737400) intuition: random projections approximately preserve distances, and PCA is strictly better than random in the relevant noise regime
+
+---
+
+## Cautions with Nonlinear Embeddings
+
+Things that are **NOT safe to conclude** from a t-SNE or UMAP plot:
+
+- "These two clusters are far apart" (distances are distorted)
+- "This cluster is larger/denser" (sizes are distorted)
+- "There are exactly $k$ clusters" (artifacts can create false clusters)
+- "The trajectory goes from A to B" (without additional evidence)
+
+. . .
+
+> Use nonlinear embeddings for **hypothesis generation**, not hypothesis testing. Always validate findings with quantitative methods.
+
+---
+
+## Connection to Factor Models
+
+PCA is closely related to the factor model:
+
+$$X = F L^T + E$$
+
+- $F$ ($n \times k$): factor scores (one row per sample)
+- $L$ ($p \times k$): factor loadings (one row per variable)
+- $E$: noise
+
+. . .
+
+When $E_{ij} \sim N(0, \sigma^2)$ (homoscedastic), PCA recovers the factors. When $E$ has heterogeneous variance, **probabilistic PCA** or **factor analysis** may be more appropriate.
+
+In genomics, surrogate variable analysis (SVA) uses this framework to estimate hidden confounders.
+
+---
+
+## Discussion
+
+*Take a few minutes on each of these before we move to the lab.*
+
+### Is 15% a lot?
+
+You run PCA on $p = 20{,}000$ genes measured on $n = 100$ samples. PC1 explains 15% of the variance.
+
+- If all $p$ variables were independent noise, each PC would explain about $1/\min(n,p) = 1/100 = 1\%$.
+- PC1 explains 15×  that. This is strong signal.
+
+. . .
+
+**But**: in the $p \gg n$ regime, the Marchenko–Pastur law inflates eigenvalues---the leading eigenvalue of pure noise with $\gamma = p/n = 200$ can be as large as $(1 + \sqrt{200})^2 \approx 229$ on the covariance matrix scale. Not all of that 15% is necessarily signal---some is inflated by high-dimensional noise. The scree plot and parallel analysis help you decide.
+
+---
+
+### Can you trust the clusters?
+
+A colleague shows you a t-SNE plot with 5 clearly separated clusters and says "There are 5 cell types."
+
+**Discuss**: What are two reasons this conclusion might be wrong?
+
+. . .
+
+1. t-SNE can split a single continuous population into apparent clusters (artifacts of perplexity and optimization)
+2. Cluster sizes and inter-cluster distances in t-SNE are not meaningful—you can't judge relative abundance or similarity
+
+---
+
+### How many PCs before UMAP?
+
+You want to run UMAP on the top $k$ PCs. How do you choose $k$?
+
+**Discuss**: Name two approaches.
+
+. . .
+
+1. **Scree plot / elbow**: keep PCs above the "elbow" where variance explained levels off
+2. **Marchenko–Pastur threshold**: keep eigenvalues above $(1 + \sqrt{p/n})^2$—everything below is noise
+
+In practice, 20–50 PCs is a common default in single-cell workflows (Seurat uses 30).
+
+---
+
+## Summary
+
+1. **PCA**: fast, interpretable, optimal for linear structure ([Eckart & Young, 1936](https://doi.org/10.1007/BF02288367)). The default first step.
+2. **Scree plots and the Marchenko–Pastur threshold** support principled selection of the number of components.
+3. **t-SNE and UMAP** can reveal nonlinear structure but distort distances and cluster sizes.
+4. **Recommended workflow**: PCA first, then nonlinear embedding on the top PCs.
+5. Nonlinear embeddings are tools for exploration, not for confirmation.
+6. In the $p \gg n$ regime, random matrix theory characterizes the fundamental detection limits of PCA.
+
+### Up Next
+
+**Lab 3**: Apply PCA and UMAP to the Golub dataset. Interpret biplots, scree plots, and embeddings.

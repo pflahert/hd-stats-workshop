@@ -29,7 +29,7 @@
 # ---------- file lists ----------
 
 LECTURE_NAMES := lecture1 lecture2 lecture3 lecture4
-SLIDE_NAMES   := lecture1-slides
+SLIDE_NAMES   := lecture1-slides lecture2-slides lecture3-slides lecture4-slides
 
 QMD_LECTURES := $(addprefix lectures/,$(addsuffix .qmd,$(LECTURE_NAMES)))
 QMD_SLIDES   := $(addprefix lectures/,$(addsuffix .qmd,$(SLIDE_NAMES)))

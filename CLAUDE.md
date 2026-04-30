@@ -47,9 +47,12 @@ hd-stats-workshop/
 │   ├── lecture-outlines.md # Master outline at three levels of detail
 │   ├── lecture1.qmd      # Essay: "The Gene That Wasn't There" (HTML article + PDF)
 │   ├── lecture1-slides.qmd # Reveal.js slide deck for Lecture 1 (image-driven)
-│   ├── lecture2.qmd      # Reveal.js + PDF: "The Histogram That Was Too Wide"
-│   ├── lecture3.qmd      # Reveal.js + PDF: "The Map That Drew Itself"
-│   └── lecture4.qmd      # Reveal.js + PDF: "Seventy Genes and a Fraud"
+│   ├── lecture2.qmd      # Essay: "The Histogram That Was Too Wide" (HTML article + PDF)
+│   ├── lecture2-slides.qmd # Reveal.js slide deck for Lecture 2
+│   ├── lecture3.qmd      # Essay: "The Map That Drew Itself" (HTML article + PDF)
+│   ├── lecture3-slides.qmd # Reveal.js slide deck for Lecture 3
+│   ├── lecture4.qmd      # Essay: "Seventy Genes and a Fraud" (HTML article + PDF)
+│   └── lecture4-slides.qmd # Reveal.js slide deck for Lecture 4
 ├── assessments/
 │   ├── pre-homework.qmd  # HTML/PDF web reference for pre-workshop assignment
 │   └── homework.qmd      # HTML/PDF web reference for Day 1→Day 2 assignment
@@ -71,10 +74,10 @@ hd-stats-workshop/
 
 ## Content Architecture
 
-Lectures use a **mix of two formats**:
+Every lecture has **both** an essay and a slide deck:
 
-- **Lecture 1 only**: split into an essay (`lecture1.qmd`, HTML+PDF article) + a separate Reveal.js slide deck (`lecture1-slides.qmd`). The essay is the speaking text; slides are image-driven with speaker notes (`::: {.notes}`).
-- **Lectures 2, 3, 4**: single Reveal.js slide deck per lecture (`lecture2.qmd`, `lecture3.qmd`, `lecture4.qmd`). Slide-deck format combines on-slide narrative + executable Python code blocks that generate figures live. Each renders as both Reveal.js HTML *and* a printable article PDF (handout format).
+- **Essays** (`lecture{1,2,3,4}.qmd`): HTML article + PDF, classic-academic prose with inline DOI links to primary sources. The essay is the readable, citable form of the lecture content. No live code in essays.
+- **Slide decks** (`lecture{1,2,3,4}-slides.qmd`): Reveal.js. Lecture 1 slides are image-driven with speaker notes; lectures 2/3/4 slides combine on-slide narrative with executable Python code that generates figures live via the `hd-stats` kernel.
 
 **Assessments and labs** follow a dual-form pattern:
 - `assessments/*.qmd` — readable HTML/PDF web reference.
@@ -90,9 +93,9 @@ Lectures use a **mix of two formats**:
 
 ## Code Conventions
 
-- **Lecture 1 essay** (`lecture1.qmd`): pure prose, no executable code.
+- **Lecture essays** (`lecture{1,2,3,4}.qmd`): pure prose, no executable code; cite primary sources inline as `[Author (year)](https://doi.org/...)`.
 - **Lecture 1 slides** (`lecture1-slides.qmd`): image-driven; `code-fold: true` in Reveal.js settings. No live code execution.
-- **Lectures 2–4** (`lecture2/3/4.qmd`): mix of prose + executable Python (`{python}` blocks with `echo: true`). Figures render live during build via the `hd-stats` Jupyter kernel.
+- **Lectures 2–4 slides** (`lecture{2,3,4}-slides.qmd`): mix of on-slide narrative + executable Python (`{python}` blocks with `echo: true`). Figures render live during build via the `hd-stats` Jupyter kernel.
 - **Labs** (Python notebooks): `numpy.random.seed(2026)` for reproducibility; `plt.style.use('seaborn-v0_8-whitegrid')` for plots; data loaded from Zenodo or GitHub raw URLs.
 - **Homework notebook** (R kernel): uses `limma` + `qvalue` (Bioconductor); data loaded from GitHub raw URLs.
 
@@ -115,8 +118,7 @@ Every lab uses AI explicitly. Students prompt AI, evaluate output, and catch err
 
 ## Editing Guidelines
 
-- For Lecture 1: the essay (`lecture1.qmd`) is the source of truth. Modify the essay first, then update slides + lab to match.
-- For Lectures 2/3/4: the slide deck is the only source. Edit it directly; the printable PDF is auto-generated.
+- For every lecture: the essay (`lecture{N}.qmd`) is the canonical text and cites primary sources. The slide deck (`lecture{N}-slides.qmd`) is the in-class delivery form. When the science changes, update the essay first; sync the slides afterwards.
 - For assessments: edit the `.qmd` and the corresponding `.ipynb` in lockstep — they should stay in sync.
 - Preserve narrative flow — each lecture tells a story with an anchor paper/finding.
 - Keep visual emphasis (p-value histograms, scree plots, biplots).
